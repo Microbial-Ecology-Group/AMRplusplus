@@ -1,0 +1,127 @@
+Bootstrap: docker
+From: debian:jessie-slim
+
+#Includes idba, trimmomatic, samtools, bwa, bedtools, freebayes, bbmap, resistomeanalyzer, rarefactionanalyzer
+
+%post
+    ## Jave install doesn't work, but can load java module from summit
+    apt update \
+    && apt install -y --no-install-recommends \
+    build-essential ca-certificates sudo \
+    git make automake autoconf openjdk-7-jre wget unzip sed \
+    zlib1g-dev curl libbz2-dev locales libncurses5-dev liblzma-dev libcurl4-openssl-dev software-properties-common apt-transport-https\
+    python3-pip python3-docopt python3-pytest python-dev python3-dev\
+    libcurl4-openssl-dev libssl-dev zlib1g-dev fonts-texgyre \
+    gcc g++ gfortran libblas-dev liblapack-dev dos2unix\
+    r-base-core r-recommended hmmer\
+    && rm -rf /var/lib/apt/lists/*
+
+    python3 -m pip install biopython
+
+
+    ## IDBA
+    cd /opt
+    git clone https://github.com/loneknightpy/idba \
+    && cd idba \
+    && sed -i 's/kMaxShortSequence = 128/kMaxShortSequence = 500/' src/sequence/short_sequence.h \
+    && ./build.sh \
+    && make
+    cd /usr/local/bin
+    ln -s /opt/idba/bin/idba_ud
+    ln -s /opt/idba/bin/fq2fa
+    cd /
+
+    ## Trimmomatic
+    TRIMMOMATIC_SOURCE="Trimmomatic-0.36.zip" \
+    TRIMMOMATIC_HOME="/opt/trimmomatic"
+    wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.36.zip -O /opt/trimmomatic.zip && \
+    unzip /opt/trimmomatic.zip -d /opt/ && \
+    rm /opt/trimmomatic.zip
+    cd /
+
+    ## BWA #/usr/local/bin/bwa
+    cd /usr/local/
+    mkdir install_bwa
+    cd install_bwa
+    git clone https://github.com/lh3/bwa.git
+    cd bwa; make
+    rm -r .git*
+    rm .travis.yml
+    rm READ*
+    rm CO*
+    rm Ch*
+    rm NEWS.md
+    rm Makefile
+    ln -s /usr/local/install_bwa/bwa/* /usr/local/bin/
+    cd /
+
+    ## SAMTOOLS
+    cd /usr/local/
+    HTSLIB_VERSION=1.9 # indexes versions for samtools and bcftools
+    wget https://github.com/samtools/samtools/releases/download/1.9/samtools-${HTSLIB_VERSION}.tar.bz2
+    tar xvjf samtools-${HTSLIB_VERSION}.tar.bz2
+    cd samtools-${HTSLIB_VERSION}
+    autoheader
+    autoconf -Wno-syntax
+    ./configure --prefix /usr/local/bin
+    make
+    make install
+    ln -s /usr/local/samtools-${HTSLIB_VERSION}/* /usr/local/bin/
+    cd /
+
+    # Bedtools
+    cd /usr/local/
+    wget https://github.com/arq5x/bedtools2/releases/download/v2.25.0/bedtools-2.25.0.tar.gz
+    tar -zxvf bedtools-2.25.0.tar.gz
+    cd bedtools2
+    make
+    ln -s /usr/local/bedtools2/bin/* /usr/local/bin/
+    cd /
+
+    # freebayes
+    cd /usr/local
+    git clone --recursive git://github.com/ekg/freebayes.git
+    cd freebayes
+    make
+    ln -s /usr/local/freebayes/bin/* /usr/local/bin/
+    ln -s /usr/local/freebayes/vcflib/bin/* /usr/local/bin/
+    cd /
+
+    # bbmap
+    cd /usr/local
+    wget https://sourceforge.net/projects/bbmap/files/latest/download
+    tar xzf download
+    ln -s /usr/local/bbmap/* /usr/local/bin/
+    cd /
+    export JAVA_HOME=`/usr/lib/jvm/java-7-openjdk-amd64/bin/java`
+    
+    # resistomeanalyzer
+    cd /usr/local
+    git clone https://github.com/cdeanj/resistomeanalyzer.git
+    cd resistomeanalyzer
+    make
+    cp resistome /usr/local/bin
+    #ln -s /usr/local/resistomeanalyzer/* /usr/local/bin/
+    cd /
+
+    # RarefactionAnalyzer
+    cd /usr/local
+    git clone https://github.com/cdeanj/RarefactionAnalyzer.git
+    cd RarefactionAnalyzer
+    make
+    cp rarefaction /usr/local/bin
+    cd /
+
+    ## SNPfinder
+    cd /usr/local
+    git clone https://github.com/cdeanj/snpfinder.git
+    cd snpfinder
+    make
+    cp snpfinder /usr/local/bin
+    cd /
+    
+%test
+    #which bwa
+    #which bedtools
+    #which samtools
+    #which freebayes
