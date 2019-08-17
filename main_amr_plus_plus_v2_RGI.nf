@@ -288,8 +288,8 @@ process AlignToAMR {
          file amr
 
      output:
-         set sample_id, file("${sample_id}.amr.alignment.sam") into (megares_resistome_sam, megares_rarefaction_sam, megares_snp_sam , megares_snpfinder_sam)
-         set sample_id, file("${sample_id}.amr.alignment.dedup.sam") into (megares_dedup_resistome_sam)
+         set sample_id, file("${sample_id}.amr.alignment.sam") into (megares_resistome_sam, megares_rarefaction_sam, megares_snp_sam , megares_snpfinder_sam, megares_RGI_sam)
+         set sample_id, file("${sample_id}.amr.alignment.dedup.sam") into (megares_dedup_resistome_sam,megares_dedup_RGI_sam)
          set sample_id, file("${sample_id}.amr.alignment.dedup.bam") into (megares_dedup_resistome_bam)
 
 
@@ -474,6 +474,234 @@ process RunSNPFinder {
     """
 }
 
+/*
+---- Confirmation of alignments to genes that require SNP confirmation with RGI
+*/
+
+process ExtractSNP {
+     tag { sample_id }
+
+     publishDir "${params.output}/ExtractMegaresSNPs", mode: "copy",
+         saveAs: { filename ->
+             if(filename.indexOf(".snp.fasta") > 0) "SNP_fasta/$filename"
+             else if(filename.indexOf("gene.tsv") > 0) "Gene_hits/$filename"
+             else {}
+         }
+
+     input:
+         set sample_id, file(sam) from megares_RGI_sam
+         file annotation
+         file amr
+
+     output:
+         set sample_id, file("*.snp.fasta") into megares_snp_fasta
+         set sample_id, file("${sample_id}*.gene.tsv") into (resistome_hits)
+
+     """
+     awk -F "\\t" '{if (\$1!="@SQ" && \$1!="@RG" && \$1!="@PG" && \$1!="@HD" && \$3="RequiresSNPConfirmation" ) {print ">"\$1"\\n"\$10}}' ${sam} | tr -d '"'  > ${sample_id}.snp.fasta
+     resistome \
+      -ref_fp ${amr} \
+      -annot_fp ${annotation} \
+      -sam_fp ${sam} \
+      -gene_fp ${sample_id}.gene.tsv \
+      -group_fp ${sample_id}.group.tsv \
+      -class_fp ${sample_id}.class.tsv \
+      -mech_fp ${sample_id}.mechanism.tsv \
+      -t ${threshold}
+
+     """
+}
+
+process RunRGI {
+     tag { sample_id }
+
+     publishDir "${params.output}/RunRGI", mode: "copy"
+
+     input:
+         set sample_id, file(fasta) from megares_snp_fasta
+
+     output:
+         set sample_id, file("${sample_id}_rgi_output.txt") into rgi_results
+
+     """
+     rgi main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads}
+     """
+}
+
+
+process SNPconfirmation {
+     tag { sample_id }
+
+     publishDir "${params.output}/SNPConfirmation", mode: "copy",
+         saveAs: { filename ->
+             if(filename.indexOf("_rgi_perfect_hits.csv") > 0) "Perfect_RGI/$filename"
+             else if(filename.indexOf("_rgi_strict_hits.csv") > 0) "Strict_RGI/$filename"
+             else if(filename.indexOf("_rgi_loose_hits.csv") > 0) "Loose_RGI/$filename"
+             else {}
+         }
+
+     input:
+         set sample_id, file(rgi) from rgi_results
+
+     output:
+         set sample_id, file("${sample_id}_rgi_strict_hits.csv") into strict_snp_long_hits
+     """
+     python $baseDir/bin/RGI_aro_hits.py ${rgi} ${sample_id}
+     """
+}
+
+process Confirmed_AMR_hits {
+     tag { sample_id }
+
+     publishDir "${params.output}/SNP_confirmed_counts", mode: "copy"
+
+     input:
+         set sample_id, file(megares_counts) from resistome_hits
+         set sample_id, file(strict_rgi_counts) from strict_snp_long_hits
+
+     output:
+         file("${sample_id}*strict_SNP_confirmed_counts") into strict_confirmed_counts
+
+     """
+     python $baseDir/bin/RGI_long_combine.py ${strict_rgi_counts} ${megares_counts} ${sample_id}.strict_SNP_confirmed_counts ${sample_id}
+     """
+}
+
+
+strict_confirmed_counts.toSortedList().set { strict_confirmed_amr_l_to_w }
+
+process Confirmed_LongToWide {
+     tag {}
+
+     publishDir "${params.output}/Confirmed_AMRLongToWide", mode: "copy"
+
+     input:
+         file(strict_confirmed_resistomes) from strict_confirmed_amr_l_to_w
+
+     output:
+         file("strict_SNP_confirmed_AMR_analytic_matrix.csv") into strict_confirmed_matrix
+
+     """
+     mkdir ret
+     python3 $baseDir/bin/amr_long_to_wide.py -i ${strict_confirmed_resistomes} -o ret
+     mv ret/AMR_analytic_matrix.csv strict_SNP_confirmed_AMR_analytic_matrix.csv
+     """
+}
+
+/*
+---- Confirmation of deduped alignments to genes that require SNP confirmation with RGI.
+*/
+
+
+process ExtractDedupSNP {
+     tag { sample_id }
+
+     publishDir "${params.output}/ExtractDedupMegaresSNPs", mode: "copy",
+         saveAs: { filename ->
+             if(filename.indexOf(".snp.fasta") > 0) "SNP_fasta/$filename"
+             else if(filename.indexOf("gene.tsv") > 0) "Gene_hits/$filename"
+             else {}
+         }
+
+     input:
+         set sample_id, file(sam) from megares_dedup_RGI_sam
+         file annotation
+         file amr
+
+     output:
+         set sample_id, file("*.snp.fasta") into dedup_megares_snp_fasta
+         set sample_id, file("${sample_id}*.gene.tsv") into (dedup_resistome_hits)
+
+     """
+     awk -F "\\t" '{if (\$1!="@SQ" && \$1!="@RG" && \$1!="@PG" && \$1!="@HD" && \$3="RequiresSNPConfirmation" ) {print ">"\$1"\\n"\$10}}' ${sam} | tr -d '"'  > ${sample_id}.snp.fasta
+     resistome \
+      -ref_fp ${amr} \
+      -annot_fp ${annotation} \
+      -sam_fp ${sam} \
+      -gene_fp ${sample_id}.gene.tsv \
+      -group_fp ${sample_id}.group.tsv \
+      -class_fp ${sample_id}.class.tsv \
+      -mech_fp ${sample_id}.mechanism.tsv \
+      -t ${threshold}
+
+     """
+}
+
+process RunDedupRGI {
+     tag { sample_id }
+
+     publishDir "${params.output}/RunDedupRGI", mode: "copy"
+
+     input:
+         set sample_id, file(fasta) from dedup_megares_snp_fasta
+
+     output:
+         set sample_id, file("${sample_id}_rgi_output.txt") into dedup_rgi_results
+
+     """
+     rgi main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads}
+     """
+}
+
+
+process DedupSNPconfirmation {
+     tag { sample_id }
+
+     publishDir "${params.output}/DedupSNPConfirmation", mode: "copy",
+         saveAs: { filename ->
+             if(filename.indexOf("_rgi_perfect_hits.csv") > 0) "Perfect_RGI/$filename"
+             else if(filename.indexOf("_rgi_strict_hits.csv") > 0) "Strict_RGI/$filename"
+             else if(filename.indexOf("_rgi_loose_hits.csv") > 0) "Loose_RGI/$filename"
+             else {}
+         }
+
+     input:
+         set sample_id, file(rgi) from dedup_rgi_results
+
+     output:
+         set sample_id, file("${sample_id}_rgi_strict_hits.csv") into dedup_strict_snp_long_hits
+     """
+     python $baseDir/bin/RGI_aro_hits.py ${rgi} ${sample_id}
+     """
+}
+
+process ConfirmDedupAMRHits {
+     tag { sample_id }
+
+     publishDir "${params.output}/SNP_confirmed_counts", mode: "copy"
+
+     input:
+         set sample_id, file(megares_counts) from dedup_resistome_hits
+         set sample_id, file(strict_rgi_counts) from dedup_strict_snp_long_hits
+
+     output:
+         file("${sample_id}*strict_SNP_confirmed_counts") into dedup_strict_confirmed_counts
+
+     """
+     python $baseDir/bin/RGI_long_combine.py ${strict_rgi_counts} ${megares_counts} ${sample_id}.strict_SNP_confirmed_counts ${sample_id}
+     """
+}
+
+
+dedup_strict_confirmed_counts.toSortedList().set { dedup_strict_confirmed_amr_l_to_w }
+
+process DedupSNPConfirmedLongToWide {
+     tag {}
+
+     publishDir "${params.output}/Confirmed_AMRLongToWide", mode: "copy"
+
+     input:
+         file(strict_confirmed_resistomes) from dedup_strict_confirmed_amr_l_to_w
+
+     output:
+         file("strict_SNP_confirmed_AMR_analytic_matrix.csv") into dedup_strict_confirmed_matrix
+
+     """
+     mkdir ret
+     python3 $baseDir/bin/amr_long_to_wide.py -i ${strict_confirmed_resistomes} -o ret
+     mv ret/AMR_analytic_matrix.csv strict_SNP_confirmed_dedup_AMR_analytic_matrix.csv
+     """
+}
 
 
 

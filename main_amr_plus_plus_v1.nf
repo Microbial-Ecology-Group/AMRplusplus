@@ -8,20 +8,20 @@ vim: syntax=groovy
 if (params.help ) {
     return help()
 }
-if( params.host_index ) { 
-    host_index = Channel.fromPath(params.host_index).toSortedList() 
+if( params.host_index ) {
+    host_index = Channel.fromPath(params.host_index).toSortedList()
     //if( host_index.isEmpty() ) return index_error(host_index)
 }
-if( params.host ) { 
-    host = file(params.host) 
+if( params.host ) {
+    host = file(params.host)
     if( !host.exists() ) return host_error(host)
 }
-if( params.amr ) { 
-    amr = file(params.amr) 
+if( params.amr ) {
+    amr = file(params.amr)
     if( !amr.exists() ) return amr_error(amr)
 }
-if( params.adapters ) { 
-    adapters = file(params.adapters) 
+if( params.adapters ) {
+    adapters = file(params.adapters)
     if( !adapters.exists() ) return adapter_error(adapters)
 }
 if( params.annotation ) {
@@ -58,20 +58,20 @@ process RunQC {
             else if(filename.indexOf("U.fastq") > 0) "Unpaired/$filename"
             else {}
         }
-	
+
     input:
         set sample_id, file(forward), file(reverse) from reads
 
     output:
-        set sample_id, file("${sample_id}.1P.fastq"), file("${sample_id}.2P.fastq") into (paired_fastq)
-        set sample_id, file("${sample_id}.1U.fastq"), file("${sample_id}.2U.fastq") into (unpaired_fastq)
+        set sample_id, file("${sample_id}.1P.fastq.gz"), file("${sample_id}.2P.fastq.gz") into (paired_fastq)
+        set sample_id, file("${sample_id}.1U.fastq.gz"), file("${sample_id}.2U.fastq.gz") into (unpaired_fastq)
         file("${sample_id}.trimmomatic.stats.log") into (trimmomatic_stats)
 
     """
-    java -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar \
+     ${JAVA} -jar ${TRIMMOMATIC}/trimmomatic.jar \
       PE \
       -threads ${threads} \
-      $forward $reverse -baseout ${sample_id} \
+      $forward $reverse ${sample_id}.1P.fastq ${sample_id}.1U.fastq ${sample_id}.2P.fastq ${sample_id}.2U.fastq \
       ILLUMINACLIP:${adapters}:2:30:10:3:TRUE \
       LEADING:${leading} \
       TRAILING:${trailing} \
@@ -79,10 +79,7 @@ process RunQC {
       MINLEN:${minlen} \
       2> ${sample_id}.trimmomatic.stats.log
 
-    mv ${sample_id}_1P ${sample_id}.1P.fastq
-    mv ${sample_id}_2P ${sample_id}.2P.fastq
-    mv ${sample_id}_1U ${sample_id}.1U.fastq
-    mv ${sample_id}_2U ${sample_id}.2U.fastq
+      gzip *fastq
     """
 }
 
@@ -128,20 +125,20 @@ if( !params.host_index ) {
 
 process AlignReadsToHost {
     tag { sample_id }
-        
+
     publishDir "${params.output}/AlignReadsToHost", mode: "copy"
-        
+
     input:
         set sample_id, file(forward), file(reverse) from paired_fastq
         file index from host_index.first()
         file host
-            
+
     output:
         set sample_id, file("${sample_id}.host.sam") into (host_sam)
-            
-    """ 
+
+    """
     bwa mem ${host} ${forward} ${reverse} -t ${threads} > ${sample_id}.host.sam
-    """ 
+    """
 }
 
 process RemoveHostDNA {
@@ -170,7 +167,7 @@ idxstats_logs.toSortedList().set { host_removal_stats }
 
 process HostRemovalStats {
     tag { sample_id }
-  
+
     publishDir "${params.output}/RemoveHostDNA", mode: "copy",
         saveAs: { filename ->
             if(filename.indexOf(".stats") > 0) "HostRemovalStats/$filename"
@@ -253,7 +250,7 @@ process RunResistome {
 
     output:
         file("${sample_id}.gene.tsv") into (resistome)
-    
+
     """
     resistome \
       -ref_fp ${amr} \
@@ -269,7 +266,7 @@ process RunResistome {
 
 process RunRarefaction {
     tag { sample_id }
-   
+
     publishDir "${params.output}/RunRarefaction", mode: "copy"
 
     input:
@@ -326,7 +323,7 @@ process RunKraken {
        set sample_id, file(forward), file(reverse) from non_host_fastq_kraken
 
     output:
-       file("${sample_id}.kraken.filtered.report") into 
+       file("${sample_id}.kraken.filtered.report") into
        kraken_report
 
     """
@@ -457,7 +454,7 @@ def help() {
     println "    --threshold     INT      gene fraction threshold"
     println "    --min           INT      starting sample level"
     println "    --max           INT      ending sample level"
-    println "    --samples       INT      number of sampling iterations to perform" 
+    println "    --samples       INT      number of sampling iterations to perform"
     println "    --skip          INT      number of levels to skip"
     println ""
     println "Help options:"
