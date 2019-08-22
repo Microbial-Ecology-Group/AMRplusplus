@@ -29,7 +29,10 @@ if( params.annotation ) {
     if( !annotation.exists() ) return annotation_error(annotation)
 }
 
-kraken_db = params.kraken_db
+if(params.kraken_db) {
+    kraken_db = file(params.kraken_db)
+}
+
 threads = params.threads
 
 threshold = params.threshold
@@ -68,7 +71,7 @@ process RunQC {
         file("${sample_id}.trimmomatic.stats.log") into (trimmomatic_stats)
 
     """
-     ${JAVA} -jar ${TRIMMOMATIC}/trimmomatic.jar \
+     ${JAVA} -jar ${TRIMMOMATIC} \
       PE \
       -threads ${threads} \
       $forward $reverse ${sample_id}.1P.fastq ${sample_id}.1U.fastq ${sample_id}.2P.fastq ${sample_id}.2U.fastq \
@@ -184,10 +187,10 @@ process HostRemovalStats {
     """
 }
 
-process BAMToFASTQ {
+process NonHostReads {
     tag { sample_id }
 
-    publishDir "${params.output}/BAMToFASTQ", mode: "copy"
+    publishDir "${params.output}/NonHostReads", mode: "copy"
 
     input:
         set sample_id, file(bam) from non_host_bam
@@ -292,10 +295,10 @@ process RunResistome {
 
 megares_resistome_counts.toSortedList().set { megares_amr_l_to_w }
 
-process AMRLongToWide {
+process ResistomeResults {
     tag { }
 
-    publishDir "${params.output}/AMRLongToWide", mode: "copy"
+    publishDir "${params.output}/ResistomeResults", mode: "copy"
 
     input:
         file(resistomes) from megares_amr_l_to_w
@@ -339,10 +342,10 @@ process SamDedupRunResistome {
 
 megares_dedup_resistome_counts.toSortedList().set { megares_dedup_amr_l_to_w }
 
-process SamDedupAMRLongToWide {
+process SamDedupResistomeResults {
     tag { }
 
-    publishDir "${params.output}/SamDedup_AMRLongToWide", mode: "copy"
+    publishDir "${params.output}/SamDedup_ResistomeResults", mode: "copy"
 
     input:
         file(resistomes) from megares_dedup_amr_l_to_w
