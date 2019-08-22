@@ -1,9 +1,10 @@
 Bootstrap: docker
 From: debian:jessie-slim
 
-#Includes idba, trimmomatic, samtools, bwa, bedtools, freebayes, bbmap, vcftools, htslib, ncurses, kraken2, resistomeanalyzer, rarefactionanalyzer
+#Includes idba, trimmomatic, samtools, bwa, bedtools, freebayes, bbmap, vcftools, htslib, ncurses, kraken2, resistomeanalyzer, rarefactionanalyzer, SNPfinder
 
 %environment
+    echo 'export PATH=/usr/local/bin/anaconda/bin:${PATH}' >> $SINGULARITY_ENVIRONMENT
     export PATH=/usr/local/envs/compute/bin/:${PATH}
 
 %files
@@ -56,6 +57,14 @@ From: debian:jessie-slim
     make
     cp rarefaction /usr/local/bin
     cd /
+ 
+    # SNPfinder
+    cd /usr/local
+    git clone https://github.com/cdeanj/snpfinder.git
+    cd snpfinder
+    make
+    cp snpfinder /usr/local/bin
+    cd /    
 
     # Make sure all the tools have the right permissions to use the tools    
     chmod -R 777 /usr/local/
