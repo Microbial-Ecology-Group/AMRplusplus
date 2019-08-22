@@ -20,6 +20,7 @@ https://singularity.lbl.gov/docs-installation
 
 ### Download AmrPlusPlus v2
 > git clone https://github.com/meglab-metagenomics/amrplusplus_v2.git
+
 > cd amrplusplus_v2
 
 ### Install nextflow
