@@ -6,7 +6,9 @@ This section will help you get started with running the AmrPlusPlus pipeline wit
 Setup
 -----
 
-We will go over a typical pipeline setup scenario in which you connect to a remote server, install Nextflow, and download the pipeline source code.
+We will go over a typical pipeline setup scenario in which you connect to a remote server, install Nextflow, and download the pipeline source code. First, make sure that Singularity is installed and in your $PATH variable. 
+Visit this website for further information:
+https://singularity.lbl.gov/docs-installation
 
 ```bash
 # username and host address
@@ -25,17 +27,20 @@ $ mv nextflow $HOME/bin
 $ mkdir amr_test && cd amr_test
 
 # clone pipeline source code
-$ git clone https://github.com/cdeanj/amrplusplus .
+$ git clone https://github.com/meglab-metagenomics/amrplusplus_v2.git .
 ```
 
 Run a Simple Test
 -----------------
 
-We will run a small sample dataset that comes with the pipeline source code. As such, we will not be specifying any input paths as they have already been included. During the program's execution, the required tool dependencies will be installed with Docker if they haven't been already. As there are many tool dependencies, this could take some time depending on your connection speed.
+We will run a small sample dataset that comes with the pipeline source code. As such, we will not be specifying any input paths as they have already been included. During the program's execution, the required tool dependencies will be accessed using a Singularity container. As there are many tool dependencies, downloading the container could take some time depending on your connection speed.
 
 ```bash
+# navigate into AmrPlusPlus repository
+$ cd amrplusplus_v2/
+
 # command to run the amrplusplus pipeline
-$ nextflow run main.nf -profile docker --threads 4 --output test
+$ nextflow run main_amr_plus_plus_v2.nf -profile singularity --output test
 
 # change directories to view pipeline outputs
 $ cd test/
