@@ -12,27 +12,6 @@ Additionally, you may want to know if the depth of your sequencing (how many rea
 
 With AmrPlusPlus, you will obtain count files for each sample that can be combined into a count matrix and analyzed using any statistical and mathematical techniques that can operate on a matrix of observations.
 
-
-## Quick setup and test
-First, make sure that Singularity is installed and in your $PATH variable. 
-Visit this website for further information:
-https://singularity.lbl.gov/docs-installation
-
-### Download AmrPlusPlus v2
-> git clone https://github.com/meglab-metagenomics/amrplusplus_v2.git
-
-> cd amrplusplus_v2
-
-### Install nextflow
-> curl -s https://get.nextflow.io | bash
-
-### Download minikraken database
-> sh download_minikraken.sh
-
-### Run test
-> nextflow run main_amr_plus_plus_v2.nf -profile singularity
-
-
 More Information
 ----------------
 
