@@ -605,7 +605,7 @@ process Confirmed_AMR_hits {
 
 strict_confirmed_counts.toSortedList().set { strict_confirmed_amr_l_to_w }
 
-process Confirmed_LongToWide {
+process Confirmed_ResistomeResults {
      tag {}
 
      publishDir "${params.output}/Confirmed_ResistomeResults", mode: "copy"
@@ -720,7 +720,7 @@ process ConfirmDedupAMRHits {
 
 dedup_strict_confirmed_counts.toSortedList().set { dedup_strict_confirmed_amr_l_to_w }
 
-process DedupSNPConfirmedLongToWide {
+process DedupSNPConfirmed_ResistomeResults {
      tag {}
 
      publishDir "${params.output}/Confirmed_ResistomeResults", mode: "copy"
