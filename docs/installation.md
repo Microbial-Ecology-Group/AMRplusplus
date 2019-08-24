@@ -14,7 +14,10 @@ https://singularity.lbl.gov/docs-installation
 # username and host address
 $ ssh [USER]@[HOST]
 
-# install Nextflow
+# Check if you have nextflow installed,
+$ nextflow -
+
+# If not available, install Nextflow
 $ curl -s https://get.nextflow.io | bash
 
 # give write permissions to user
