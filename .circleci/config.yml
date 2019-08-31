@@ -4,7 +4,7 @@ orbs:
   singularity: singularity/singularity@1.0.0
   
 workflows:
-  install_debian_3_example:
+  build-and-deploy:
     jobs:
       - singularity/install_debian_3:
           go-version: 1.11.5
