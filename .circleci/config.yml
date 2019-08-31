@@ -3,10 +3,12 @@ version: 2.1
 orbs:
   singularity: singularity/singularity@1.0.0
   
-  
 workflows:
   install_debian_3_example:
     jobs:
+      - singularity/install_debian_3:
+          go-version: 1.11.5
+          singularity-version: 3.2.1
       - build:
       - test:
         requires:
@@ -16,13 +18,7 @@ jobs:
   build:
     docker:
       - image: debian:stretch
-          - singularity/install_debian_3:
-          go-version: 1.11.5
-          singularity-version: 3.2.1
     steps:
-      - singularity/install-go:
-          go-version: 1.11.5
-
       - run:
           name: install nextflow
           command: curl -s https://get.nextflow.io | bash
