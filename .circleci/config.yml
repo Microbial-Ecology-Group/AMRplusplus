@@ -14,14 +14,33 @@ parameters:
   machine-type:
     type: string
     default: machine
-steps:
-  - install-go:
-      go-version: <<parameters.go-version>>
-  - debian-install-3:
-      singularity-version: <<parameters.singularity-version>>
-      machine-type: <<parameters.machine-type>>
-  - run:
-      name: Check install version
-      command: |
-        if [ -f "$BASH_ENV" ]; then source $BASH_ENV; fi
-        singularity --version
+
+jobs:
+  build:
+    steps:
+      - install-go:
+          go-version: <<parameters.go-version>>
+      - debian-install-3:
+          singularity-version: <<parameters.singularity-version>>
+          machine-type: <<parameters.machine-type>>
+      - run:
+          name: Check install version
+          command: |
+            if [ -f "$BASH_ENV" ]; then source $BASH_ENV; fi
+            singularity --version
+  test:
+    steps:
+      - Try_pipeline:
+          name: Run AmrPlusPlus
+          command: echo "TEST"
+     
+workflows:
+  build-and-deploy:
+    jobs:
+      - singularity/install_debian_3:
+          go-version: 1.11.5
+          singularity-version: 3.2.1
+      - build:
+      - test:
+        requires:
+          - build
