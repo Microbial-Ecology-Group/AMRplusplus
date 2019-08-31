@@ -1,3 +1,4 @@
+version: 2.1
 description: |
   Install Singularity 3.* on a debian base. We must first install GoLang.
   This is slower than using a pre-built container base, but gives us a native
