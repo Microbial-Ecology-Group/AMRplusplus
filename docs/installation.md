@@ -19,6 +19,8 @@ $ nextflow -h
 
 # If not available, install Nextflow
 $ curl -s https://get.nextflow.io | bash
+# If you do not have curl installed, try wget
+# $ wget -qO- https://get.nextflow.io | bash
 
 # give write permissions to user
 $ chmod u+x nextflow
