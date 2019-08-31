@@ -6,9 +6,11 @@ This section will help you get started with running the AmrPlusPlus pipeline wit
 Setup
 -----
 
-We will go over a typical pipeline setup scenario in which you connect to a remote server, install Nextflow, and download the pipeline source code. First, make sure that Singularity is installed and in your $PATH variable. 
+We will go over a typical pipeline setup scenario in which you connect to a remote server, install Nextflow, and download the pipeline source code. For the easist use of AmrPlusPlus, make sure that Singularity is installed and in your $PATH variable. 
 Visit this website for further information:
 https://singularity.lbl.gov/docs-installation
+
+If Singularity cannot be installed, configure the "config/local.config" file to specify the absolute PATH to each required bioinformatic tool. Then, change the flag after "-profile" to "local" when running the pipeline.
 
 ```bash
 # username and host address
