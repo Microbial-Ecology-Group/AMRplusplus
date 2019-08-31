@@ -101,7 +101,7 @@ process QCStats {
 	file("trimmomatic.stats")
 
     """
-    python3 $baseDir/bin/trimmomatic_stats.py -i ${stats} -o trimmomatic.stats
+    ${PYTHON3} $baseDir/bin/trimmomatic_stats.py -i ${stats} -o trimmomatic.stats
     """
 }
 
@@ -118,7 +118,7 @@ if( !params.host_index ) {
             file '*' into (host_index)
 
         """
-        bwa index ${host}
+        ${bwa} index ${host}
         """
     }
 }
@@ -137,7 +137,7 @@ process AlignReadsToHost {
         set sample_id, file("${sample_id}.host.sam") into (host_sam)
 
     """
-    bwa mem ${host} ${forward} ${reverse} -t ${threads} > ${sample_id}.host.sam
+    ${bwa} mem ${host} ${forward} ${reverse} -t ${threads} > ${sample_id}.host.sam
     """
 }
 
@@ -157,9 +157,9 @@ process RemoveHostDNA {
         file("${sample_id}.samtools.idxstats") into (idxstats_logs)
 
     """
-    samtools view -bS ${sam} | samtools sort -@ ${threads} -o ${sample_id}.host.sorted.bam
-    samtools index ${sample_id}.host.sorted.bam && samtools idxstats ${sample_id}.host.sorted.bam > ${sample_id}.samtools.idxstats
-    samtools view -h -f 4 -b ${sample_id}.host.sorted.bam -o ${sample_id}.host.sorted.removed.bam
+    ${SAMTOOLS} view -bS ${sam} | ${SAMTOOLS} sort -@ ${threads} -o ${sample_id}.host.sorted.bam
+    ${SAMTOOLS} index ${sample_id}.host.sorted.bam && ${SAMTOOLS} idxstats ${sample_id}.host.sorted.bam > ${sample_id}.samtools.idxstats
+    ${SAMTOOLS} view -h -f 4 -b ${sample_id}.host.sorted.bam -o ${sample_id}.host.sorted.removed.bam
     """
 }
 
@@ -180,7 +180,7 @@ process HostRemovalStats {
         file("host.removal.stats")
 
     """
-    python3 $baseDir/bin/samtools_idxstats.py -i ${stats} -o host.removal.stats
+    ${PYTHON3} $baseDir/bin/samtools_idxstats.py -i ${stats} -o host.removal.stats
     """
 }
 
@@ -196,7 +196,7 @@ process BAMToFASTQ {
         set sample_id, file("${sample_id}.non.host.R1.fastq"), file("${sample_id}.non.host.R2.fastq") into (non_host_fastq, non_host_fastq_kraken)
 
     """
-    bedtools  \
+    ${BEDTOOLS}  \
        bamtofastq \
       -i ${bam} \
       -fq ${sample_id}.non.host.R1.fastq \
@@ -215,7 +215,7 @@ if( !params.amr_index ) {
             file '*' into (amr_index)
 
         """
-        bwa index ${amr}
+        ${bwa} index ${amr}
         """
     }
 }
@@ -234,7 +234,7 @@ process AlignToAMR {
          set sample_id, file("${sample_id}.amr.alignment.sam") into (resistome_sam, rarefaction_sam, snp_sam)
 
      """
-     bwa mem ${amr} ${forward} ${reverse} -t ${threads} > ${sample_id}.amr.alignment.sam
+     ${bwa} mem ${amr} ${forward} ${reverse} -t ${threads} > ${sample_id}.amr.alignment.sam
      """
 }
 
@@ -252,8 +252,7 @@ process RunResistome {
         file("${sample_id}.gene.tsv") into (resistome)
 
     """
-    resistome \
-      -ref_fp ${amr} \
+    ${RESISTOME} -ref_fp ${amr} \
       -annot_fp ${annotation} \
       -sam_fp ${sam} \
       -gene_fp ${sample_id}.gene.tsv \
@@ -278,7 +277,7 @@ process RunRarefaction {
         set sample_id, file("*.tsv") into (rarefaction)
 
     """
-    rarefaction \
+    ${RAREFACTION} \
       -ref_fp ${amr} \
       -sam_fp ${sam} \
       -annot_fp ${annotation} \
@@ -307,7 +306,7 @@ process RunSNPFinder {
         set sample_id, file("*.tsv") into (snp)
 
     """
-    snpfinder \
+    ${SNPFINDER} \
       -amr_fp ${amr} \
       -sampe ${sam} \
       -out_fp ${sample_id}.tsv
@@ -327,8 +326,8 @@ process RunKraken {
        kraken_report
 
     """
-    kraken2 --preload --db ${kraken_db} --paired ${forward} ${reverse} --threads ${threads} --report ${sample_id}.kraken.report > ${sample_id}.kraken.raw
-    kraken2 --preload --db ${kraken_db} --confidence 1 --paired ${forward} ${reverse} --threads ${threads} --report ${sample_id}.kraken.filtered.report > ${sample_id}.kraken.raw
+    ${KRAKEN2} --preload --db ${kraken_db} --paired ${forward} ${reverse} --threads ${threads} --report ${sample_id}.kraken.report > ${sample_id}.kraken.raw
+    ${KRAKEN2} --preload --db ${kraken_db} --confidence 1 --paired ${forward} ${reverse} --threads ${threads} --report ${sample_id}.kraken.filtered.report > ${sample_id}.kraken.raw
     """
 }
 
@@ -347,7 +346,7 @@ process AMRLongToWide {
 
     """
     mkdir ret
-    python3 $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ret
+    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ret
     mv ret/AMR_analytic_matrix.csv .
     """
 }
@@ -367,7 +366,7 @@ process KrakenLongToWide {
 
     """
     mkdir ret
-    python3 $baseDir/bin/kraken2_long_to_wide.py -i ${kraken_reports} -o ret
+    ${PYTHON3} $baseDir/bin/kraken2_long_to_wide.py -i ${kraken_reports} -o ret
     mv ret/kraken_analytic_matrix.csv .
     """
 }

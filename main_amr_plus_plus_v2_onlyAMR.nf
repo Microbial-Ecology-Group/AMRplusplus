@@ -104,7 +104,7 @@ process QCStats {
 	file("trimmomatic.stats")
 
     """
-    python3 $baseDir/bin/trimmomatic_stats.py -i ${stats} -o trimmomatic.stats
+    ${PYTHON3} $baseDir/bin/trimmomatic_stats.py -i ${stats} -o trimmomatic.stats
     """
 }
 
@@ -121,7 +121,7 @@ if( !params.host_index ) {
             file '*' into (host_index)
 
         """
-        bwa index ${host}
+        ${bwa} index ${host}
         """
     }
 }
@@ -140,7 +140,7 @@ process AlignReadsToHost {
         set sample_id, file("${sample_id}.host.sam") into (host_sam)
 
     """
-    bwa mem ${host} ${forward} ${reverse} -t ${threads} > ${sample_id}.host.sam
+    ${bwa} mem ${host} ${forward} ${reverse} -t ${threads} > ${sample_id}.host.sam
     """
 }
 
@@ -160,9 +160,9 @@ process RemoveHostDNA {
         file("${sample_id}.samtools.idxstats") into (idxstats_logs)
 
     """
-    samtools view -bS ${sam} | samtools sort -@ ${threads} -o ${sample_id}.host.sorted.bam
-    samtools index ${sample_id}.host.sorted.bam && samtools idxstats ${sample_id}.host.sorted.bam > ${sample_id}.samtools.idxstats
-    samtools view -h -f 4 -b ${sample_id}.host.sorted.bam -o ${sample_id}.host.sorted.removed.bam
+    ${SAMTOOLS} view -bS ${sam} | ${SAMTOOLS} sort -@ ${threads} -o ${sample_id}.host.sorted.bam
+    ${SAMTOOLS} index ${sample_id}.host.sorted.bam && ${SAMTOOLS} idxstats ${sample_id}.host.sorted.bam > ${sample_id}.samtools.idxstats
+    ${SAMTOOLS} view -h -f 4 -b ${sample_id}.host.sorted.bam -o ${sample_id}.host.sorted.removed.bam
     """
 }
 
@@ -183,7 +183,7 @@ process HostRemovalStats {
         file("host.removal.stats")
 
     """
-    python3 $baseDir/bin/samtools_idxstats.py -i ${stats} -o host.removal.stats
+    ${PYTHON3} $baseDir/bin/samtools_idxstats.py -i ${stats} -o host.removal.stats
     """
 }
 
@@ -199,7 +199,7 @@ process NonHostReads {
         set sample_id, file("${sample_id}.non.host.R1.fastq"), file("${sample_id}.non.host.R2.fastq") into (non_host_fastq_megares, non_host_fastq_dedup,non_host_fastq_kraken)
 
     """
-    bedtools  \
+    ${BEDTOOLS}  \
        bamtofastq \
       -i ${bam} \
       -fq ${sample_id}.non.host.R1.fastq \
@@ -234,7 +234,7 @@ if( !params.amr_index ) {
             file '*' into (amr_index)
 
         """
-        bwa index ${amr}
+        ${bwa} index ${amr}
         """
     }
 }
@@ -256,13 +256,13 @@ process AlignToAMR {
 
 
      """
-     bwa mem ${amr} ${forward} ${reverse} -t ${threads} -R '@RG\\tID:${sample_id}\\tSM:${sample_id}' > ${sample_id}.amr.alignment.sam
-     samtools view -S -b ${sample_id}.amr.alignment.sam > ${sample_id}.amr.alignment.bam
-     samtools sort -n ${sample_id}.amr.alignment.bam -o ${sample_id}.amr.alignment.sorted.bam
-     samtools fixmate ${sample_id}.amr.alignment.sorted.bam ${sample_id}.amr.alignment.sorted.fix.bam
-     samtools sort ${sample_id}.amr.alignment.sorted.fix.bam -o ${sample_id}.amr.alignment.sorted.fix.sorted.bam
-     samtools rmdup -S ${sample_id}.amr.alignment.sorted.fix.sorted.bam ${sample_id}.amr.alignment.dedup.bam
-     samtools view -h -o ${sample_id}.amr.alignment.dedup.sam ${sample_id}.amr.alignment.dedup.bam
+     ${bwa} mem ${amr} ${forward} ${reverse} -t ${threads} -R '@RG\\tID:${sample_id}\\tSM:${sample_id}' > ${sample_id}.amr.alignment.sam
+     ${SAMTOOLS} view -S -b ${sample_id}.amr.alignment.sam > ${sample_id}.amr.alignment.bam
+     ${SAMTOOLS} sort -n ${sample_id}.amr.alignment.bam -o ${sample_id}.amr.alignment.sorted.bam
+     ${SAMTOOLS} fixmate ${sample_id}.amr.alignment.sorted.bam ${sample_id}.amr.alignment.sorted.fix.bam
+     ${SAMTOOLS} sort ${sample_id}.amr.alignment.sorted.fix.bam -o ${sample_id}.amr.alignment.sorted.fix.sorted.bam
+     ${SAMTOOLS} rmdup -S ${sample_id}.amr.alignment.sorted.fix.sorted.bam ${sample_id}.amr.alignment.dedup.bam
+     ${SAMTOOLS} view -h -o ${sample_id}.amr.alignment.dedup.sam ${sample_id}.amr.alignment.dedup.bam
      rm ${sample_id}.amr.alignment.bam
      rm ${sample_id}.amr.alignment.sorted*.bam
      """
@@ -282,7 +282,7 @@ process RunResistome {
         file("${sample_id}.gene.tsv") into (megares_resistome_counts, SNP_confirm_long)
 
     """
-    resistome -ref_fp ${amr} \
+    ${RESISTOME} -ref_fp ${amr} \
       -annot_fp ${annotation} \
       -sam_fp ${sam} \
       -gene_fp ${sample_id}.gene.tsv \
@@ -308,7 +308,7 @@ process ResistomeResults {
 
     """
     mkdir ret
-    python3 $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ret
+    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ret
     mv ret/AMR_analytic_matrix.csv .
     """
 }
@@ -329,7 +329,7 @@ process SamDedupRunResistome {
         file("${sample_id}.gene.tsv") into (megares_dedup_resistome_counts)
 
     """
-    resistome -ref_fp ${amr} \
+    ${RESISTOME} -ref_fp ${amr} \
       -annot_fp ${annotation} \
       -sam_fp ${sam} \
       -gene_fp ${sample_id}.gene.tsv \
@@ -355,7 +355,7 @@ process SamDedupResistomeResults {
 
     """
     mkdir ret
-    python3 $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ret
+    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ret
     mv ret/AMR_analytic_matrix.csv SamDedup_AMR_analytic_matrix.csv
     """
 }
@@ -374,7 +374,7 @@ process RunRarefaction {
         set sample_id, file("*.tsv") into (rarefaction)
 
     """
-    rarefaction \
+    ${RAREFACTION} \
       -ref_fp ${amr} \
       -sam_fp ${sam} \
       -annot_fp ${annotation} \
@@ -409,7 +409,7 @@ process RunFreebayes {
         set sample_id, file("${sample_id}.results.vcf") into (SNP)
 
     """
-    freebayes \
+    ${FREEBAYES} \
       -f ${amr} \
       -p 1 \
       ${bam} > ${sample_id}.results.vcf
@@ -429,7 +429,7 @@ process RunSNPFinder {
         set sample_id, file("*.tsv") into (snp)
 
     """
-    snpfinder \
+    ${SNPFINDER} \
       -amr_fp ${amr} \
       -sampe ${sam} \
       -out_fp ${sample_id}.tsv
