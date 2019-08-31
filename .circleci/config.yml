@@ -3,21 +3,8 @@ version: 2.1
 orbs:
   singularity: singularity/singularity@1.0.0
   
-workflows:
-  build-and-deploy:
-    jobs:
-      - singularity/install_debian_3:
-          go-version: 1.11.5
-          singularity-version: 3.2.1
-      - build:
-      - test:
-        requires:
-          - build
-
 jobs:
   build:
-    docker:
-      - image: debian:stretch
     steps:
       - run:
           name: install nextflow
@@ -28,3 +15,14 @@ jobs:
       - run:
           name: Test
           command: echo "Test,Test"
+          
+workflows:
+  build-and-deploy:
+    jobs:
+      - singularity/install_debian_3:
+          go-version: 1.11.5
+          singularity-version: 3.2.1
+      - build:
+      - test:
+        requires:
+          - build
