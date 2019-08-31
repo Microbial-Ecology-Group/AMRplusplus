@@ -1,0 +1,16 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: debian:stretch
+
+    steps:
+      - singularity/install-go:
+          go-version: 1.11.5
+      - singularity/debian-install-3:
+                singularity-version: << parameters.singularity >>
+
+      - run:
+          name: install nextflow
+          command: curl -s https://get.nextflow.io | bash
+            chmod u+x nextflow
