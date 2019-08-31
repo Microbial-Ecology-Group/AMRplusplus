@@ -121,7 +121,7 @@ if( !params.host_index ) {
             file '*' into (host_index)
 
         """
-        ${bwa} index ${host}
+        ${BWA} index ${host}
         """
     }
 }
@@ -140,7 +140,7 @@ process AlignReadsToHost {
         set sample_id, file("${sample_id}.host.sam") into (host_sam)
 
     """
-    ${bwa} mem ${host} ${forward} ${reverse} -t ${threads} > ${sample_id}.host.sam
+    ${BWA} mem ${host} ${forward} ${reverse} -t ${threads} > ${sample_id}.host.sam
     """
 }
 
@@ -233,7 +233,7 @@ if( !params.amr_index ) {
             file '*' into (amr_index)
 
         """
-        ${bwa} index ${amr}
+        ${BWA} index ${amr}
         """
     }
 }
@@ -255,7 +255,7 @@ process AlignToAMR {
 
 
      """
-     ${bwa} mem ${amr} ${forward} ${reverse} -t ${threads} -R '@RG\\tID:${sample_id}\\tSM:${sample_id}' > ${sample_id}.amr.alignment.sam
+     ${BWA} mem ${amr} ${forward} ${reverse} -t ${threads} -R '@RG\\tID:${sample_id}\\tSM:${sample_id}' > ${sample_id}.amr.alignment.sam
      ${SAMTOOLS} view -S -b ${sample_id}.amr.alignment.sam > ${sample_id}.amr.alignment.bam
      ${SAMTOOLS} sort -n ${sample_id}.amr.alignment.bam -o ${sample_id}.amr.alignment.sorted.bam
      ${SAMTOOLS} fixmate ${sample_id}.amr.alignment.sorted.bam ${sample_id}.amr.alignment.sorted.fix.bam

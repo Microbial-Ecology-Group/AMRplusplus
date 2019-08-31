@@ -118,7 +118,7 @@ if( !params.host_index ) {
             file '*' into (host_index)
 
         """
-        ${bwa} index ${host}
+        ${BWA} index ${host}
         """
     }
 }
@@ -137,7 +137,7 @@ process AlignReadsToHost {
         set sample_id, file("${sample_id}.host.sam") into (host_sam)
 
     """
-    ${bwa} mem ${host} ${forward} ${reverse} -t ${threads} > ${sample_id}.host.sam
+    ${BWA} mem ${host} ${forward} ${reverse} -t ${threads} > ${sample_id}.host.sam
     """
 }
 
@@ -215,7 +215,7 @@ if( !params.amr_index ) {
             file '*' into (amr_index)
 
         """
-        ${bwa} index ${amr}
+        ${BWA} index ${amr}
         """
     }
 }
@@ -234,7 +234,7 @@ process AlignToAMR {
          set sample_id, file("${sample_id}.amr.alignment.sam") into (resistome_sam, rarefaction_sam, snp_sam)
 
      """
-     ${bwa} mem ${amr} ${forward} ${reverse} -t ${threads} > ${sample_id}.amr.alignment.sam
+     ${BWA} mem ${amr} ${forward} ${reverse} -t ${threads} > ${sample_id}.amr.alignment.sam
      """
 }
 
