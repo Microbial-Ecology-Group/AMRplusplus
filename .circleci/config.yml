@@ -4,30 +4,29 @@ orbs:
   singularity: singularity/singularity@1.0.2
 
 jobs:
-  build:
+  get_nextflow:
     machine:
     - image: ubuntu-1604:201903-01
     steps:
     - run:
-        name: Download Nextflow 
+        name: Install nextflow
         command: |
-          curl -fsSL get.nextflow.io | bash  
-    
-  deploy:
+          curl -fsSL get.nextflow.io | bash
+          ls
+  get_singularity:
     docker:
     - image: singularityware/singularity:3.1-slim
     steps:
     - run:
         name: Check singularity version
         command: |
-          if [ -f \"$BASH_ENV\" ]; then source $BASH_ENV; fi
+          if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
           singularity --version
-          ls
     
+
+
 workflows:         
   build-and-deploy:
     jobs:
-      - build:
-      - deploy:
-        requires:
-          - build
+      - get_nextflow
+      - get_singularity
