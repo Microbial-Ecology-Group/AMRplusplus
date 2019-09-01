@@ -32,7 +32,6 @@ if(params.kraken_db) {
     kraken_db = file(params.kraken_db)
 }
 
-
 threads = params.threads
 
 threshold = params.threshold
@@ -221,8 +220,6 @@ process NonHostReads {
 /*
 ---- Run Kraken2
 */
-
-
 
 process RunKraken {
     tag { sample_id }
