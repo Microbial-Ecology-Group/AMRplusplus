@@ -5,6 +5,7 @@ orbs:
 
 jobs:
   build:
+    executor: singularity/machine
     parameters:
         singularity:
           type: string
@@ -30,6 +31,7 @@ jobs:
           
   test:
     machine: true
+    executor: singularity/machine
     steps:
     - run:
         name: Test AmrPlusPlus pipeline
