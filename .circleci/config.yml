@@ -5,22 +5,17 @@ orbs:
 
 jobs:
   build:
-    machine:
-      image: ubuntu-1604:201903-01
+    docker:
+      image: singularityware/singularity:3.1-slim
     steps:
     - run:
         name: Check install version
         command: |
           if [ -f \"$BASH_ENV\" ]; then source $BASH_ENV; fi
           singularity --version
+          echo "Test"
 
-workflows:
-  build_container_docker_base_example:
-    jobs:
-      - singularity/build_container_docker_base:
-          from-uri: docker://busybox 
-          image: busybox.sif
-          
+workflows:         
   build-and-deploy:
     jobs:
       - build
