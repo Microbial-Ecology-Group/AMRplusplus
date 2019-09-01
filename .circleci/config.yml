@@ -13,8 +13,10 @@ jobs:
         name: Install nextflow
         command: |
           if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
-          curl -fsSL get.nextflow.io | bash
-          nextflow -h
+          ls /usr/src/
+          javac Main.java
+          #curl -fsSL get.nextflow.io | bash
+          #nextflow -h
   deploy:
     docker:
     - image: singularityware/singularity:3.1-slim
