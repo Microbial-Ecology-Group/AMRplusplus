@@ -4,7 +4,9 @@ orbs:
   singularity: singularity/singularity@1.0.2
 
 jobs:
-  get_singularity:
+  build:
+    machine:
+    - image: ubuntu-1604:201903-01
     docker:
     - image: singularityware/singularity:3.1-slim
     steps:
@@ -13,13 +15,6 @@ jobs:
         command: |
           if [ -f \"$BASH_ENV\" ]; then source $BASH_ENV; fi
           singularity --version
-  get_nextflow:
-    machine:
-    - image: ubuntu-1604:201903-01
-    steps:
-    - run:
-        name: Install nextflow
-        command: |
           curl -fsSL get.nextflow.io | bash
           ls
     
@@ -28,5 +23,4 @@ jobs:
 workflows:         
   build-and-deploy:
     jobs:
-      - get_singularity
-      - get_nextflow
+      - build
