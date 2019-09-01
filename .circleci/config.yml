@@ -6,14 +6,14 @@ orbs:
 jobs:
   get_nextflow:
     docker:
-    - image: circleci/node:4.8.2-jessie
+    - image: circleci/classic:latest
     steps:
     - run:
         name: Install nextflow
         command: |
           if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
           curl -fsSL get.nextflow.io | bash
-          ls
+          nextflow -h
   get_singularity:
     docker:
     - image: singularityware/singularity:3.1-slim
