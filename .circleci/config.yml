@@ -9,11 +9,17 @@ jobs:
     - image: singularityware/singularity:3.1-slim
     steps:
     - run:
-        name: Check install version
+        name: Check singularity version
         command: |
           if [ -f \"$BASH_ENV\" ]; then source $BASH_ENV; fi
           singularity --version
-          echo "Test"
+    - run:
+        name: Install nextflow
+        command: |
+          curl -fsSL get.nextflow.io | bash
+          ls
+    
+
 
 workflows:         
   build-and-deploy:
