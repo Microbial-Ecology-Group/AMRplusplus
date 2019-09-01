@@ -5,8 +5,8 @@ orbs:
 
 jobs:
   get_nextflow:
-    machine:
-    - image: ubuntu-1604:201903-01
+    docker:
+    - image: circleci/node:4.8.2-jessie
     steps:
     - run:
         name: Install nextflow
