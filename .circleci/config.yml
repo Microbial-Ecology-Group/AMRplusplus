@@ -4,26 +4,10 @@ orbs:
   singularity: singularity/singularity@1.0.2
 
 jobs:
-  get_nextflow:
-    docker:
-    - image: buildpack-deps:trusty
-    steps:
-    - run:
-        name: Install nextflow
-        command: |
-          if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
-          add-apt-repository ppa:openjdk-r/ppa && \
-          apt-get update && \
-          apt-get install -y openjdk-8-jdk && \
-          apt-get install -y ant && \
-          apt-get clean;
-          ls /bin/
-          ls /usr/lib/
-          curl -fsSL get.nextflow.io | bash
-          nextflow -h
-  deploy:
+  build:
     docker:
     - image: singularityware/singularity:3.1-slim
+    - image: nextflow/nextflow
     steps:
     - run:
         name: Check singularity version
@@ -36,7 +20,4 @@ jobs:
 workflows:         
   build-and-deploy:
     jobs:
-      - get_nextflow
-      - deploy:
-           requires:
-             - get_nextflow
+      - build
