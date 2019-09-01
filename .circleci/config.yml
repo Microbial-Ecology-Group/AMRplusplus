@@ -14,7 +14,7 @@ jobs:
           if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
           curl -fsSL get.nextflow.io | bash
           nextflow -h
-  get_singularity:
+  deploy:
     docker:
     - image: singularityware/singularity:3.1-slim
     steps:
@@ -30,4 +30,6 @@ workflows:
   build-and-deploy:
     jobs:
       - get_nextflow
-      - get_singularity
+      - deploy:
+           requires:
+             - build
