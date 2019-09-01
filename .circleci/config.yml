@@ -26,12 +26,11 @@ workflows:
   version: 2.1
   build-and-deploy:
     jobs:
-      - singularity/build_container_custom_3:
+      - build
+      - test:
           go-version: 1.11.5
           singularity-version: 3.2.1
           from-uri: docker://busybox
           image: busybox.sif
-      - build
-      - test:
           requires:
             - build
