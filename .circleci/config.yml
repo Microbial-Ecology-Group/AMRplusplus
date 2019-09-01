@@ -6,7 +6,7 @@ orbs:
 jobs:
   get_nextflow:
     docker:
-    - image: circleci/classic:latest
+    - image: buildpack-deps:trusty
     steps:
     - run:
         name: Install nextflow
