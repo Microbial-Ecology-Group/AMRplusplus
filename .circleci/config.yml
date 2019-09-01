@@ -30,8 +30,10 @@ jobs:
           if [ -f "$BASH_ENV" ]; then source $BASH_ENV; fi
           singularity --version
   test:
-    -run:
-        command: echo "Test"
+    - run:
+        name: Test AmrPlusPlus pipeline
+        command: |
+          echo "Test"
 
 
 workflows:
