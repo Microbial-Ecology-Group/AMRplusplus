@@ -13,7 +13,7 @@ jobs:
         name: Install nextflow
         command: |
           if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
-          ls /usr/local/openjdk-8/
+          ls /bin/
           #curl -fsSL get.nextflow.io | bash
           #nextflow -h
   deploy:
