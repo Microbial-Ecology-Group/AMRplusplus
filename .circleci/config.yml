@@ -4,48 +4,6 @@ orbs:
   singularity: singularity/singularity@1.0.2
 
 jobs:
-  get_nextflow:
-    docker:
-    - image: buildpack-deps:trusty
-    steps:
-    - run:
-        name: Install nextflow
-        command: |
-          if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
-          ls /bin/
-          ls /usr/lib/
-          curl -fsSL get.nextflow.io | bash
-          nextflow -h
-  deploy:
-    docker:
-    - image: singularityware/singularity:3.1-slim
-    steps:
-    - run:
-        name: Check singularity version
-        command: |
-          if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
-          singularity --version
-
-
-
-workflows:
-  build-and-deploy:
-    jobs:
-      - get_nextflow
-      - deploy:
-           requires:
-             - get_nextflow
-
-
-
-----------------------------------------------
-
-version: 2.1
-
-orbs:
-  singularity: singularity/singularity@1.0.2
-
-jobs:
   build:
     docker:
     - image: buildpack-deps:trusty
