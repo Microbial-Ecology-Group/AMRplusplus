@@ -6,33 +6,18 @@ orbs:
 jobs:
   build:
     docker:
-    - image: buildpack-deps:trusty
-    - image: nextflow/nextflow
-    - image: singularityware/singularity:3.1-slim
-    steps:
-    - checkout
-    - run:
-        name: install dockerize
-        command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-        environment:
-          DOCKERIZE_VERSION: v0.3.0
-    - run:
-        name: Wait for db
-        command: |
-          sleep 30 
-          #dockerize -wait tcp://db:27017 -wait http://localhost:27017 -timeout 1m
-    - run:
-        name: Check nextflow
-        command: |
-          if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
-          /usr/local/bin/nextflow -h
+    - image: circleci/python:3.6.2-stretch-browsers
     - run:
         name: Test AmrPlusPlus
         command: |
-          singularity --version
-          git clone https://github.com/meglab-metagenomics/amrplusplus_v2.git
-          cd amrplusplus_v2/
-          nextflow run main_amr_plus_plus_v2_onlyAMR.nf -profile singularity --output test
+          if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
+          sudo apt-get update
+          curl -fsSL get.nextflow.io | bash
+          #/usr/local/bin/nextflow -h
+          #singularity --version
+          #git clone https://github.com/meglab-metagenomics/amrplusplus_v2.git
+          #cd amrplusplus_v2/
+          #nextflow run main_amr_plus_plus_v2_onlyAMR.nf -profile singularity --output test
 
 workflows:
   build-and-deploy:
