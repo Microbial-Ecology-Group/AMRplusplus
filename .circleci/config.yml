@@ -32,4 +32,4 @@ workflows:
       - get_nextflow
       - deploy:
            requires:
-             - build
+             - get_nextflow
