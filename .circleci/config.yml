@@ -28,6 +28,11 @@ jobs:
           default: true
     machine: true
     steps:
+    - run:
+        name: Check install version
+        command: |
+          if [ -f "$BASH_ENV" ]; then source $BASH_ENV; fi
+          echo "Test"
     # Install Singularity
     - when:
         condition: << parameters.singularity-3 >>
@@ -41,11 +46,6 @@ jobs:
         steps:
           - singularity/debian-install-2:
                     singularity-version: << parameters.singularity >>
-    - run:
-        name: Check install version
-        command: |
-          if [ -f "$BASH_ENV" ]; then source $BASH_ENV; fi
-          singularity --version
           
           
   test:
