@@ -4,8 +4,10 @@ orbs:
   singularity: singularity/singularity@1.0.0
 
 workflows:
-  install_debian_3_example:
-    jobs:
-      - singularity/install_debian_3:
-        go-version: 11.1.5
+  build_container_custom_3_example:
+  jobs:
+    - singularity/build_container_custom_3:
+        go-version: 1.11.5
         singularity-version: 3.2.1
+        from-uri: docker://busybox
+        image: busybox.sif
