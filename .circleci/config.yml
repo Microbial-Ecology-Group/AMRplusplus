@@ -7,17 +7,14 @@ jobs:
   build:
     docker:
     - image: nextflow/nextflow
+    - image: singularityware/singularity:3.1-slim
     steps:
     - run:
         name: Check singularity version
         command: |
           if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
-          #singularity --version
-          #ls /usr/local/bin/nextflow -h
-          ls /usr/local/lib
-          ls -hla /usr/local/bin/
-          .nextflow
-          
+          /usr/local/bin/nextflow -h
+          singularity --version
     
 
 
