@@ -14,8 +14,7 @@ jobs:
         command: |
           if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
           ls /bin/
-          ls /usr/local/
-          ls /src/
+          ls /usr/lib/
           curl -fsSL get.nextflow.io | bash
           nextflow -h
   deploy:
