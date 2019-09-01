@@ -14,8 +14,8 @@ jobs:
         command: |
           if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
           ls /bin/
-          #curl -fsSL get.nextflow.io | bash
-          #nextflow -h
+          curl -fsSL get.nextflow.io | bash
+          nextflow -h
   deploy:
     docker:
     - image: singularityware/singularity:3.1-slim
