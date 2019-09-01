@@ -6,8 +6,8 @@ orbs:
 jobs:
   build:
     docker:
-    - image: circleci/golang:1.9-browsers
     - image: singularityware/singularity:3.1-slim
+    - image: circleci/golang:1.9-browsers
     steps:
     - checkout
     - run:
