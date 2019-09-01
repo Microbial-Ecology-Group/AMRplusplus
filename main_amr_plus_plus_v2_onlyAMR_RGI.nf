@@ -133,7 +133,7 @@ process AlignReadsToHost {
 
     input:
         set sample_id, file(forward), file(reverse) from paired_fastq
-        file index from host_index.first()
+        file index from host_index
         file host
 
     output:
@@ -245,7 +245,7 @@ process AlignToAMR {
 
      input:
          set sample_id, file(forward), file(reverse) from non_host_fastq_megares
-         file index from amr_index.first()
+         file index from amr_index
          file amr
 
      output:
