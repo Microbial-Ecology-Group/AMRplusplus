@@ -19,7 +19,7 @@ jobs:
     - run:
         name: Wait for db
         command: |
-          sleep 5 && nc -vz localhost 27017
+          sleep 30 
           #dockerize -wait tcp://db:27017 -wait http://localhost:27017 -timeout 1m
     - run:
         name: Check nextflow
