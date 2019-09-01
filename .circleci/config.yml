@@ -6,8 +6,8 @@ orbs:
 jobs:
   build:
     docker:
-    - image: buildpack-deps:trusty
     - image: singularityware/singularity:3.1-slim
+    - image: buildpack-deps:trusty
     - image: nextflow/nextflow
     steps:
     - checkout
