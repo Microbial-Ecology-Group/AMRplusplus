@@ -4,7 +4,7 @@ orbs:
   singularity: singularity/singularity@1.0.2
 
 jobs:
-  build:
+  get_singularity:
     docker:
     - image: singularityware/singularity:3.1-slim
     steps:
@@ -13,6 +13,11 @@ jobs:
         command: |
           if [ -f \"$BASH_ENV\" ]; then source $BASH_ENV; fi
           singularity --version
+   get_nextflow:
+    machine:
+      java:
+        version: openjdk8
+    steps:
     - run:
         name: Install nextflow
         command: |
@@ -25,3 +30,4 @@ workflows:
   build-and-deploy:
     jobs:
       - build
+      - get_nextflow
