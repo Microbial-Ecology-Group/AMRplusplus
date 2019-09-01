@@ -1,5 +1,47 @@
 version: 2.1
- 
+
+orbs:
+  singularity: singularity/singularity@1.0.2
+
+jobs:
+  get_nextflow:
+    docker:
+    - image: buildpack-deps:trusty
+    steps:
+    - run:
+        name: Install nextflow
+        command: |
+          if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
+          ls /bin/
+          ls /usr/lib/
+          curl -fsSL get.nextflow.io | bash
+          nextflow -h
+  deploy:
+    docker:
+    - image: singularityware/singularity:3.1-slim
+    steps:
+    - run:
+        name: Check singularity version
+        command: |
+          if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
+          singularity --version
+
+
+
+workflows:
+  build-and-deploy:
+    jobs:
+      - get_nextflow
+      - deploy:
+           requires:
+             - get_nextflow
+
+
+
+----------------------------------------------
+
+version: 2.1
+
 orbs:
   singularity: singularity/singularity@1.0.2
 
@@ -11,14 +53,6 @@ jobs:
     steps:
     - checkout
     - run:
-        name: install dockerize
-        command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-        environment:
-          DOCKERIZE_VERSION: v0.3.0
-    - run:
-        name: Wait for db
-        command: dockerize -wait tcp://db:5432 -wait http://localhost:80 -timeout 1m
-    - run:
         name: Check nextflow
         command: |
           if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
@@ -26,6 +60,7 @@ jobs:
 
   deploy:
     docker:
+    - image: buildpack-deps:trusty
     - image: singularityware/singularity:3.1-slim
     steps:
     - checkout
@@ -35,12 +70,12 @@ jobs:
           singularity --version
           git clone https://github.com/meglab-metagenomics/amrplusplus_v2.git
           cd amrplusplus_v2/
-          nextflow run main_amr_plus_plus_v2_onlyAMR.nf -profile singularity --output test
-          
-    
+          /usr/local/bin/nextflow run main_amr_plus_plus_v2_onlyAMR.nf -profile singularity --output test
 
 
-workflows:         
+
+
+workflows:
   build-and-deploy:
     jobs:
       - build
