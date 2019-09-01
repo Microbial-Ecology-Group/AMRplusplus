@@ -18,13 +18,17 @@ jobs:
           DOCKERIZE_VERSION: v0.3.0
     - run:
         name: Wait for db
-        command: dockerize -wait tcp://localhost:5432 -timeout 1m
+        command: dockerize -wait tcp://localhost:5432 -timeout 5m
     - run:
         name: Test Run
         command: |
           if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
           /usr/local/bin/nextflow -h
           singularity --version
+          git clone https://github.com/meglab-metagenomics/amrplusplus_v2.git
+          cd amrplusplus_v2/
+          nextflow run main_amr_plus_plus_v2_onlyAMR.nf -profile singularity --output test
+          
     
 
 
