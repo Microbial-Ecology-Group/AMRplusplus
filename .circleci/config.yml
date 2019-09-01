@@ -7,7 +7,7 @@ jobs:
   get_nextflow:
     docker:
     - image: buildpack-deps:trusty
-    - image: 8-jre
+    - image: openjdk:8
     steps:
     - run:
         name: Install nextflow
