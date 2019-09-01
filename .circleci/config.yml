@@ -5,7 +5,7 @@ orbs:
 
 jobs:
   build:
-    executor = machine
+    executor : machine
     steps:
     - run:
         name: Check install version
