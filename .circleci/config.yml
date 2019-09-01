@@ -11,21 +11,9 @@ jobs:
     steps:
     - checkout
     - run:
-        name: install dockerize
-        command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-        environment:
-          DOCKERIZE_VERSION: v0.3.0
-    - run:
-        name: Wait for db
-        command: dockerize -wait tcp://db:5432 -wait http://localhost:80 -timeout 1m
-    - run:
-        name: Check nextflow
-        command: |
-          if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
-          /usr/local/bin/nextflow -h
-    - run:
         name: Test AmrPlusPlus
         command: |
+          if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
           singularity --version
           curl -fsSL https://get.nextflow.io | bash
           git clone https://github.com/meglab-metagenomics/amrplusplus_v2.git
