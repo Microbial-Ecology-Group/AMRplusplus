@@ -13,7 +13,7 @@ jobs:
         command: |
           if [ -f \"$BASH_ENV\" ]; then source $BASH_ENV; fi
           singularity --version
-   get_nextflow:
+  get_nextflow:
     machine:
       java:
         version: openjdk8
