@@ -3,23 +3,6 @@ version: 2.1
 orbs:
   singularity: singularity/singularity@1.0.4
 
-description: |
-  Install Singularity 3.* on a debian base. We must first install GoLang.
-  This is slower than using a pre-built container base, but gives us a native
-  install with more functionality.
-executor: machine
-parameters:
-  singularity-version:
-    type: string
-    default: 3.2.1
-  go-version:
-    type: string
-    default: 1.11.5
-  machine-type:
-    type: string
-    default: machine
-
-
 jobs:
   build:
     parameters:
@@ -32,11 +15,12 @@ jobs:
           default: true
     machine: true
     steps:
+    - checkout
     # Install Singularity
     - singularity/install-go:
         go-version: 1.11.5
     - singularity/debian-install-3:
-        singularity-version: << parameters.singularity >>
+        singularity-version: 3.2.1
     - run:
         name: Check install version
         command: |
