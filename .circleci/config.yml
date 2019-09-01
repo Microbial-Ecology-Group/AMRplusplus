@@ -31,14 +31,13 @@ jobs:
           singularity --version
   test:
     -run:
-      command: |
-      echo "Test"
+        command: echo "Test"
 
 
 workflows:
   build-and-deploy:
     jobs:
-      - build:
-      - test:
-        requires:
-          - build
+    - build:
+    - test:
+      requires:
+      - build
