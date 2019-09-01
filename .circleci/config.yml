@@ -4,6 +4,11 @@ orbs:
   singularity: singularity/singularity@1.0.0
 
 jobs:
+  - singularity/install_debian_3:
+    go-version: 1.11.5
+    singularity-version: 3.2.1
+    from-uri: docker://busybox
+    image: busybox.sif
   build:
     machine: true
     steps:
@@ -16,11 +21,6 @@ jobs:
   test:
     machine: true
     executor: singularity/machine
-    - singularity/install_debian_3:
-      go-version: 1.11.5
-      singularity-version: 3.2.1
-      from-uri: docker://busybox
-      image: busybox.sif
     steps:
     - run:
         name: Test AmrPlusPlus pipeline
