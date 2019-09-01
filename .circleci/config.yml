@@ -4,8 +4,8 @@ orbs:
   singularity: singularity/singularity@1.0.2
 
 jobs:
-  machine = true
   build:
+    executor = machine
     steps:
     - run:
         name: Check install version
