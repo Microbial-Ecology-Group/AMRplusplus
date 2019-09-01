@@ -6,7 +6,7 @@ orbs:
 jobs:
   build:
     docker:
-      image: singularityware/singularity:3.1-slim
+    - image: singularityware/singularity:3.1-slim
     steps:
     - run:
         name: Check install version
