@@ -7,14 +7,14 @@ jobs:
   get_nextflow:
     docker:
     - image: buildpack-deps:trusty
-    - image: openjdk:8
+    - image: openjdk:8-jre
     steps:
     - run:
         name: Install nextflow
         command: |
           if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
-          ls /usr/src/
-          javac Main.java
+          ls /usr/local/openjdk-8/bin
+          which java
           #curl -fsSL get.nextflow.io | bash
           #nextflow -h
   deploy:
