@@ -1,13 +1,11 @@
 version: 2.1
 
 orbs:
-  singularity: singularity/singularity@1.0.0
+  singularity: singularity/singularity@1.0.2
 
 workflows:
-  build_container_custom_3_example:
-  jobs:
-    - singularity/build_container_custom_3:
-        go-version: 1.11.5
-        singularity-version: 3.2.1
-        from-uri: docker://busybox
-        image: busybox.sif
+  build_container_docker_base_example:
+    jobs:
+      - singularity/build_container_docker_base:
+          from-uri: docker://busybox 
+          image: busybox.sif
