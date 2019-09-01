@@ -24,3 +24,30 @@ workflows:
   build-and-deploy:
     jobs:
       - build
+
+version: 2.1
+ 
+orbs:
+  singularity: singularity/singularity@1.0.2
+
+jobs:
+  build:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+    - run:
+        name: Check install version
+        command: |
+          if [ -f \"$BASH_ENV\" ]; then source $BASH_ENV; fi
+          singularity --version
+
+workflows:
+  build_container_docker_base_example:
+    jobs:
+      - singularity/build_container_docker_base:
+          from-uri: docker://busybox 
+          image: busybox.sif
+          
+  build-and-deploy:
+    jobs:
+      - build
