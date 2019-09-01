@@ -14,9 +14,9 @@ jobs:
         command: |
           if [ -f \\\"$BASH_ENV\\\" ]; then source $BASH_ENV; fi
           singularity --version
-          ls /usr/local/bin/
-          ls /usr/local/
-          nextflow -h
+          ls /usr/local/bin/nextflow -h
+          ls /usr/local/lib
+          
     
 
 
