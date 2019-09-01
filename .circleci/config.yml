@@ -29,5 +29,5 @@ jobs:
 workflows:         
   build-and-deploy:
     jobs:
-      - build
+      - get_singularity
       - get_nextflow
