@@ -18,18 +18,36 @@ parameters:
 
 jobs:
   build:
+    parameters:
+        singularity:
+          type: string
+          description: "Singularity version"
+        singularity-3:
+          type: boolean
+          description: "Set to true for singularity 3, false for singularity 2"
+          default: true
     machine: true
     steps:
-    - install-go:
-        go-version: <<parameters.go-version>>
-    - debian-install-3:
-        singularity-version: <<parameters.singularity-version>>
-        machine-type: <<parameters.machine-type>>
+    # Install Singularity
+    - when:
+        condition: << parameters.singularity-3 >>
+        steps:
+          - singularity/install-go:
+              go-version: 1.11.5
+          - singularity/debian-install-3:
+                    singularity-version: << parameters.singularity >>
+    - unless:
+        condition: << parameters.singularity-3 >>
+        steps:
+          - singularity/debian-install-2:
+                    singularity-version: << parameters.singularity >>
     - run:
         name: Check install version
         command: |
           if [ -f "$BASH_ENV" ]; then source $BASH_ENV; fi
           singularity --version
+          
+          
   test:
     machine: true
     steps:
