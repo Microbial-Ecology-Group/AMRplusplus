@@ -18,6 +18,7 @@ parameters:
 
 jobs:
   build:
+    machine: true
     steps:
     - install-go:
         go-version: <<parameters.go-version>>
@@ -30,6 +31,7 @@ jobs:
           if [ -f "$BASH_ENV" ]; then source $BASH_ENV; fi
           singularity --version
   test:
+    machine: true
     steps:
     - run:
         name: Test AmrPlusPlus pipeline
