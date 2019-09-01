@@ -1,33 +1,17 @@
 version: 2.1
 
 orbs:
-  singularity: singularity/singularity@dev:alpha
+  singularity: singularity/singularity@1.0.0
 
 jobs:
   build:
-    executor: singularity/machine
-    parameters:
-        singularity:
-          type: string
-          description: "Singularity version"
-        singularity-3:
-          type: boolean
-          description: "Set to true for singularity 3, false for singularity 2"
-          default: true
     machine: true
     steps:
-    - checkout
-    # Install Singularity
-    - singularity/install-go:
-        go-version: 1.11.5
-    - singularity/debian-install-3:
-        singularity-version: 3.2.1
     - run:
         name: Check install version
         command: |
           if [ -f "$BASH_ENV" ]; then source $BASH_ENV; fi
           echo "Test"
-          
           
   test:
     machine: true
@@ -42,6 +26,11 @@ workflows:
   version: 2.1
   build-and-deploy:
     jobs:
+      - singularity/build_container_custom_3:
+          go-version: 1.11.5
+          singularity-version: 3.2.1
+          from-uri: docker://busybox
+          image: busybox.sif
       - build
       - test:
           requires:
