@@ -4,10 +4,7 @@ From: debian:jessie-slim
 #Includes idba, trimmomatic, samtools, bwa, bedtools, freebayes, bbmap, vcftools, htslib, ncurses, kraken2, resistomeanalyzer, rarefactionanalyzer, SNPfinder
 
 %environment
-    echo 'export PATH=/usr/local/bin/anaconda/bin:${PATH}' >> $SINGULARITY_ENVIRONMENT
     export PATH=/usr/local/envs/compute/bin/:${PATH}
-
-%files
     
 %post
     ## Jave install doesn't work, but can load java module from summit
