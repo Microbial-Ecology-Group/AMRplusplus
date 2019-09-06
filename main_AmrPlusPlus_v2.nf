@@ -74,15 +74,13 @@ process RunQC {
      ${JAVA} -jar ${TRIMMOMATIC} \
       PE \
       -threads ${threads} \
-      $forward $reverse ${sample_id}.1P.fastq ${sample_id}.1U.fastq ${sample_id}.2P.fastq ${sample_id}.2U.fastq \
+      $forward $reverse ${sample_id}.1P.fastq.gz ${sample_id}.1U.fastq.gz ${sample_id}.2P.fastq.gz ${sample_id}.2U.fastq.gz \
       ILLUMINACLIP:${adapters}:2:30:10:3:TRUE \
       LEADING:${leading} \
       TRAILING:${trailing} \
       SLIDINGWINDOW:${slidingwindow} \
       MINLEN:${minlen} \
       2> ${sample_id}.trimmomatic.stats.log
-
-      gzip *fastq
     """
 }
 
@@ -263,8 +261,8 @@ process AlignToAMR {
      ${SAMTOOLS} sort ${sample_id}.amr.alignment.sorted.fix.bam -o ${sample_id}.amr.alignment.sorted.fix.sorted.bam
      ${SAMTOOLS} rmdup -S ${sample_id}.amr.alignment.sorted.fix.sorted.bam ${sample_id}.amr.alignment.dedup.bam
      ${SAMTOOLS} view -h -o ${sample_id}.amr.alignment.dedup.sam ${sample_id}.amr.alignment.dedup.bam
-     rm ${sample_id}.amr.alignment.bam
-     rm ${sample_id}.amr.alignment.sorted*.bam
+     #rm ${sample_id}.amr.alignment.bam
+     #rm ${sample_id}.amr.alignment.sorted*.bam
      """
 }
 
@@ -307,9 +305,7 @@ process ResistomeResults {
         file("AMR_analytic_matrix.csv") into amr_master_matrix
 
     """
-    mkdir ret
-    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ret
-    mv ret/AMR_analytic_matrix.csv .
+    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o AMR_analytic_matrix.csv
     """
 }
 
@@ -354,9 +350,7 @@ process SamDedupResistomeResults {
         file("SamDedup_AMR_analytic_matrix.csv") into megares_dedup_amr_master_matrix
 
     """
-    mkdir ret
-    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ret
-    mv ret/AMR_analytic_matrix.csv SamDedup_AMR_analytic_matrix.csv
+    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o SamDedup_AMR_analytic_matrix.csv
     """
 }
 
