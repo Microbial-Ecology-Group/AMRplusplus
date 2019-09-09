@@ -39,8 +39,8 @@ def parse_cmdline_params(cmdline_params):
     parser = argparse.ArgumentParser(description=info)
     parser.add_argument('-i', '--input_files', nargs='+', required=True,
                         help='Use globstar to pass a list of files, (Ex: *.tsv)')
-    parser.add_argument('-o', '--output_directory', required=True,
-                        help='Output directory for writing the kraken_analytic_matrix.csv file')
+    parser.add_argument('-o', '--output_file', required=True,
+                        help='Output file name for writing the kraken_analytic_matrix.csv file')
     return parser.parse_args(cmdline_params)
 
 
@@ -112,9 +112,9 @@ def kraken2_load_analytic_data(file_name_list):
     return dict_to_matrix(return_values), unclassifieds
 
 
-def output_kraken2_analytic_data(outdir, M, m_names, n_names, unclassifieds):
-    with open(outdir + '/kraken_analytic_matrix.csv', 'w') as out, \
-            open(outdir + '/kraken_unclassifieds.csv', 'w') as u_out:
+def output_kraken2_analytic_data(outfile, M, m_names, n_names, unclassifieds):
+    with open(outfile, 'w') as out, \
+            open('kraken_unclassifieds.csv', 'w') as u_out:
         out.write(','.join(n_names) + '\n')
         for i, row in enumerate(M):
             out.write('\"{}\",'.format(
@@ -133,4 +133,4 @@ if __name__ == '__main__':
     opts = parse_cmdline_params(sys.argv[1:])
     kraken2_load_analytic_data(opts.input_files)
     (K, m, n), u = kraken2_load_analytic_data(opts.input_files)
-    output_kraken2_analytic_data(opts.output_directory, K, m, n, u)
+    output_kraken2_analytic_data(opts.output_file, K, m, n, u)
