@@ -1,56 +1,16 @@
-Installation
+Troubleshooting and frequently asked questions (FAQs)
 ------------
 
-This section will help you get started with running the AmrPlusPlus pipeline with Nextflow and Docker. This tutorial assumes you will be running the pipeline from a POSIX compatible system such as Linux, Solaris, or OS X.
+Many errors that may be encountered may ultimately be the result of user error. If you encounter an error message any time that this pipeline is used, carefully check the command you used for any spelling errors. Additionally, many of these error messages give some detail as too where the code is wrong. Here are a few common errors and our suggestions for basic troubleshooting.
 
-Setup
------
+* Are you using the correct "profile" to run AmrPlusPlus?
+  * We provide many examples of profile configurationg and choosing the correct one depends on your computing environment.
+    * If you have singularity installed on your server, we recommend using the "singularity" profile to avoid the installation of any additional tools. 
+    * If you already have the tools installed on your server, the best option is to configure the local.config file to point to the absolute PATH to each too.
 
-We will go over a typical pipeline setup scenario in which you connect to a remote server, install Nextflow, and download the pipeline source code. For the easist use of AmrPlusPlus, make sure that Singularity is installed and in your $PATH variable. 
-Visit this website for further information:
-https://singularity.lbl.gov/docs-installation
-
-If Singularity cannot be installed, configure the "config/local.config" file to specify the absolute PATH to each required bioinformatic tool. Then, change the flag after "-profile" to "local" when running the pipeline.
-
-```bash
-# username and host address
-$ ssh [USER]@[HOST]
-
-# Check if you have nextflow installed,
-$ nextflow -h
-
-# If not available, install Nextflow
-$ curl -s https://get.nextflow.io | bash
-# If you do not have curl installed, try wget
-# $ wget -qO- https://get.nextflow.io | bash
-
-# give write permissions to user
-$ chmod u+x nextflow
-
-# move nextflow executable to a folder in your PATH environment variable
-$ mv nextflow $HOME/bin
-
-# create a test directory and change into it
-$ mkdir amr_test && cd amr_test
-
-# clone pipeline source code
-$ git clone https://github.com/meglab-metagenomics/amrplusplus_v2.git .
-```
-
-Run a Simple Test
------------------
-
-We will run a small sample dataset that comes with the pipeline source code. As such, we will not be specifying any input paths as they have already been included. During the program's execution, the required tool dependencies will be accessed using a Singularity container. As there are many tool dependencies, downloading the container could take some time depending on your connection speed.
-
-```bash
-# navigate into AmrPlusPlus repository
-$ cd amrplusplus_v2/
-
-# command to run the amrplusplus pipeline
-$ nextflow run main_amr_plus_plus_v2_onlyAMR.nf -profile singularity --output test
-
-# change directories to view pipeline outputs
-$ cd test/
-```
+* Are the right user permissions are granted to the file/directory/server in which you are going to run the pipeline?
+  * In servers with multiple users, there are often cases in which certain directories give some users more editing privileges than others. Start by navigating to the directory in which you will be working. Next, type “ls -lha or ls -l”. This produces a list of all files in that directory and info on what permissions the user has using the “-rwxrwxrwx” scheme; r = read permissions, w = writing permissions, and x = execute permissions).
+  * Permission errors could be due to the directories chosen for the pipeline output or individual bioinformatic tools installed by other users, for example. 
+  * Review this tutorial for more information regarding file permissions: https://www.guru99.com/file-permissions.html
 
 
