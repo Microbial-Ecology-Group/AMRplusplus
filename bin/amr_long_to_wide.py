@@ -18,8 +18,8 @@ def parse_cmdline_params(cmdline_params):
     parser = argparse.ArgumentParser(description=info)
     parser.add_argument('-i', '--input_files', nargs='+', required=True,
                         help='Use globstar to pass a list of files, (Ex: *.tsv)')
-    parser.add_argument('-o', '--output_directory', required=True,
-                        help='Output directory for writing the AMR_analytic_matrix.csv file')
+    parser.add_argument('-o', '--output_file', required=True,
+                        help='Output file name for writing the AMR_analytic_matrix.csv file')
     return parser.parse_args(cmdline_params)
 
 def amr_load_data(file_name_list):
@@ -45,8 +45,8 @@ def amr_load_data(file_name_list):
                 labels.add(gene_name)
     return samples, labels
 
-def output_amr_analytic_data(outdir, S, L):
-    with open(outdir + '/AMR_analytic_matrix.csv', 'w') as amr:
+def output_amr_analytic_data(outfile, S, L):
+    with open(outfile, 'w') as amr:
         local_sample_names = []
         for sample, dat in S.items():
             local_sample_names.append(sample)
@@ -64,4 +64,4 @@ def output_amr_analytic_data(outdir, S, L):
 if __name__ == '__main__':
     opts = parse_cmdline_params(sys.argv[1:])
     S, L = amr_load_data(opts.input_files)
-    output_amr_analytic_data(opts.output_directory, S, L)
+    output_amr_analytic_data(opts.output_file, S, L)
