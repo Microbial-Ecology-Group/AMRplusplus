@@ -47,7 +47,7 @@ We will run a small sample dataset that comes with the pipeline source code. As 
 $ cd amrplusplus_v2/
 
 # command to run the amrplusplus pipeline
-$ nextflow run main_amr_plus_plus_v2_onlyAMR.nf -profile singularity --output test
+$ nextflow run main_amr_plus_plus_v2.nf -profile singularity --output test
 
 # change directories to view pipeline outputs
 $ cd test/
