@@ -452,55 +452,6 @@ process RunRarefaction {
 }
 
 
-/*
----- SNP analysis
-*/
-
-process RunFreebayes {
-    tag { sample_id }
-
-    publishDir "${params.output}/RunFreebayes", mode: "copy"
-
-    input:
-        set sample_id, file(bam) from megares_dedup_resistome_bam
-        file annotation
-        file amr
-
-    output:
-        set sample_id, file("${sample_id}.results.vcf") into (SNP)
-
-    """
-    ${FREEBAYES} \
-      -f ${amr} \
-      -p 1 \
-      ${bam} > ${sample_id}.results.vcf
-    """
-}
-
-process RunSNPFinder {
-    tag { sample_id }
-
-    publishDir "${params.output}/RunSNPFinder", mode: "copy"
-
-    input:
-        set sample_id, file(sam) from megares_snpfinder_sam
-        file amr
-
-    output:
-        set sample_id, file("*.tsv") into (snp)
-
-    """
-    ${SNPFINDER} \
-      -amr_fp ${amr} \
-      -sampe ${sam} \
-      -out_fp ${sample_id}.tsv
-    """
-}
-
-
-
-
-
 
 
 def nextflow_version_error() {
