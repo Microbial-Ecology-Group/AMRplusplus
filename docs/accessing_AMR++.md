@@ -1,56 +1,27 @@
-Installation
+Accessing AMR++
 ------------
 
-This section will help you get started with running the AmrPlusPlus pipeline with Nextflow and Docker. This tutorial assumes you will be running the pipeline from a POSIX compatible system such as Linux, Solaris, or OS X.
+This section will help you get access to all the bioinformatic tools required for metagenomic analysis with AMR++.
 
-Setup
+Amazon Web Services
 -----
 
-We will go over a typical pipeline setup scenario in which you connect to a remote server, install Nextflow, and download the pipeline source code. For the easist use of AmrPlusPlus, make sure that Singularity is installed and in your $PATH variable. 
-Visit this website for further information:
-https://singularity.lbl.gov/docs-installation
+In order to facilitate evaluation of the MEGARes 2.0 database and the functionality of AMR++ 2.0 pipeline, we have provided free access to an Amazon Machine Image (AMI) with example files for analysis. AMR++ 2.0 is pre-installed and fully integrated with all necessary bioinformatic tools and dependencies within an AMI named "Microbial_Ecology_Group_AMR_AMI", allowing users to easily employ the AMR++ v2.0 pipeline within the Amazon Web Services (AWS) ecosystem. Please follow the instructions on amazon web services for details on creating your own EC2 instance (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html). With this approach, users pay for the cost of a suitable AWS EC2 instance without the challenge of accessing large computing clusters and individually installing each piece of software necessary to run the pipeline (including all dependencies). Integration within AWS also allows users to scale the computing resources to fit the needs of any project size.
 
-If Singularity cannot be installed, configure the "config/local.config" file to specify the absolute PATH to each required bioinformatic tool. Then, change the flag after "-profile" to "local" when running the pipeline.
-
-```bash
-# username and host address
-$ ssh [USER]@[HOST]
-
-# Check if you have nextflow installed,
-$ nextflow -h
-
-# If not available, install Nextflow
-$ curl -s https://get.nextflow.io | bash
-# If you do not have curl installed, try wget
-# $ wget -qO- https://get.nextflow.io | bash
-
-# give write permissions to user
-$ chmod u+x nextflow
-
-# move nextflow executable to a folder in your PATH environment variable
-$ mv nextflow $HOME/bin
-
-# create a test directory and change into it
-$ mkdir amr_test && cd amr_test
-
-# clone pipeline source code
-$ git clone https://github.com/meglab-metagenomics/amrplusplus_v2.git .
-```
-
-Run a Simple Test
+Singularity container
 -----------------
 
-We will run a small sample dataset that comes with the pipeline source code. As such, we will not be specifying any input paths as they have already been included. During the program's execution, the required tool dependencies will be accessed using a Singularity container. As there are many tool dependencies, downloading the container could take some time depending on your connection speed.
+Singularity containers allow the packaging of multiple bioinformatic tools. While singularity is a popular tool and likely to be supported by many computing clusters, please contact your system administrator for help with installing singularity. Installation on a local computer is also an option and can be performed by following these instructions: https://sylabs.io/guides/3.0/user-guide/installation.html
+
+We provide AMR++ with a singularity container that is automatically accessed when running the AMR++ pipeline by using the flag, "-profile singularity". Additionally, the singularity container is supported on singularity-hub.org and can be used locally for custom analysis (https://singularity-hub.org/collections/3418). P
 
 ```bash
-# navigate into AmrPlusPlus repository
-$ cd amrplusplus_v2/
+# Choose your preference to pull the container from Singularity Hub (once)
+$ singularity pull shub://meglab-metagenomics/amrplusplus_v2
 
-# command to run the amrplusplus pipeline
-$ nextflow run main_amr_plus_plus_v2.nf -profile singularity --output test
+# Then interact with it (enter "exit" to leave the singularity container):
+$ singularity shell amrplusplus_v2.sif
 
-# change directories to view pipeline outputs
-$ cd test/
 ```
 
 
