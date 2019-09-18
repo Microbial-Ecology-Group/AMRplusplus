@@ -434,7 +434,8 @@ process RunRGI {
          set sample_id, file("${sample_id}_rgi_output.txt") into rgi_results
 
      """
-     ${RGI} main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads}
+     alias diamond='echo "${DIAMOND}"'
+     ${RGI} main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads} --low_quality
      """
 }
 
@@ -544,8 +545,9 @@ process RunDedupRGI {
      output:
          set sample_id, file("${sample_id}_rgi_output.txt") into dedup_rgi_results
 
-     """
-     ${RGI} main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads}
+     """     
+     alias diamond='echo "${DIAMOND}"'
+     ${RGI} main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads} --low_quality
      """
 }
 
