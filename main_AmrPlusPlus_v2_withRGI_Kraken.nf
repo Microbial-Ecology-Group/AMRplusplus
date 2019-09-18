@@ -497,7 +497,6 @@ process ExtractSNP {
 
 process RunRGI {
      tag { sample_id }
-     errorStrategy 'ignore'
 	
      publishDir "${params.output}/RunRGI", mode: "copy"
 
@@ -508,7 +507,8 @@ process RunRGI {
          set sample_id, file("${sample_id}_rgi_output.txt") into rgi_results
 
      """
-     ${RGI} main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads}
+     alias diamond='echo "${DIAMOND}"'
+     ${RGI} main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads} --low_quality
      """
 }
 
@@ -610,7 +610,6 @@ process ExtractDedupSNP {
 
 process RunDedupRGI {
      tag { sample_id }
-     errorStrategy 'ignore'
      publishDir "${params.output}/RunDedupRGI", mode: "copy"
 
      input:
@@ -620,7 +619,8 @@ process RunDedupRGI {
          set sample_id, file("${sample_id}_rgi_output.txt") into dedup_rgi_results
 
      """
-     ${RGI} main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads}
+     alias diamond='echo "${DIAMOND}"'
+     ${RGI} main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads} --low_quality
      """
 }
 
