@@ -497,7 +497,8 @@ process ExtractSNP {
 
 process RunRGI {
      tag { sample_id }
-
+     errorStrategy 'ignore'
+	
      publishDir "${params.output}/RunRGI", mode: "copy"
 
      input:
@@ -609,7 +610,7 @@ process ExtractDedupSNP {
 
 process RunDedupRGI {
      tag { sample_id }
-
+     errorStrategy 'ignore'
      publishDir "${params.output}/RunDedupRGI", mode: "copy"
 
      input:
