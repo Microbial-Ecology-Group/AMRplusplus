@@ -434,7 +434,8 @@ process RunRGI {
 
      """
      alias diamond='echo "${DIAMOND}"'
-     ${RGI} main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads} --low_quality
+     cp ${fasta} ${fasta}.temp.contig.fsa
+     ${RGI} main --low_quality --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads} --clean
      """
 }
 
@@ -545,7 +546,8 @@ process RunDedupRGI {
 
      """     
      alias diamond='echo "${DIAMOND}"'
-     ${RGI} main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads} --low_quality
+     cp ${fasta} ${fasta}.temp.contig.fsa
+     ${RGI} main --low_quality --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads} --clean
      """
 }
 
