@@ -1,9 +1,13 @@
 #!/bin/bash
-#qsub -N=amrplusplus
-#qsub -q small
-#qsub -l procs-per-node 1
-#qsub -l walltime 20:00:00
-#qsub -l M user_email@gmail.com
+#SBATCH --job-name=AMRPlusPlus
+#SBATCH --partition=shas
+#SBATCH --ntasks=1
+#SBATCH --qos=long
+#SBATCH --cpus-per-task=1
+#SBATCH --time=100:00:00
+#SBATCH --export=ALL
+#SBATCH --mail-user=enriquedoster@gmail.com
+#SBATCH --mail-type=ALL
 
 module purge
 module load jdk/1.8.0
