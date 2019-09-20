@@ -12,7 +12,7 @@
 module purge
 module load jdk/1.8.0
 module load singularity/2.5.2
-module load ompi/gnu.mesabi
+module spider openmpi/4.0.0
 
 mpirun --pernode ./nextflow run main_AmrPlusPlus_v2.nf -resume -profile msi_pbs \
 -w /work_dir --threads 15 \
