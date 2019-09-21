@@ -497,6 +497,7 @@ process ExtractSNP {
 
 process RunRGI {
      tag { sample_id }
+     errorStrategy 'ignore'
 	
      publishDir "${params.output}/RunRGI", mode: "copy"
 
@@ -516,6 +517,7 @@ process RunRGI {
 
 process SNPconfirmation {
      tag { sample_id }
+     errorStrategy 'ignore'
 
      publishDir "${params.output}/SNPConfirmation", mode: "copy",
          saveAs: { filename ->
@@ -611,6 +613,7 @@ process ExtractDedupSNP {
 
 process RunDedupRGI {
      tag { sample_id }
+     errorStrategy 'ignore'
      publishDir "${params.output}/RunDedupRGI", mode: "copy"
 
      input:
@@ -629,6 +632,7 @@ process RunDedupRGI {
 
 process DedupSNPconfirmation {
      tag { sample_id }
+     errorStrategy 'ignore'
 
      publishDir "${params.output}/DedupSNPConfirmation", mode: "copy",
          saveAs: { filename ->
