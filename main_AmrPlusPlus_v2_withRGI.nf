@@ -456,7 +456,7 @@ process SNPconfirmation {
          set sample_id, file(rgi) from rgi_results
 
      output:
-         set sample_id, file("${sample_id}_rgi_strict_hits.csv") into strict_snp_long_hits
+         set sample_id, file("${sample_id}_rgi_perfect_hits.csv") into perfect_snp_long_hits
      """
      ${PYTHON3} $baseDir/bin/RGI_aro_hits.py ${rgi} ${sample_id}
      """
@@ -469,18 +469,18 @@ process Confirmed_AMR_hits {
 
      input:
          set sample_id, file(megares_counts) from resistome_hits
-         set sample_id, file(strict_rgi_counts) from strict_snp_long_hits
+         set sample_id, file(perfect_rgi_counts) from perfect_snp_long_hits
 
      output:
-         file("${sample_id}*strict_SNP_confirmed_counts") into strict_confirmed_counts
+         file("${sample_id}*perfect_SNP_confirmed_counts") into perfect_confirmed_counts
 
      """
-     ${PYTHON3} $baseDir/bin/RGI_long_combine.py ${strict_rgi_counts} ${megares_counts} ${sample_id}.strict_SNP_confirmed_counts ${sample_id}
+     ${PYTHON3} $baseDir/bin/RGI_long_combine.py ${perfect_rgi_counts} ${megares_counts} ${sample_id}.perfect_SNP_confirmed_counts ${sample_id}
      """
 }
 
 
-strict_confirmed_counts.toSortedList().set { strict_confirmed_amr_l_to_w }
+perfect_confirmed_counts.toSortedList().set { perfect_confirmed_amr_l_to_w }
 
 process Confirmed_ResistomeResults {
      tag {}
@@ -488,13 +488,13 @@ process Confirmed_ResistomeResults {
      publishDir "${params.output}/Confirmed_ResistomeResults", mode: "copy"
 
      input:
-         file(strict_confirmed_resistomes) from strict_confirmed_amr_l_to_w
+         file(perfect_confirmed_resistomes) from perfect_confirmed_amr_l_to_w
 
      output:
-         file("strict_SNP_confirmed_AMR_analytic_matrix.csv") into strict_confirmed_matrix
+         file("perfect_SNP_confirmed_AMR_analytic_matrix.csv") into perfect_confirmed_matrix
 
      """
-     ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${strict_confirmed_resistomes} -o strict_SNP_confirmed_AMR_analytic_matrix.csv
+     ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${perfect_confirmed_resistomes} -o perfect_SNP_confirmed_AMR_analytic_matrix.csv
      """
 }
 
@@ -570,7 +570,7 @@ process DedupSNPconfirmation {
          set sample_id, file(rgi) from dedup_rgi_results
 
      output:
-         set sample_id, file("${sample_id}_rgi_strict_hits.csv") into dedup_strict_snp_long_hits
+         set sample_id, file("${sample_id}_rgi_perfect_hits.csv") into dedup_perfect_snp_long_hits
      """
      ${PYTHON3} $baseDir/bin/RGI_aro_hits.py ${rgi} ${sample_id}
      """
@@ -584,18 +584,18 @@ process ConfirmDedupAMRHits {
 
      input:
          set sample_id, file(megares_counts) from dedup_resistome_hits
-         set sample_id, file(strict_rgi_counts) from dedup_strict_snp_long_hits
+         set sample_id, file(perfect_rgi_counts) from dedup_perfect_snp_long_hits
 
      output:
-         file("${sample_id}*strict_SNP_confirmed_counts") into dedup_strict_confirmed_counts
+         file("${sample_id}*perfect_SNP_confirmed_counts") into dedup_perfect_confirmed_counts
 
      """
-     ${PYTHON3} $baseDir/bin/RGI_long_combine.py ${strict_rgi_counts} ${megares_counts} ${sample_id}.strict_SNP_confirmed_counts ${sample_id}
+     ${PYTHON3} $baseDir/bin/RGI_long_combine.py ${perfect_rgi_counts} ${megares_counts} ${sample_id}.perfect_SNP_confirmed_counts ${sample_id}
      """
 }
 
 
-dedup_strict_confirmed_counts.toSortedList().set { dedup_strict_confirmed_amr_l_to_w }
+dedup_perfect_confirmed_counts.toSortedList().set { dedup_perfect_confirmed_amr_l_to_w }
 
 process DedupSNPConfirmed_ResistomeResults {
      tag {}
@@ -603,13 +603,13 @@ process DedupSNPConfirmed_ResistomeResults {
      publishDir "${params.output}/Confirmed_ResistomeResults", mode: "copy"
 
      input:
-         file(strict_confirmed_resistomes) from dedup_strict_confirmed_amr_l_to_w
+         file(perfect_confirmed_resistomes) from dedup_perfect_confirmed_amr_l_to_w
 
      output:
-         file("strict_SNP_confirmed_AMR_analytic_matrix.csv") into dedup_strict_confirmed_matrix
+         file("perfect_SNP_confirmed_AMR_analytic_matrix.csv") into dedup_perfect_confirmed_matrix
 
      """
-     ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${strict_confirmed_resistomes} -o strict_SNP_confirmed_dedup_AMR_analytic_matrix.csv
+     ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${perfect_confirmed_resistomes} -o perfect_SNP_confirmed_dedup_AMR_analytic_matrix.csv
      """
 }
 

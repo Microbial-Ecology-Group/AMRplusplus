@@ -4,8 +4,7 @@ From: debian:jessie-slim
 #Includes idba, trimmomatic, samtools, bwa, bedtools, freebayes, bbmap, vcftools, htslib, ncurses, kraken2, resistomeanalyzer, rarefactionanalyzer, SNPfinder
 
 %environment
-    export PATH=/usr/local/envs/AmrPlusPlus/bin/:${PATH}
-    
+
 %post
     ## Jave install doesn't work, but can load java module from summit
     apt update \
@@ -27,12 +26,17 @@ From: debian:jessie-slim
     conda config --add channels defaults
     conda config --add channels conda-forge
     conda config --add channels bioconda
+
+    # install bulk of bioinformatic tools using conda
+    conda create -n AmrPlusPlus python=3 biopython rgi idba trimmomatic bwa blat samtools bedtools freebayes bbmap vcftools htslib ncurses kraken2
+
+    . /usr/local/bin/activate AmrPlusPlus_env
     
-    # install bulk of bioinformatic tools using conda 
-    conda create -n AmrPlusPlus python=3 rgi idba trimmomatic bwa samtools bedtools freebayes bbmap vcftools htslib ncurses kraken2
+    #ln -s /usr/local/envs/compute/bin/* /usr/local/bin/
     
-    . /usr/local/bin/activate AmrPlusPlus
-        
+    #Still experimenting with how to change $PATH location. 
+    echo 'export PATH=$PATH:/usr/local/envs/AmrPlusPlus_env/bin/' >> $SINGULARITY_ENVIRONMENT
+
     # resistomeanalyzer
     cd /usr/local
     git clone https://github.com/cdeanj/resistomeanalyzer.git
@@ -49,21 +53,22 @@ From: debian:jessie-slim
     make
     cp rarefaction /usr/local/bin
     cd /
- 
+
     # SNPfinder
     cd /usr/local
     git clone https://github.com/cdeanj/snpfinder.git
     cd snpfinder
     make
     cp snpfinder /usr/local/bin
-    cd /    
+    cd /
 
-    # Make sure all the tools have the right permissions to use the tools    
+    # Make sure all the tools have the right permissions to use the tools
     chmod -R 777 /usr/local/
 
-    
+
 %test
     #which bwa
     #which bedtools
     #which samtools
     #which freebayes
+
