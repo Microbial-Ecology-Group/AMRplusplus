@@ -4,6 +4,7 @@ From: debian:jessie-slim
 #Includes idba, trimmomatic, samtools, bwa, bedtools, freebayes, bbmap, vcftools, htslib, ncurses, kraken2, resistomeanalyzer, rarefactionanalyzer, SNPfinder
 
 %environment
+    export LC_ALL=C
 
 %post
     ## Jave install doesn't work, but can load java module from summit
@@ -28,7 +29,7 @@ From: debian:jessie-slim
     conda config --add channels bioconda
 
     # install bulk of bioinformatic tools using conda
-    conda create -n AmrPlusPlus_env python=3 biopython rgi idba trimmomatic bwa blat samtools bedtools freebayes bbmap vcftools htslib ncurses kraken2
+    conda create -n AmrPlusPlus_env python=3 biopython rgi trimmomatic bwa samtools bedtools vcftools htslib ncurses kraken2 blast
 
     . /usr/local/bin/activate AmrPlusPlus_env
     
