@@ -5,7 +5,7 @@ Usage
 
 The `help` parameter displays the available options and commands.
 ```
-$ nextflow run main_amr_plus_plus_v2.nf --help
+$ nextflow run main_AmrPlusPlus_v2.nf --help
 ```
 
 ### File Inputs
@@ -14,42 +14,42 @@ $ nextflow run main_amr_plus_plus_v2.nf --help
 
 The `reads` parameter accepts sequence files in standard fastq and gz format.
 ```
-$ nextflow run main_amr_plus_plus_v2.nf --reads "data/raw/*_R{1,2}.fastq"
+$ nextflow run main_AmrPlusPlus_v2.nf --reads "data/raw/*_R{1,2}.fastq"
 ```
 
 #### Set host genome
 
 The `host` parameter accepts a fasta formatted host genome.
 ```
-$ nextflow run main_amr_plus_plus_v2.nf --host "data/host/chr21.fasta.gz"
+$ nextflow run main_AmrPlusPlus_v2.nf --host "data/host/chr21.fasta.gz"
 ```
 
 #### Set host index
 
 The `index` parameter allows you to upload pre-built host indexes produced by BWA.
 ```
-$ nextflow run main_amr_plus_plus_v2.nf --host "data/host/chr21.fasta.gz" --index "data/index/*"
+$ nextflow run main_AmrPlusPlus_v2.nf --host "data/host/chr21.fasta.gz" --index "data/index/*"
 ```
 
 #### Set resistance database
 
 The `amr` parameter accepts a fasta formatted resistance database. 
 ```
-$ nextflow run main_amr_plus_plus_v2.nf --amr "data/amr/megares_database_v1.02.fasta"
+$ nextflow run main_AmrPlusPlus_v2.nf --amr "data/amr/megares_database_v1.02.fasta"
 ```
 
 #### Set annotation database
 
 The `annotation` parameter accepts a csv formatted annotation database.
 ```
-$ nextflow run main_amr_plus_plus_v2.nf --annotation "data/amr/megares_annotations_v1.02.csv"
+$ nextflow run main_AmrPlusPlus_v2.nf --annotation "data/amr/megares_annotations_v1.02.csv"
 ```
 
 #### Set adapter file
 
 The `adapters` parameter accepts a fasta formatted adapter file.
 ```
-$ nextflow run main_amr_plus_plus_v2.nf --adapters "data/adapters/adapters.fa"
+$ nextflow run main_AmrPlusPlus_v2.nf --adapters "data/adapters/adapters.fa"
 ```
 
 ### File Outputs
@@ -58,14 +58,14 @@ $ nextflow run main_amr_plus_plus_v2.nf --adapters "data/adapters/adapters.fa"
 
 The `output` parameter writes the results to the specified directory. As a nextflow variable, the `work` parameter only requires one dash and determines where the temporary files will be directed. Upon completing the run, you can delete the temporary file directory.
 ```
-$ nextflow run main_amr_plus_plus_v2.nf --output "test/" -work "work_dir/"
+$ nextflow run main_AmrPlusPlus_v2.nf --output "test/" -work "work_dir/"
 ```
 
 ### Resume a pipeline run
 
 If the pipeline run is cancelled or stopped for whatever reason, using the same command with the addition of the `-resume` flag will attempt to pick up where the pipeline stopped. 
 ```
-$ nextflow run main_amr_plus_plus_v2.nf --output "test/" -work "work_dir/" -resume
+$ nextflow run main_AmrPlusPlus_v2.nf --output "test/" -work "work_dir/" -resume
 ```
 
 ### Trimming Options
@@ -73,7 +73,7 @@ $ nextflow run main_amr_plus_plus_v2.nf --output "test/" -work "work_dir/" -resu
 #### Set custom trimming parameters
 
 ```
-$ nextflow run main_amr_plus_plus_v2.nf \
+$ nextflow run main_AmrPlusPlus_v2.nf \
     --reads "data/raw/*_R{1,2}.fastq" \
     --leading 3 \
     --trailing 3 \
@@ -88,7 +88,7 @@ $ nextflow run main_amr_plus_plus_v2.nf \
 #### Set custom algorithm options
 
 ```
-$ nextflow run main_amr_plus_plus_v2.nf \
+$ nextflow run main_AmrPlusPlus_v2.nf \
     --reads "data/raw/*_R{1,2}.fastq" \
     --threshold 80 \
     --min 1 \
@@ -101,5 +101,5 @@ $ nextflow run main_amr_plus_plus_v2.nf \
 #### Set number of threads to use for each process
 
 ```
-$ nextflow run main_amr_plus_plus_v2.nf --threads 8
+$ nextflow run main_AmrPlusPlus_v2.nf --threads 8
 ```
