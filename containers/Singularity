@@ -15,7 +15,7 @@ From: debian:jessie-slim
     zlib1g-dev curl libbz2-dev locales libncurses5-dev liblzma-dev libcurl4-openssl-dev software-properties-common apt-transport-https\
     python3-pip python3-docopt python3-pytest python-dev python3-dev\
     libcurl4-openssl-dev libssl-dev zlib1g-dev fonts-texgyre \
-    gcc g++ gfortran libblas-dev liblapack-dev dos2unix\
+    gcc g++ gfortran libblas-dev liblapack-dev dos2unix libstdc++6\
     r-base-core r-recommended hmmer\
     && rm -rf /var/lib/apt/lists/*
 
