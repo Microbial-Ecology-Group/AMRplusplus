@@ -55,10 +55,10 @@ Channel
 process RunQC {
     tag { sample_id }
 
-    publishDir "${params.output}/RunQC", mode: 'copy', pattern: '*.fastq',
+    publishDir "${params.output}/RunQC", mode: 'copy', pattern: '*.fastq.gz',
         saveAs: { filename ->
-            if(filename.indexOf("P.fastq") > 0) "Paired/$filename"
-            else if(filename.indexOf("U.fastq") > 0) "Unpaired/$filename"
+            if(filename.indexOf("P.fastq.gz") > 0) "Paired/$filename"
+            else if(filename.indexOf("U.fastq.gz") > 0) "Unpaired/$filename"
             else {}
         }
 
