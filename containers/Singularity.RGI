@@ -1,7 +1,7 @@
 Bootstrap: docker
 From: debian:jessie-slim
 
-#Includes trimmomatic, samtools, bwa, bedtools, vcftools, htslib,  kraken2, SNPfinder, freebayes, bbmap
+#Includes Resistance Gene Identifier (RGI)
 
 %environment
     export LC_ALL=C
@@ -15,7 +15,6 @@ From: debian:jessie-slim
     python3-pip python3-docopt python3-pytest python-dev python3-dev\
     libcurl4-openssl-dev libssl-dev zlib1g-dev fonts-texgyre \
     gcc g++ gfortran libblas-dev liblapack-dev dos2unix libstdc++6\
-    r-base-core r-recommended hmmer\
     && rm -rf /var/lib/apt/lists/*
 
 
@@ -28,25 +27,22 @@ From: debian:jessie-slim
     conda config --add channels bioconda
 
     # install bulk of bioinformatic tools using conda
-    conda create -n AmrPlusPlus_env python=3 trimmomatic bwa samtools bedtools freebayes bbmap vcftools htslib kraken2
+    conda create -n AmrPlusPlus_env rgi
 
     . /usr/local/bin/activate AmrPlusPlus_env
-    
-    #ln -s /usr/local/envs/AmrPlusPlus_env/bin/* /usr/local/bin/
-    
-    #Still experimenting with how to change $PATH location. 
-    echo 'export PATH=$PATH:/usr/local/envs/AmrPlusPlus_env/bin/' >> $SINGULARITY_ENVIRONMENT
+      
+    #change $PATH  
+    echo 'export PATH=/usr/local/envs/AmrPlusPlus_env/bin/:$PATH' >> $SINGULARITY_ENVIRONMENT
 
-    # SNPfinder
-    cd /usr/local
-    git clone https://github.com/cdeanj/snpfinder.git
-    cd snpfinder
-    make
-    cp snpfinder /usr/local/bin
-    cd /
 
     # Make sure all the tools have the right permissions to use the tools
-    chmod -R 777 /usr/local/
-    
+     chmod -R 777 /usr/local/
+     
+     # This downloads the latest CARD database and attempts to load it for RGI
+     # Doesn't seem to work due to the github [RGI issue #60](https://github.com/arpcard/rgi/issues/60)
+     wget -q -O card-data.tar.bz2 https://card.mcmaster.ca/latest/data && tar xfvj card-data.tar.bz2 
+     /usr/local/envs/AmrPlusPlus_env/bin/rgi load -i card.json
+
 %test
+
 

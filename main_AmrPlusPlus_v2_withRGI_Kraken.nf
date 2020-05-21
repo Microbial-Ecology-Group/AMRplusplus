@@ -194,16 +194,17 @@ process NonHostReads {
         set sample_id, file(bam) from non_host_bam
 
     output:
-        set sample_id, file("${sample_id}.non.host.R1.fastq"), file("${sample_id}.non.host.R2.fastq") into (non_host_fastq_megares, non_host_fastq_dedup,non_host_fastq_kraken)
+        set sample_id, file("${sample_id}.non.host.R1.fastq.gz"), file("${sample_id}.non.host.R2.fastq.gz") into (non_host_fastq_megares, non_host_fastq_dedup,non_host_fastq_kraken)
 
     """
     ${BEDTOOLS}  \
        bamtofastq \
       -i ${bam} \
-      -fq ${sample_id}.non.host.R1.fastq \
-      -fq2 ${sample_id}.non.host.R2.fastq
+      -fq ${sample_id}.non.host.R1.fastq.gz \
+      -fq2 ${sample_id}.non.host.R2.fastq.gz
     """
 }
+
 
 /*
 -
@@ -334,8 +335,8 @@ process AlignToAMR {
      ${SAMTOOLS} sort ${sample_id}.amr.alignment.sorted.fix.bam -o ${sample_id}.amr.alignment.sorted.fix.sorted.bam
      ${SAMTOOLS} rmdup -S ${sample_id}.amr.alignment.sorted.fix.sorted.bam ${sample_id}.amr.alignment.dedup.bam
      ${SAMTOOLS} view -h -o ${sample_id}.amr.alignment.dedup.sam ${sample_id}.amr.alignment.dedup.bam
-     #rm ${sample_id}.amr.alignment.bam
-     #rm ${sample_id}.amr.alignment.sorted*.bam
+     rm ${sample_id}.amr.alignment.bam
+     rm ${sample_id}.amr.alignment.sorted*.bam
      """
 }
 
@@ -351,15 +352,20 @@ process RunResistome {
 
     output:
         file("${sample_id}.gene.tsv") into (megares_resistome_counts, SNP_confirm_long)
+        file("${sample_id}.group.tsv") into (megares_group_counts)
+        file("${sample_id}.mechanism.tsv") into (megares_mech_counts)
+        file("${sample_id}.class.tsv") into (megares_class_counts)
+        file("${sample_id}.type.tsv") into (megares_type_counts)
 
     """
-    ${RESISTOME} -ref_fp ${amr} \
+    $baseDir/bin/resistome -ref_fp ${amr} \
       -annot_fp ${annotation} \
       -sam_fp ${sam} \
       -gene_fp ${sample_id}.gene.tsv \
       -group_fp ${sample_id}.group.tsv \
-      -class_fp ${sample_id}.class.tsv \
       -mech_fp ${sample_id}.mechanism.tsv \
+      -class_fp ${sample_id}.class.tsv \
+      -type_fp ${sample_id}.type.tsv \
       -t ${threshold}
     """
 }
@@ -396,15 +402,20 @@ process SamDedupRunResistome {
 
     output:
         file("${sample_id}.gene.tsv") into (megares_dedup_resistome_counts)
+        file("${sample_id}.group.tsv") into (megares_dedup_group_counts)
+        file("${sample_id}.mechanism.tsv") into (megares_dedup_mech_counts)
+        file("${sample_id}.class.tsv") into (megares_dedup_class_counts)
+        file("${sample_id}.type.tsv") into (megares_dedup_type_counts)
 
     """
-    ${RESISTOME} -ref_fp ${amr} \
+    $baseDir/bin/resistome -ref_fp ${amr} \
       -annot_fp ${annotation} \
       -sam_fp ${sam} \
       -gene_fp ${sample_id}.gene.tsv \
       -group_fp ${sample_id}.group.tsv \
-      -class_fp ${sample_id}.class.tsv \
       -mech_fp ${sample_id}.mechanism.tsv \
+      -class_fp ${sample_id}.class.tsv \
+      -type_fp ${sample_id}.type.tsv \
       -t ${threshold}
     """
 }
@@ -441,14 +452,15 @@ process RunRarefaction {
         set sample_id, file("*.tsv") into (rarefaction)
 
     """
-    ${RAREFACTION} \
+    $baseDir/bin/rarefaction \
       -ref_fp ${amr} \
       -sam_fp ${sam} \
       -annot_fp ${annotation} \
       -gene_fp ${sample_id}.gene.tsv \
       -group_fp ${sample_id}.group.tsv \
-      -class_fp ${sample_id}.class.tsv \
       -mech_fp ${sample_id}.mech.tsv \
+      -class_fp ${sample_id}.class.tsv \
+      -type_fp ${sample_id}.type.tsv \
       -min ${min} \
       -max ${max} \
       -skip ${skip} \
@@ -465,7 +477,9 @@ process RunRarefaction {
 
 process ExtractSNP {
      tag { sample_id }
-
+     
+     errorStrategy 'ignore'
+     
      publishDir "${params.output}/ExtractMegaresSNPs", mode: "copy",
          saveAs: { filename ->
              if(filename.indexOf(".snp.fasta") > 0) "SNP_fasta/$filename"
@@ -484,33 +498,47 @@ process ExtractSNP {
 
      """
      awk -F "\\t" '{if (\$1!="@SQ" && \$1!="@RG" && \$1!="@PG" && \$1!="@HD" && \$3="RequiresSNPConfirmation" ) {print ">"\$1"\\n"\$10}}' ${sam} | tr -d '"'  > ${sample_id}.snp.fasta
-     ${RESISTOME} -ref_fp ${amr} \
+     $baseDir/bin/resistome -ref_fp ${amr} \
       -annot_fp ${annotation} \
       -sam_fp ${sam} \
       -gene_fp ${sample_id}.gene.tsv \
       -group_fp ${sample_id}.group.tsv \
-      -class_fp ${sample_id}.class.tsv \
       -mech_fp ${sample_id}.mechanism.tsv \
+      -class_fp ${sample_id}.class.tsv \
+      -type_fp ${sample_id}.type.tsv \
       -t ${threshold}
      """
 }
 
+
+
+
 process RunRGI {
      tag { sample_id }
      errorStrategy 'ignore'
-	
-     publishDir "${params.output}/RunRGI", mode: "copy"
+
+
+     publishDir "${params.output}/RunRGI", mode: "symlink"
 
      input:
          set sample_id, file(fasta) from megares_snp_fasta
+         file card_db
 
      output:
-         set sample_id, file("${sample_id}_rgi_output.txt") into rgi_results
+         set sample_id, file("${sample_id}*rgi_output.txt") into rgi_results
 
      """
-     alias diamond='echo "${DIAMOND}"'
-     cp ${fasta} ${fasta}.temp.contig.fsa
-     ${RGI} main --low_quality --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads} --clean
+     ${RGI} load --local -i ${card_db} --debug
+
+     # We are using the code provided in the following RGI github issue https://github.com/arpcard/rgi/issues/93
+     set +e
+     echo "Run RGI the first time"
+     ${RGI} main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond --local
+     set -e
+     echo "Run RGI again"
+     ${RGI} main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond --local
+
+
      """
 }
 
@@ -618,14 +646,22 @@ process RunDedupRGI {
 
      input:
          set sample_id, file(fasta) from dedup_megares_snp_fasta
+         file card_db
 
      output:
          set sample_id, file("${sample_id}_rgi_output.txt") into dedup_rgi_results
 
      """
-     alias diamond='echo "${DIAMOND}"'
-     cp ${fasta} ${fasta}.temp.contig.fsa
-     ${RGI} main --low_quality --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond -n ${threads} --clean
+     ${RGI} load --local -i ${card_db} --debug
+
+     # We are using the code provided in the following RGI github issue https://github.com/arpcard/rgi/issues/93
+     set +e
+     echo "Run RGI the first time"
+     ${RGI} main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond --local
+     set -e
+     echo "Run RGI again"
+     ${RGI} main --input_sequence ${fasta} --output_file ${sample_id}_rgi_output -a diamond --local
+
      """
 }
 

@@ -135,32 +135,33 @@ process AlignReadsToHost {
         file host
 
     output:
-        set sample_id, file("${sample_id}.host.sam") into (host_sam)
+        set sample_id, file("${sample_id}.host.sorted.bam") into (host_bam)
 
     """
     ${BWA} mem ${host} ${forward} ${reverse} -t ${threads} > ${sample_id}.host.sam
+    ${SAMTOOLS} view -bS ${sample_id}.host.sam | ${SAMTOOLS} sort -@ ${threads} -o ${sample_id}.host.sorted.bam
+    rm ${sample_id}.host.sam
     """
-}
+  }
 
 process RemoveHostDNA {
     tag { sample_id }
 
     publishDir "${params.output}/RemoveHostDNA", mode: "copy", pattern: '*.bam',
-	saveAs: { filename ->
+        saveAs: { filename ->
             if(filename.indexOf(".bam") > 0) "NonHostBAM/$filename"
         }
 
     input:
-        set sample_id, file(sam) from host_sam
+        set sample_id, file(bam) from host_bam
 
     output:
         set sample_id, file("${sample_id}.host.sorted.removed.bam") into (non_host_bam)
         file("${sample_id}.samtools.idxstats") into (idxstats_logs)
 
     """
-    ${SAMTOOLS} view -bS ${sam} | ${SAMTOOLS} sort -@ ${threads} -o ${sample_id}.host.sorted.bam
-    ${SAMTOOLS} index ${sample_id}.host.sorted.bam && ${SAMTOOLS} idxstats ${sample_id}.host.sorted.bam > ${sample_id}.samtools.idxstats
-    ${SAMTOOLS} view -h -f 4 -b ${sample_id}.host.sorted.bam -o ${sample_id}.host.sorted.removed.bam
+    ${SAMTOOLS} index ${bam} && ${SAMTOOLS} idxstats ${bam} > ${sample_id}.samtools.idxstats
+    ${SAMTOOLS} view -h -f 4 -b ${bam} -o ${sample_id}.host.sorted.removed.bam
     """
 }
 
@@ -194,14 +195,14 @@ process NonHostReads {
         set sample_id, file(bam) from non_host_bam
 
     output:
-        set sample_id, file("${sample_id}.non.host.R1.fastq"), file("${sample_id}.non.host.R2.fastq") into (non_host_fastq_megares, non_host_fastq_dedup,non_host_fastq_kraken)
+        set sample_id, file("${sample_id}.non.host.R1.fastq.gz"), file("${sample_id}.non.host.R2.fastq.gz") into (non_host_fastq_megares, non_host_fastq_dedup,non_host_fastq_kraken)
 
     """
     ${BEDTOOLS}  \
        bamtofastq \
       -i ${bam} \
-      -fq ${sample_id}.non.host.R1.fastq \
-      -fq2 ${sample_id}.non.host.R2.fastq
+      -fq ${sample_id}.non.host.R1.fastq.gz \
+      -fq2 ${sample_id}.non.host.R2.fastq.gz
     """
 }
 
@@ -261,8 +262,8 @@ process AlignToAMR {
      ${SAMTOOLS} sort ${sample_id}.amr.alignment.sorted.fix.bam -o ${sample_id}.amr.alignment.sorted.fix.sorted.bam
      ${SAMTOOLS} rmdup -S ${sample_id}.amr.alignment.sorted.fix.sorted.bam ${sample_id}.amr.alignment.dedup.bam
      ${SAMTOOLS} view -h -o ${sample_id}.amr.alignment.dedup.sam ${sample_id}.amr.alignment.dedup.bam
-     #rm ${sample_id}.amr.alignment.bam
-     #rm ${sample_id}.amr.alignment.sorted*.bam
+     rm ${sample_id}.amr.alignment.bam
+     rm ${sample_id}.amr.alignment.sorted*.bam
      """
 }
 
@@ -278,15 +279,20 @@ process RunResistome {
 
     output:
         file("${sample_id}.gene.tsv") into (megares_resistome_counts, SNP_confirm_long)
+        file("${sample_id}.group.tsv") into (megares_group_counts)
+        file("${sample_id}.mechanism.tsv") into (megares_mech_counts)
+        file("${sample_id}.class.tsv") into (megares_class_counts)
+        file("${sample_id}.type.tsv") into (megares_type_counts)
 
     """
-    ${RESISTOME} -ref_fp ${amr} \
+    $baseDir/bin/resistome -ref_fp ${amr} \
       -annot_fp ${annotation} \
       -sam_fp ${sam} \
       -gene_fp ${sample_id}.gene.tsv \
       -group_fp ${sample_id}.group.tsv \
-      -class_fp ${sample_id}.class.tsv \
       -mech_fp ${sample_id}.mechanism.tsv \
+      -class_fp ${sample_id}.class.tsv \
+      -type_fp ${sample_id}.type.tsv \
       -t ${threshold}
     """
 }
@@ -323,15 +329,20 @@ process SamDedupRunResistome {
 
     output:
         file("${sample_id}.gene.tsv") into (megares_dedup_resistome_counts)
+        file("${sample_id}.group.tsv") into (megares_dedup_group_counts)
+        file("${sample_id}.mechanism.tsv") into (megares_dedup_mech_counts)
+        file("${sample_id}.class.tsv") into (megares_dedup_class_counts)
+        file("${sample_id}.type.tsv") into (megares_dedup_type_counts)
 
     """
-    ${RESISTOME} -ref_fp ${amr} \
+    $baseDir/bin/resistome -ref_fp ${amr} \
       -annot_fp ${annotation} \
       -sam_fp ${sam} \
       -gene_fp ${sample_id}.gene.tsv \
       -group_fp ${sample_id}.group.tsv \
-      -class_fp ${sample_id}.class.tsv \
       -mech_fp ${sample_id}.mechanism.tsv \
+      -class_fp ${sample_id}.class.tsv \
+      -type_fp ${sample_id}.type.tsv \
       -t ${threshold}
     """
 }
@@ -368,14 +379,15 @@ process RunRarefaction {
         set sample_id, file("*.tsv") into (rarefaction)
 
     """
-    ${RAREFACTION} \
+    $baseDir/bin/rarefaction \
       -ref_fp ${amr} \
       -sam_fp ${sam} \
       -annot_fp ${annotation} \
       -gene_fp ${sample_id}.gene.tsv \
       -group_fp ${sample_id}.group.tsv \
-      -class_fp ${sample_id}.class.tsv \
       -mech_fp ${sample_id}.mech.tsv \
+      -class_fp ${sample_id}.class.tsv \
+      -type_fp ${sample_id}.type.tsv \
       -min ${min} \
       -max ${max} \
       -skip ${skip} \
