@@ -32,6 +32,7 @@ if(params.kraken_db) {
     kraken_db = file(params.kraken_db)
 }
 
+card_db = file(params.card_db)
 
 threads = params.threads
 

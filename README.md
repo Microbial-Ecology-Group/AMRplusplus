@@ -12,6 +12,10 @@ We identified issues in running RGI with the full AMR++ pipeline thanks to githu
   * To run the AMR++ pipeline with RGI, you'll have to download the CARD database locally and specify it's location using the "--card_db" flag like this:
 
 ```
+# If you want to include RGI in your analysis, first download CARD with this command:
+wget -q -O card-data.tar.bz2 https://card.mcmaster.ca/latest/data && tar xfvj card-data.tar.bz2
+
+# Run the AMR++ pipeline with the "--card_db" flag
 nextflow run main_AmrPlusPlus_v2_withRGI.nf -profile singularity --card_db /path/to/card.json --reads '/path/to/reads/*R{1,2}_001.R1.fastq.gz' --output AMR++_results -w work_dir
 ```
 

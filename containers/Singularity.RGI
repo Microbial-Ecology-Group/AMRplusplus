@@ -40,8 +40,8 @@ From: debian:jessie-slim
      
      # This downloads the latest CARD database and attempts to load it for RGI
      # Doesn't seem to work due to the github [RGI issue #60](https://github.com/arpcard/rgi/issues/60)
-     wget -q -O card-data.tar.bz2 https://card.mcmaster.ca/latest/data && tar xfvj card-data.tar.bz2 
-     /usr/local/envs/AmrPlusPlus_env/bin/rgi load -i card.json
+     #wget -q -O card-data.tar.bz2 https://card.mcmaster.ca/latest/data && tar xfvj card-data.tar.bz2 
+     #/usr/local/envs/AmrPlusPlus_env/bin/rgi load -i card.json
 
 %test
 
