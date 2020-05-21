@@ -1,6 +1,9 @@
 Details on AMR++ updates
 ------------
 
+## 2020-05-21 : AMR++ v2.0.2 update
+Fixed a mistake with the config/singularity.config file to correctly call the singularity container anytime that RGI is run.
+
 ## 2020-05-21 : AMR++ v2.0.1 update
 We identified issues with running RGI thanks to github users, AroArz and DiegoBrambilla. As of this update, RGI developers are focused on contributing to the COVID-19 response, so we plan to reconvene with them when their schedule opens up. In the meantime, we are releasing updates to continue AMR++ functionality.
 We found that the errors were associated with RGI bugs that were previously reported:
