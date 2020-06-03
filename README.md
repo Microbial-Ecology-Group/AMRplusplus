@@ -6,14 +6,23 @@ Overview
 
 ## AMR++ v2 updates
 
-### 2020-03-21 : AMR++ v2.0.1 update.
+### 2020-03-21 : AMR++ v2.0.2 update.
 We identified issues in running RGI with the full AMR++ pipeline thanks to github users, AroArz and DiegoBrambilla. We are releasing v2.0.1 to continue AMR++ functionality, but we are planning further updates for the next stable release. As of this update, RGI developers are focused on contributing to the COVID-19 response, so we plan to reconvene with them when their schedule opens up.
-  * Please view [this document](https://github.com/meglab-metagenomics/amrplusplus_v2/blob/master/docs/update_details.md) for more details on changes included in AMR++ v2.0.1
+  * Please view the [CHANGELOG](https://github.com/meglab-metagenomics/amrplusplus_v2/blob/master/docs/CHANGELOG.md) for more details on changes included in AMR++ v2.0.1
   * To run the AMR++ pipeline with RGI, you'll have to download the CARD database locally and specify it's location using the "--card_db" flag like this:
 
 ```
 # If you want to include RGI in your analysis, first download CARD with this command:
+# We tested AMR++ v2.0.2 with the CARD database v3.0.8, but we recommend using the command below to get the latest CARD db
 wget -q -O card-data.tar.bz2 https://card.mcmaster.ca/latest/data && tar xfvj card-data.tar.bz2
+
+# In case the latest CARD database is causing issues, you can download the version we used for testing, v3.0.8:
+wget -q -O card-data.tar.bz2 https://card.mcmaster.ca/download/0/broadstreet-v3.0.8.tar.bz2 && tar xfvj card-data.tar.bz2
+
+
+# If you run into an error regarding "Issued certificate has expired.", try this command:
+wget --no-check-certificate -q -O card-data.tar.bz2 https://card.mcmaster.ca/latest/data && tar xfvj card-data.tar.bz2
+
 
 # Run the AMR++ pipeline with the "--card_db" flag
 nextflow run main_AmrPlusPlus_v2_withRGI.nf -profile singularity --card_db /path/to/card.json --reads '/path/to/reads/*R{1,2}_001.R1.fastq.gz' --output AMR++_results -w work_dir
