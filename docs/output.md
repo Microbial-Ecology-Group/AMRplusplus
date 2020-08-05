@@ -47,10 +47,6 @@ Files without sample prefixes are a result of aggregation. For example, the file
 │   ├── SRR532663.gene.tsv
 │   ├── SRR532663.group.tsv
 │   └── SRR532663.mech.tsv
-└── RunSNPFinder
-│   └── SRR532663.tsv
-└── RunFreebayes
-│   └── SRR532663.results.vcf
 ├── RunKraken
 │   └── SRR532663.kraken.report
 │   └── SRR532663.kraken.filtered.report
