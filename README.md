@@ -6,6 +6,16 @@ Overview
 
 ## AMR++ v2 updates
 
+
+### 2022-08-22 : AMR++ update coming soon
+Hello AMR++ users, we would like to sincerely apologize for the delay in addresssing your concerns and updating AMR++. As a lot of you likely experienced, COVID was challenging and we were not able dedicate the resources to AMR++ that it deserves. We are happy to announce that we have assembled a team for another major update to AMR++ and the MEGARes database in the next few months!
+
+A few notes:
+ * We are aware of the issues with integrating RGI results with the AMR++ pipeline. Unfortunately, we are discontinuing our support of integrating AMR++ results with the RGI software.
+ * We are attempting to remedy the issues that AMR++ users have reported, but we would also like to hear any other suggestions you might have. Please send any suggestions to enriquedoster@gmail.com with the subject line, "AMR++ update".
+ * A few upcoming updates: easy control over the amount of intermediate files that are stored, option to re-arrange pipeline processes, better sample summary statistics provided, and improved functionality through nextflow profiles.
+
+
 ### 2020-03-21 : AMR++ v2.0.2 update.
 We identified issues in running RGI with the full AMR++ pipeline thanks to github users, AroArz and DiegoBrambilla. We are releasing v2.0.1 to continue AMR++ functionality, but we are planning further updates for the next stable release. As of this update, RGI developers are focused on contributing to the COVID-19 response, so we plan to reconvene with them when their schedule opens up.
   * Please view the [CHANGELOG](https://github.com/meglab-metagenomics/amrplusplus_v2/blob/master/docs/CHANGELOG.md) for more details on changes included in AMR++ v2.0.1
