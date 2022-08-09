@@ -26,9 +26,9 @@ $ nextflow run main_AmrPlusPlus_v2.nf --host "data/host/chr21.fasta.gz"
 
 #### Set host index
 
-The `index` parameter allows you to upload pre-built host indexes produced by BWA.
+The `host_index` parameter allows you to upload pre-built host indexes produced by BWA.
 ```
-$ nextflow run main_AmrPlusPlus_v2.nf --host "data/host/chr21.fasta.gz" --index "data/index/*"
+$ nextflow run main_AmrPlusPlus_v2.nf --host "data/host/chr21.fasta.gz" --host_index "data/index/*"
 ```
 
 #### Set resistance database
