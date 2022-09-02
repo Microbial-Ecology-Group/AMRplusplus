@@ -1,0 +1,118 @@
+Sample	Mechanism	Hits
+S3_test	16S rRNA methyltransferases	38
+S3_test	23S rRNA methyltransferases	344
+S3_test	Acid resistance regulator	2
+S3_test	Aminocoumarin efflux pump	4
+S3_test	Aminocoumarin-resistant DNA topoisomerases	432
+S3_test	Aminoglycoside N-acetyltransferases	322
+S3_test	Aminoglycoside O-nucleotidyltransferases	326
+S3_test	Aminoglycoside O-phosphotransferases	282
+S3_test	Aminoglycoside-resistant arabinosyltransferase	18
+S3_test	Bacitracin ABC transporter	6
+S3_test	Bleomycin resistance protein	4
+S3_test	Chloramphenicol acetyltransferases	174
+S3_test	Chloramphenicol phosphotransferase	6
+S3_test	Class A betalactamases	4918
+S3_test	Class B betalactamases	954
+S3_test	Class C betalactamases	1868
+S3_test	Class D betalactamases	1674
+S3_test	Colistin phosphoethanolamine transferase	12
+S3_test	Colistin-resistant mutant	14
+S3_test	Daptomycin-resistant beta-subunit of RNA polymerase RpoB	36
+S3_test	Daptomycin-resistant beta-subunit of RNA polymerase RpoC	14
+S3_test	Daptomycin-resistant mutant	72
+S3_test	Defensin-resistant mutant	22
+S3_test	Dihydrofolate reductase	104
+S3_test	Drug and biocide ABC efflux regulator	6
+S3_test	Drug and biocide MATE efflux pumps	16
+S3_test	Drug and biocide MFS efflux pumps	142
+S3_test	Drug and biocide MFS efflux regulator	32
+S3_test	Drug and biocide RND efflux pumps	612
+S3_test	Drug and biocide RND efflux regulator	84
+S3_test	Drug and biocide SMR efflux regulator	5
+S3_test	Drug and biocide and metal RND efflux pumps	118
+S3_test	Drug and biocide and metal RND efflux regulator	14
+S3_test	Drug and biocide and metal SMR efflux pump	2
+S3_test	Drug and biocide and metal resistance regulator	4
+S3_test	EF-Tu inhibition	208
+S3_test	Elfamycin efflux pumps	12
+S3_test	Ethambutol resistant arabinosyltransferase	84
+S3_test	Ethambutol-resistant mutant	20
+S3_test	Ethionamide-resistant mutant	14
+S3_test	Fluoroquinolone-resistant DNA topoisomerases	1382
+S3_test	Fosfomycin phosphorylation	6
+S3_test	Fosfomycin thiol transferases	34
+S3_test	Fusidic acid esterases	16
+S3_test	Gold resistance regulator	4
+S3_test	Isoniazid-resistant mutant	26
+S3_test	Lincosamide nucleotidyltransferases	14
+S3_test	Lipid A modification	12
+S3_test	MDR 23S ribosomal RNA methyltransferase	32
+S3_test	MDR mutant porin proteins	31
+S3_test	MDR regulator	44
+S3_test	MLS resistance ABC efflux pumps	114
+S3_test	MLS resistance MFS efflux pumps	42
+S3_test	Macrolide esterases	46
+S3_test	Macrolide glycosyltransferases	34
+S3_test	Macrolide phosphotransferases	68
+S3_test	Monooxygenase	8
+S3_test	Multi-biocide RND efflux pump	60
+S3_test	Multi-biocide resistance regulator	2
+S3_test	Multi-drug ABC efflux pumps	144
+S3_test	Multi-drug MATE efflux pump	2
+S3_test	Multi-drug MFS efflux pumps	42
+S3_test	Multi-drug RND efflux pumps	44
+S3_test	Multi-drug RND efflux regulator	42
+S3_test	Multi-drug SMR efflux regulator	2
+S3_test	Mutant porin proteins	60
+S3_test	Penicillin binding protein	172
+S3_test	Penicillin binding protein regulator	26
+S3_test	Phenicol resistance MFS efflux pumps	214
+S3_test	Polymyxin B resistance regulator	20
+S3_test	Pyrazinamide-resistant mutant	2
+S3_test	QAC efflux pump	8
+S3_test	Quinolone active efflux	22
+S3_test	Quinolone resistance protein Qnr	270
+S3_test	Ribosomal zinc-binding protein	4
+S3_test	Rifampin ADP-ribosyltransferase Arr	16
+S3_test	Rifampin glycosyltransferase	12
+S3_test	Rifampin phosphotransferase	14
+S3_test	Rifampin-resistant beta-subunit of RNA polymerase RpoB	972
+S3_test	Streptogramin A O-acetyltransferase	42
+S3_test	Streptogramin B ester bond cleavage	4
+S3_test	Streptothricin acetyltransferase	14
+S3_test	Sulfonamide-resistant dihydropteroate synthases	380
+S3_test	Tetracenomycin MFS efflux pump	6
+S3_test	Tetracycline inactivation enzymes	28
+S3_test	Tetracycline resistance ABC efflux pumps	2
+S3_test	Tetracycline resistance MFS efflux pumps	468
+S3_test	Tetracycline resistance MFS efflux regulator	10
+S3_test	Tetracycline resistance ribosomal protection proteins	424
+S3_test	Tetracycline transcriptional repressor	16
+S3_test	Undecaprenyl pyrophosphate phosphatase	10
+S3_test	VanA-type accessory protein	34
+S3_test	VanA-type regulator	58
+S3_test	VanA-type resistance protein	132
+S3_test	VanB-type accessory protein	14
+S3_test	VanB-type regulator	60
+S3_test	VanB-type resistance protein	22
+S3_test	VanC-type regulator	26
+S3_test	VanC-type resistance protein	132
+S3_test	VanD-type accessory protein	16
+S3_test	VanD-type regulator	32
+S3_test	VanD-type resistance protein	72
+S3_test	VanE-type regulator	8
+S3_test	VanE-type resistance protein	14
+S3_test	VanF-type accessory protein	26
+S3_test	VanG-type accessory protein	18
+S3_test	VanG-type regulator	12
+S3_test	VanG-type resistance protein	16
+S3_test	VanI-type accessory protein	10
+S3_test	VanL-type regulator	8
+S3_test	VanL-type resistance protein	14
+S3_test	VanM-type regulator	22
+S3_test	VanN-type regulator	12
+S3_test	VanN-type resistance protein	41
+S3_test	VanO-type regulator	12
+S3_test	Viomycin phosphotransferases	4
+S3_test	nim nitroimidazole reductase	22

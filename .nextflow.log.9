@@ -1,0 +1,135 @@
+Sep-02 13:30:00.255 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main_amr++.nf -profile local --pipeline fast_AMR
+Sep-02 13:30:00.466 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 22.04.5
+Sep-02 13:30:00.491 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/nextflow.config
+Sep-02 13:30:00.493 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/nextflow.config
+Sep-02 13:30:00.684 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `local`
+Sep-02 13:30:02.102 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [slurm, gcp, batch, local]
+Sep-02 13:30:02.134 [main] DEBUG nextflow.cli.CmdRun - Applied DSL=2 from script declararion
+Sep-02 13:30:02.201 [main] INFO  nextflow.cli.CmdRun - Launching `main_amr++.nf` [astonishing_cray] DSL2 - revision: e690d3bfe4
+Sep-02 13:30:02.237 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; plugins-dir=/home/enrique/.nextflow/plugins; core-plugins: nf-amazon@1.7.2,nf-azure@0.13.2,nf-console@1.0.3,nf-ga4gh@1.0.3,nf-google@1.1.4,nf-sqldb@0.4.0,nf-tower@1.4.0
+Sep-02 13:30:02.239 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Sep-02 13:30:02.273 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Sep-02 13:30:02.274 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Sep-02 13:30:02.305 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Sep-02 13:30:02.376 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Sep-02 13:30:02.577 [main] DEBUG nextflow.Session - Session uuid: 929f0dd9-d590-459d-9cc0-d18a52f4a186
+Sep-02 13:30:02.577 [main] DEBUG nextflow.Session - Run name: astonishing_cray
+Sep-02 13:30:02.578 [main] DEBUG nextflow.Session - Executor pool size: 4
+Sep-02 13:30:02.678 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 22.04.5 build 5708
+  Created: 15-07-2022 16:09 UTC (10:09 MDT)
+  System: Linux 5.15.0-46-generic
+  Runtime: Groovy 3.0.10 on OpenJDK 64-Bit Server VM 17.0.4+8
+  Encoding: UTF-8 (UTF-8)
+  Process: 14932@Enrique-VM [127.0.1.1]
+  CPUs: 4 - Mem: 9.7 GB (3.7 GB) - Swap: 1.8 GB (1.8 GB)
+Sep-02 13:30:02.723 [main] DEBUG nextflow.Session - Work-dir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work [ext2/ext3]
+Sep-02 13:30:02.760 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Sep-02 13:30:02.778 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Sep-02 13:30:02.831 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Sep-02 13:30:02.852 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 5; maxThreads: 1000
+Sep-02 13:30:02.957 [main] DEBUG nextflow.Session - Session start invoked
+Sep-02 13:30:03.664 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Sep-02 13:30:03.680 [main] INFO  nextflow.Nextflow -  A M R + +    N F   P I P E L I N E
+ ===================================
+ reads        : /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/data/raw/*_R{1,2}.fastq.gz
+ output       : test_results
+ 
+Sep-02 13:30:11.753 [main] WARN  nextflow.script.ScriptBinding - Access to undefined parameter `fastq` -- Initialise it to a default value eg. `params.fastq = some_value`
+Sep-02 13:30:11.866 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Sep-02 13:30:11.869 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-02 13:30:11.888 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Sep-02 13:30:11.904 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=4; memory=9.7 GB; capacity=4; pollInterval=100ms; dumpInterval=5m
+Sep-02 13:30:12.470 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Sep-02 13:30:12.475 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-02 13:30:12.505 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Sep-02 13:30:12.511 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-02 13:30:12.534 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Sep-02 13:30:12.536 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-02 13:30:12.555 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Sep-02 13:30:12.556 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-02 13:30:12.567 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Sep-02 13:30:12.568 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-02 13:30:12.584 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Sep-02 13:30:12.585 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-02 13:30:12.596 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Sep-02 13:30:12.597 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-02 13:30:12.606 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: runqc, FAST_AMRplusplus:amr_index, FAST_AMRplusplus:runrarefaction, runsnp, FAST_AMRplusplus:runqc, host_index, FAST_AMRplusplus:bwa_align, resistomeresults, index, bwa_rm_contaminant_fq, FAST_AMRplusplus:multiqc, runrarefaction, bwa_align, FAST_AMRplusplus:runresistome, fastqc, amr_index, runresistome, FAST_AMRplusplus:fastqc, multiqc, FAST_AMRplusplus:resistomeresults
+Sep-02 13:30:12.608 [main] DEBUG nextflow.Session - Ignite dataflow network (9)
+Sep-02 13:30:12.634 [PathVisitor-1] DEBUG nextflow.file.PathVisitor - files for syntax: glob; folder: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/data/raw/; pattern: *_R{1,2}.fastq.gz; options: [:]
+Sep-02 13:30:12.637 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > FAST_AMRplusplus:fastqc
+Sep-02 13:30:12.638 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > FAST_AMRplusplus:multiqc
+Sep-02 13:30:12.639 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > FAST_AMRplusplus:runqc
+Sep-02 13:30:12.639 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > FAST_AMRplusplus:amr_index
+Sep-02 13:30:12.639 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > FAST_AMRplusplus:bwa_align
+Sep-02 13:30:12.639 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > FAST_AMRplusplus:runresistome
+Sep-02 13:30:12.643 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > FAST_AMRplusplus:resistomeresults
+Sep-02 13:30:12.646 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > FAST_AMRplusplus:runrarefaction
+Sep-02 13:30:12.646 [main] DEBUG nextflow.script.ScriptRunner - > Await termination 
+Sep-02 13:30:12.646 [main] DEBUG nextflow.Session - Session await
+Sep-02 13:30:12.721 [Actor Thread 5] DEBUG nextflow.conda.CondaCache - conda found local env for environment=/home/enrique/anaconda3/envs/AmrPlusPlus_env/; path=/home/enrique/anaconda3/envs/AmrPlusPlus_env
+Sep-02 13:30:13.192 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:30:13.215 [Task submitter] INFO  nextflow.Session - [dc/f56d8e] Submitted process > FAST_AMRplusplus:fastqc (FASTQC on S3_test)
+Sep-02 13:30:25.809 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 3; name: FAST_AMRplusplus:fastqc (FASTQC on S3_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/dc/f56d8e8cbffb604358beec5f090d5d]
+Sep-02 13:30:25.828 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:30:25.838 [Task submitter] INFO  nextflow.Session - [a0/cf0691] Submitted process > FAST_AMRplusplus:fastqc (FASTQC on S2_test)
+Sep-02 13:30:25.897 [Task monitor] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=4; maxSize=4; workQueue=LinkedBlockingQueue[10000]; allowCoreThreadTimeout=false
+Sep-02 13:30:35.279 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 4; name: FAST_AMRplusplus:fastqc (FASTQC on S2_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/a0/cf0691abb85847a971b6adc539e493]
+Sep-02 13:30:35.284 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:30:35.286 [Task submitter] INFO  nextflow.Session - [ee/a70614] Submitted process > FAST_AMRplusplus:amr_index
+Sep-02 13:30:43.823 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 1; name: FAST_AMRplusplus:amr_index; status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/ee/a706149b512ceaf918081be1e51064]
+Sep-02 13:30:43.827 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:30:43.828 [Task submitter] INFO  nextflow.Session - [09/97e22f] Submitted process > FAST_AMRplusplus:runqc (S1_test)
+Sep-02 13:30:56.437 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 6; name: FAST_AMRplusplus:runqc (S1_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/09/97e22f3465b965b760e56b5da0d2a9]
+Sep-02 13:30:56.446 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:30:56.456 [Task submitter] INFO  nextflow.Session - [b0/82ecb2] Submitted process > FAST_AMRplusplus:runqc (S2_test)
+Sep-02 13:31:07.344 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 5; name: FAST_AMRplusplus:runqc (S2_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/b0/82ecb2e057bcf735e7cef34885a33e]
+Sep-02 13:31:07.348 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:31:07.349 [Task submitter] INFO  nextflow.Session - [2e/c4d046] Submitted process > FAST_AMRplusplus:fastqc (FASTQC on S1_test)
+Sep-02 13:31:15.681 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 7; name: FAST_AMRplusplus:fastqc (FASTQC on S1_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/2e/c4d046c28b7ef8a8c6166bf0ed9f88]
+Sep-02 13:31:15.687 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:31:15.689 [Task submitter] INFO  nextflow.Session - [03/51ac31] Submitted process > FAST_AMRplusplus:runqc (S3_test)
+Sep-02 13:31:30.281 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 2; name: FAST_AMRplusplus:runqc (S3_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/03/51ac31265895243157e631cd6a9796]
+Sep-02 13:31:30.296 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:31:30.297 [Task submitter] INFO  nextflow.Session - [37/a2c637] Submitted process > FAST_AMRplusplus:bwa_align (S1_test)
+Sep-02 13:31:42.553 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 8; name: FAST_AMRplusplus:bwa_align (S1_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/37/a2c637d9b3035f1e1da23e75a11928]
+Sep-02 13:31:42.561 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:31:42.567 [Task submitter] INFO  nextflow.Session - [05/ee51a5] Submitted process > FAST_AMRplusplus:bwa_align (S2_test)
+Sep-02 13:31:51.895 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 9; name: FAST_AMRplusplus:bwa_align (S2_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/05/ee51a513a56355bc7bea440864c21b]
+Sep-02 13:31:51.907 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:31:51.912 [Task submitter] INFO  nextflow.Session - [43/4196f6] Submitted process > FAST_AMRplusplus:multiqc
+Sep-02 13:31:55.378 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 10; name: FAST_AMRplusplus:multiqc; status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/43/4196f66eda01b404fe3f0aeb28e16e]
+Sep-02 13:31:55.386 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:31:55.401 [Task submitter] INFO  nextflow.Session - [58/5c5dc0] Submitted process > FAST_AMRplusplus:bwa_align (S3_test)
+Sep-02 13:32:05.027 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 11; name: FAST_AMRplusplus:bwa_align (S3_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/58/5c5dc0d65e9e6d975a46a2a9d32913]
+Sep-02 13:32:05.035 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:32:05.036 [Task submitter] INFO  nextflow.Session - [c5/95d1db] Submitted process > FAST_AMRplusplus:runresistome (S1_test)
+Sep-02 13:32:09.525 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 12; name: FAST_AMRplusplus:runresistome (S1_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/c5/95d1db085d9ca334abc39d64fe89cf]
+Sep-02 13:32:09.530 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:32:09.531 [Task submitter] INFO  nextflow.Session - [a1/6c2df0] Submitted process > FAST_AMRplusplus:runrarefaction (S1_test)
+Sep-02 13:32:17.656 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 13; name: FAST_AMRplusplus:runrarefaction (S1_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/a1/6c2df05daf27af975e9fd25f7bfd50]
+Sep-02 13:32:17.660 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:32:17.660 [Task submitter] INFO  nextflow.Session - [fb/d71570] Submitted process > FAST_AMRplusplus:runrarefaction (S2_test)
+Sep-02 13:32:24.432 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 14; name: FAST_AMRplusplus:runrarefaction (S2_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/fb/d7157067257ab72c6fba2fcb613b8c]
+Sep-02 13:32:24.437 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:32:24.437 [Task submitter] INFO  nextflow.Session - [b1/797b56] Submitted process > FAST_AMRplusplus:runresistome (S2_test)
+Sep-02 13:32:28.389 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 15; name: FAST_AMRplusplus:runresistome (S2_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/b1/797b56c9019f00d582603bb985a75e]
+Sep-02 13:32:28.406 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:32:28.407 [Task submitter] INFO  nextflow.Session - [c9/6931f1] Submitted process > FAST_AMRplusplus:runresistome (S3_test)
+Sep-02 13:32:35.323 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 17; name: FAST_AMRplusplus:runresistome (S3_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/c9/6931f15e959687cbe48f95289c7b01]
+Sep-02 13:32:35.331 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:32:35.338 [Task submitter] INFO  nextflow.Session - [e7/df7e48] Submitted process > FAST_AMRplusplus:runrarefaction (S3_test)
+Sep-02 13:32:46.460 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 16; name: FAST_AMRplusplus:runrarefaction (S3_test); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/e7/df7e4872ac7a29db5a81d84000ce94]
+Sep-02 13:32:46.470 [Task submitter] DEBUG nextflow.executor.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-02 13:32:46.481 [Task submitter] INFO  nextflow.Session - [82/34072b] Submitted process > FAST_AMRplusplus:resistomeresults (null)
+Sep-02 13:32:49.042 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 18; name: FAST_AMRplusplus:resistomeresults (null); status: COMPLETED; exit: 0; error: -; workDir: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/82/34072b15feb63ace04ca358ff9eb32]
+Sep-02 13:32:49.045 [main] DEBUG nextflow.Session - Session await > all process finished
+Sep-02 13:32:49.046 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Sep-02 13:32:49.050 [main] INFO  nextflow.script.BaseScript - Pipeline completed!
+Sep-02 13:32:49.053 [main] INFO  nextflow.script.BaseScript - Started at  2022-09-02T13:30:02.788778447-06:00
+Sep-02 13:32:49.053 [main] INFO  nextflow.script.BaseScript - Finished at 2022-09-02T13:32:49.047626368-06:00
+Sep-02 13:32:49.054 [main] INFO  nextflow.script.BaseScript - Time elapsed: 2m 46s
+Sep-02 13:32:49.054 [main] INFO  nextflow.script.BaseScript - Execution status: OK
+Sep-02 13:32:49.062 [main] DEBUG nextflow.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=18; failedCount=0; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=10m 16s; failedDuration=0ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=1; peakCpus=4; peakMemory=8 GB; ]
+Sep-02 13:32:49.256 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+Sep-02 13:32:49.280 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye

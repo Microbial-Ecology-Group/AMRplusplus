@@ -1,0 +1,21 @@
+[2022-09-02 13:40:27,159] multiqc                                            [INFO   ]  This is MultiQC v0.4
+[2022-09-02 13:40:27,159] multiqc                                            [DEBUG  ]  Working dir : /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/1f/0260b24324a4cb4b0ecef18924bc61
+[2022-09-02 13:40:27,161] multiqc                                            [DEBUG  ]  Template    : default
+[2022-09-02 13:40:27,161] multiqc                                            [INFO   ]  Searching   : .
+[2022-09-02 13:40:27,161] multiqc                                            [DEBUG  ]  Analysing modules: qualimap, featureCounts, picard, preseq, bismark, star, tophat, bowtie2, bowtie1, cutadapt, fastq_screen, fastqc
+[2022-09-02 13:40:27,165] multiqc                                            [DEBUG  ]  Using temporary directory for rendering report: /tmp/tmpf83rzv9t
+[2022-09-02 13:40:27,165] multiqc                                            [INFO   ]  Report      : multiqc_report.html
+[2022-09-02 13:40:27,165] multiqc                                            [INFO   ]  Data        : multiqc_report_data
+[2022-09-02 13:40:27,169] multiqc.modules.qualimap.qualimap                  [DEBUG  ]  Could not find any reports in ('.',)
+[2022-09-02 13:40:27,171] multiqc.modules.featureCounts.feature_counts       [DEBUG  ]  Could not find any reports in ('.',)
+[2022-09-02 13:40:27,281] multiqc.modules.picard.picard                      [DEBUG  ]  Could not find any reports in ('.',)
+[2022-09-02 13:40:27,295] multiqc.modules.preseq.preseq                      [DEBUG  ]  Could not find any preseq data in ('.',)
+[2022-09-02 13:40:27,298] multiqc.modules.bismark.bismark                    [DEBUG  ]  Could not find any reports in ('.',)
+[2022-09-02 13:40:27,301] multiqc.modules.star.star                          [DEBUG  ]  Could not find any reports in ('.',)
+[2022-09-02 13:40:27,303] multiqc.modules.tophat.tophat                      [DEBUG  ]  Could not find any reports in ('.',)
+[2022-09-02 13:40:27,316] multiqc.modules.bowtie2.bowtie2                    [DEBUG  ]  Could not find any reports in ('.',)
+[2022-09-02 13:40:27,331] multiqc.modules.bowtie1.bowtie1                    [DEBUG  ]  Could not find any reports in ('.',)
+[2022-09-02 13:40:27,352] multiqc.modules.cutadapt.cutadapt                  [DEBUG  ]  Could not find any reports in ('.',)
+[2022-09-02 13:40:27,356] multiqc.modules.fastq_screen.fastq_screen          [DEBUG  ]  Could not find any reports in ('.',)
+[2022-09-02 13:40:27,425] multiqc.modules.fastqc.fastqc                      [INFO   ]  Found 6 reports
+[2022-09-02 13:40:27,590] multiqc                                            [INFO   ]  MultiQC complete

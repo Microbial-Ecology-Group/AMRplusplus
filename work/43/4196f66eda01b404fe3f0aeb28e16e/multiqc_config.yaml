@@ -1,0 +1,12 @@
+title: "Nextflow RNA-seq demo"
+subtitle: "A pipeline for quantification of genomic features from short read data"
+
+report_header_info:
+    - Contact E-mail: 'paolo.ditommaso@gmail.com'
+    - Application Type: 'RNA-seq'
+    - Project Type: 'Nextflow demo'
+
+custom_logo_url: 'https://www.nextflow.io'
+custom_logo_title: 'Center for Genomic Regulation'
+
+custom_logo: /home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/43/4196f66eda01b404fe3f0aeb28e16e/logo.png
