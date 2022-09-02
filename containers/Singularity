@@ -13,14 +13,14 @@ From: debian:jessie-slim
     git make automake autoconf openjdk-7-jre wget gzip unzip sed\
     zlib1g-dev curl libbz2-dev locales libncurses5-dev liblzma-dev libcurl4-openssl-dev software-properties-common apt-transport-https\
     python3-pip python3-docopt python3-pytest python-dev python3-dev\
-    libcurl4-openssl-dev libssl-dev zlib1g-dev fonts-texgyre \
+     libssl-dev fonts-texgyre \
     gcc g++ gfortran libblas-dev liblapack-dev dos2unix libstdc++6\
-    r-base-core r-recommended hmmer\
+    r-base-core r-recommended libgl1-mesa-glx libegl1-mesa  \
+    libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 libxtst6
     && rm -rf /var/lib/apt/lists/*
 
-
-    wget -c https://repo.continuum.io/archive/Anaconda3-2020.02-Linux-x86_64.sh
-    sh Anaconda3-2020.02-Linux-x86_64.sh -bfp /usr/local
+    wget -c https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh
+    sh Anaconda3-2022.05-Linux-x86_64.sh -bfp /usr/local
 
     # add bioconda channels
     conda config --add channels defaults
@@ -28,7 +28,7 @@ From: debian:jessie-slim
     conda config --add channels bioconda
 
     # install bulk of bioinformatic tools using conda
-    conda create -n AmrPlusPlus_env python=3 trimmomatic bwa samtools bedtools freebayes bbmap vcftools htslib kraken2
+    conda create -n AmrPlusPlus_env python=3 trimmomatic multiqc bwa samtools bedtools freebayes bbmap vcftools htslib kraken2
 
     . /usr/local/bin/activate AmrPlusPlus_env
     
