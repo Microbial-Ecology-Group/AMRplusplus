@@ -22,9 +22,6 @@ Brief tutorial for nextflow pipeline test run
 Brief tutorial for snakemake pipeline test run
 
 
-```
-
-
 # Microbial Ecology Group (MEG)
 (https://megares.meglab.org/)
 
