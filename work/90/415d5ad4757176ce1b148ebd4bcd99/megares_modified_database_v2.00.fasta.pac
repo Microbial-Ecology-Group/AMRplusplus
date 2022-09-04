@@ -1,1 +1,0 @@
-/home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/07/035bd4fca81c5757b983df3ea58067/megares_modified_database_v2.00.fasta.pac

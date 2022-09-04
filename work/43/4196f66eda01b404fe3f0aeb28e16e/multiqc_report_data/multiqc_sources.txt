@@ -1,7 +1,0 @@
-Module	Section	Sample Name	Source
-FastQC	all_sections	S2_test_R1	/home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/43/4196f66eda01b404fe3f0aeb28e16e/data2/S2_test_fastqc_logs/S2_test_R1_fastqc.zip
-FastQC	all_sections	S2_test_R2	/home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/43/4196f66eda01b404fe3f0aeb28e16e/data2/S2_test_fastqc_logs/S2_test_R2_fastqc.zip
-FastQC	all_sections	S3_test_R1	/home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/43/4196f66eda01b404fe3f0aeb28e16e/data1/S3_test_fastqc_logs/S3_test_R1_fastqc.zip
-FastQC	all_sections	S3_test_R2	/home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/43/4196f66eda01b404fe3f0aeb28e16e/data1/S3_test_fastqc_logs/S3_test_R2_fastqc.zip
-FastQC	all_sections	S1_test_R2	/home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/43/4196f66eda01b404fe3f0aeb28e16e/data3/S1_test_fastqc_logs/S1_test_R2_fastqc.zip
-FastQC	all_sections	S1_test_R1	/home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/work/43/4196f66eda01b404fe3f0aeb28e16e/data3/S1_test_fastqc_logs/S1_test_R1_fastqc.zip

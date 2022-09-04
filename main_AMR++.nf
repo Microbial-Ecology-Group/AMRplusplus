@@ -1,6 +1,6 @@
 nextflow.enable.dsl=2
 // Example command:
-// nextflow run main_AMR++.nf -profile local --pipeline demo
+// nextflow run main_AMR++.nf -profile conda --pipeline demo
 
 /*
  * Default pipeline parameters. They can be overriden on the command line eg.
@@ -14,17 +14,6 @@ log.info """\
  output       : ${params.output}
  """
 
-// Load main pipeline workflows
-
-include { STANDARD_AMRplusplus } from './subworkflows/AMR++_standard.nf' 
-include { FAST_AMRplusplus } from './subworkflows/AMR++_fast.nf'
-
-// Load subworkflows
-include { FASTQ_QC_WF } from './subworkflows/fastq_information.nf'
-include { FASTQ_TRIM_WF } from './subworkflows/fastq_QC_trimming.nf'
-include { FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf' 
-include { FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
-
 Channel
 .fromFilePairs( params.reads , size: ("${params.reads}" =~ /\{/) ? 2 : 1)
 .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
@@ -32,6 +21,18 @@ Channel
 
 // Default is pipeline is null to warn users below
 params.pipeline = null
+
+// Load main pipeline workflows
+
+include { STANDARD_AMRplusplus } from './subworkflows/AMR++_standard.nf' 
+include { FAST_AMRplusplus } from './subworkflows/AMR++_fast.nf'
+include { STANDARD_AMRplusplus_wKraken } from './subworkflows/AMR++_standard_wKraken.nf'
+
+// Load subworkflows
+include { FASTQ_QC_WF } from './subworkflows/fastq_information.nf'
+include { FASTQ_TRIM_WF } from './subworkflows/fastq_QC_trimming.nf'
+include { FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf' 
+include { FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
 
 workflow {
     
@@ -48,6 +49,10 @@ workflow {
     } else if(params.pipeline == "fast_AMR") {
 
         FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
+    } 
+    else if(params.pipeline == "standard_AMR_wKraken") {
+
+        STANDARD_AMRplusplus_wKraken(fastq_files,params.reference, params.amr, params.annotation, params.krakendb)
     } 
     else {
             println "ERROR ################################################################"

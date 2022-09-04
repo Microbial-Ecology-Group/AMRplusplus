@@ -1,2 +1,0 @@
-#!/bin/bash -ue
-/home/enrique/Dropbox/Projects/AMR++_v3_update/AMRplusplus/bin/rarefaction       -ref_fp megares_modified_database_v2.00.fasta       -sam_fp S1_test.sam       -annot_fp megares_modified_annotations_v2.00.csv       -gene_fp S1_test.gene.tsv       -group_fp S1_test.group.tsv       -mech_fp S1_test.mech.tsv       -class_fp S1_test.class.tsv       -type_fp S1_test.type.tsv       -min 5       -max 100       -skip 5       -samples 1       -t 10

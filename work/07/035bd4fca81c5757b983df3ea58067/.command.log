@@ -1,9 +1,0 @@
-[bwa_index] Pack FASTA... 0.16 sec
-[bwa_index] Construct BWT for the packed sequence...
-[bwa_index] 4.45 seconds elapse.
-[bwa_index] Update BWT... 0.08 sec
-[bwa_index] Pack forward-only FASTA... 0.07 sec
-[bwa_index] Construct SA from BWT and Occ... 1.45 sec
-[main] Version: 0.7.17-r1188
-[main] CMD: bwa index megares_modified_database_v2.00.fasta
-[main] Real time: 6.618 sec; CPU: 6.229 sec
