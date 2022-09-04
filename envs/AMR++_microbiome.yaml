@@ -1,0 +1,11 @@
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - python = 3.9
+  - git = 2.34.1
+  - cxx-compiler = 1.5.0
+  - make = 4.2.1
+  - kraken2 = 2.1.2
+  - krona = 2.7.1
+  - bracken = 2.7

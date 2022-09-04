@@ -1,18 +1,7 @@
-// Load modules
-include { index as amr_index ; index as host_index } from '../modules/Alignment/bwa' addParams(EXTRAPARS: "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:36")
-include { bwa_align } from '../modules/Alignment/bwa' addParams(EXTRAPARS: "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:36")
-include { fastqc ; multiqc } from '../modules/Fastqc/fastqc' addParams(EXTRAPARS: "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:36")
-include { runqc } from '../modules/Trimming/trimmomatic' addParams(EXTRAPARS: "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:36")
-
-// contaminant removal
-include { bwa_rm_contaminant_fq } from '../modules/Alignment/bwa' addParams(EXTRAPARS: "test")
-
-// resistome
-include { runresistome } from '../modules/Resistome/resistome' addParams(EXTRAPARS: "test")
-include { runsnp } from '../modules/Resistome/resistome' addParams(EXTRAPARS: "test")
-include { resistomeresults } from '../modules/Resistome/resistome' addParams(EXTRAPARS: "test")
-include { runrarefaction } from '../modules/Resistome/resistome' addParams(EXTRAPARS: "test")
-
+include { FASTQ_QC_WF } from "$baseDir/subworkflows/fastq_information.nf"
+include { FASTQ_TRIM_WF } from './subworkflows/fastq_QC_trimming.nf'
+include { FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf' 
+include { FASTQ_RESISTOME_WF } from "$baseDir/subworkflows/fastq_resistome.nf"
 
 workflow STANDARD_AMRplusplus {
     take: 
@@ -23,25 +12,17 @@ workflow STANDARD_AMRplusplus {
 
     main:
         // fastqc
-        fastqc( read_pairs_ch )
-        multiqc(fastqc.out.collect(), params.multiqc )
+        FASTQ_QC_WF( read_pairs_ch )
         // runqc trimming
-        runqc(read_pairs_ch)
-        // make indices for host and amr
-        amr_index(amr)
-        host_index(hostfasta)
+        FASTQ_TRIM_WF(read_pairs_ch)
         // remove host DNA
-        bwa_rm_contaminant_fq(hostfasta,host_index.out, runqc.out.paired_fastq )
+        FASTQ_RM_HOST_WF(hostfasta, FASTQ_TRIM_WF.out.trimmed_reads)
         // AMR alignment
-        bwa_align(amr, amr_index.out, bwa_rm_contaminant_fq.out.nonhost_reads )
-        runresistome(bwa_align.out.bwa_sam,amr, annotation )
-        //runsnp(bwa_align.out.bwa_sam )
-        resistomeresults(runresistome.out.resistome_counts.collect())
-        runrarefaction(bwa_align.out.bwa_sam, annotation, amr)
+        FASTQ_RESISTOME_WF(FASTQ_RM_HOST_WF.out.nonhost_reads, amr,annotation)
 
-    emit:
-        fastqc = fastqc.out   
-        multiqc = multiqc.out
-        trim_reads = runqc.out.paired_fastq
-        non_host_reads = bwa_rm_contaminant_fq.out.nonhost_reads
+    //emit:
+        //fastqc = fastqc.out   
+        //multiqc = multiqc.out
+        //trim_reads = runqc.out.paired_fastq
+        //non_host_reads = bwa_rm_contaminant_fq.out.nonhost_reads
 }

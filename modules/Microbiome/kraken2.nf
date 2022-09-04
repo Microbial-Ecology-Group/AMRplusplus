@@ -1,5 +1,7 @@
 process runkraken {
     tag { sample_id }
+    conda = "$baseDir/envs/AMR++_microbiome.yaml"
+    container = 'enriquedoster/amrplusplus_microbiome:latest'
 
     publishDir "${params.output}/RunKraken", mode: 'copy',
         saveAs: { filename ->
@@ -23,21 +25,22 @@ process runkraken {
 
 
      """
-     ${KRAKEN2} --db ${kraken_db} --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.kraken.report > ${sample_id}.kraken.raw
-     ${KRAKEN2} --db ${kraken_db} --confidence 1 --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.kraken.filtered.report > ${sample_id}.kraken.filtered.raw
+     ${KRAKEN2} --db ${krakendb} --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.kraken.report > ${sample_id}.kraken.raw
+     ${KRAKEN2} --db ${krakendb} --confidence 1 --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.kraken.filtered.report > ${sample_id}.kraken.filtered.raw
      """
 }
 
 process krakenresults {
     tag { }
-
+    conda = "$baseDir/envs/AMR++_microbiome.yaml"
+    container = 'enriquedoster/amrplusplus_microbiome:latest'
     publishDir "${params.output}/KrakenResults", mode: "copy"
 
     input:
         path(kraken_reports)
 
     output:
-        path("kraken_analytic_matrix.csv"); emit kraken_master_matrix
+        path("kraken_analytic_matrix.csv")
 
     """
     ${PYTHON3} $baseDir/bin/kraken2_long_to_wide.py -i ${kraken_reports} -o kraken_analytic_matrix.csv

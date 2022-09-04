@@ -1,6 +1,7 @@
 nextflow.enable.dsl=2
 // Example command:
 // nextflow run main_AMR++.nf -profile conda --pipeline demo
+// nextflow run main_AMR++.nf -profile conda --pipeline demo --kraken_db /mnt/c/Users/enriq/Dropbox/minikraken_8GB_20200312/
 
 /*
  * Default pipeline parameters. They can be overriden on the command line eg.
@@ -33,13 +34,17 @@ include { FASTQ_QC_WF } from './subworkflows/fastq_information.nf'
 include { FASTQ_TRIM_WF } from './subworkflows/fastq_QC_trimming.nf'
 include { FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf' 
 include { FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
+include { FASTQ_KRAKEN_WF } from './subworkflows/fastq_microbiome.nf'
+
 
 workflow {
     
     if (params.pipeline == "demo") {
 
         //run with demo params, use params.config
-        FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
+        
+        FASTQ_KRAKEN_WF(fastq_files, params.kraken_db)
+        //FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
         
     } else if(params.pipeline == "standard_AMR") {
 

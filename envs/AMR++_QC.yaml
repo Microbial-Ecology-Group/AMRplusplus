@@ -1,0 +1,13 @@
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - bedtools = 2.30.0
+  - bwa = 0.7.17
+  - python = 3.9
+  - git = 2.34.1
+  - cxx-compiler = 1.5.0
+  - make = 4.2.1
+  - kraken2 = 2.1.2
+  - samtools = 1.15.1
+  - trimmomatic = 0.39

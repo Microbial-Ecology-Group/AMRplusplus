@@ -1,15 +1,5 @@
-// Load modules
-include { index as amr_index ; index as host_index } from '../modules/Alignment/bwa' addParams(EXTRAPARS: "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:36")
-include { bwa_align } from '../modules/Alignment/bwa' addParams(EXTRAPARS: "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:36")
-include { fastqc ; multiqc } from '../modules/Fastqc/fastqc' addParams(EXTRAPARS: "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:36")
-include { runqc } from '../modules/Trimming/trimmomatic' addParams(EXTRAPARS: "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:36")
-
-// resistome
-include { runresistome } from '../modules/Resistome/resistome' addParams(EXTRAPARS: "test")
-include { runsnp } from '../modules/Resistome/resistome' addParams(EXTRAPARS: "test")
-include { resistomeresults } from '../modules/Resistome/resistome' addParams(EXTRAPARS: "test")
-include { runrarefaction } from '../modules/Resistome/resistome' addParams(EXTRAPARS: "test")
-
+include { FASTQ_QC_WF } from "$baseDir/subworkflows/fastq_information.nf"
+include { FASTQ_RESISTOME_WF } from "$baseDir/subworkflows/fastq_resistome.nf"
 
 workflow FAST_AMRplusplus {
     take: 
@@ -18,16 +8,12 @@ workflow FAST_AMRplusplus {
         annotation
 
     main:
-        fastqc( read_pairs_ch )
-        multiqc(fastqc.out.collect(), params.multiqc )
-        runqc(read_pairs_ch)
-        amr_index(amr)
+        // fastqc
+        FASTQ_QC_WF( read_pairs_ch )
+        // runqc trimming
+        FASTQ_TRIM_WF(read_pairs_ch)
         // AMR alignment
-        bwa_align(amr, amr_index.out, runqc.out.paired_fastq )
-        runresistome(bwa_align.out.bwa_sam,amr, annotation )
-        //runsnp(bwa_align.out.bwa_sam )
-        resistomeresults(runresistome.out.resistome_counts.collect())
-        runrarefaction(bwa_align.out.bwa_sam, annotation, amr)
+        FASTQ_RESISTOME_WF(FASTQ_TRIM_WF.out.trimmed_reads, amr,annotation)
 
         
 }
