@@ -53,11 +53,20 @@ nextflow run main_AMR++.nf -profile conda --pipeline demo
 
 ### Pipelines
 
-```--pipeline demo``` 
-```--pipeline standard_AMR``` QC trimming > Host DNA removal > Resistome alignment > Resistome results
+```--pipeline demo```    Simple demonstration
+
+```--pipeline standard_AMR```   QC trimming > Host DNA removal > Resistome alignment > Resistome results
+
 ```--pipeline fast_AMR```  QC trimming > Resistome alignment > Resistome results
-```--pipeline standard_AMR_wKraken``` QC trimming > Host DNA removal > Resistome alignment > Resistome results 
+
+```--pipeline standard_AMR_wKraken```   QC trimming > Host DNA removal > Resistome alignment > Resistome results 
 Non-host reads > Microbiome analysis
+
+
+pipeline fragments
+```--pipeline multiqc```  Evaluate sample QC 
+
+
 
 
 ## Run SnakeMake Workflow
