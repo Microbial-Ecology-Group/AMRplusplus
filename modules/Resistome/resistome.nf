@@ -14,7 +14,7 @@ samples = params.samples
 
 process runresistome {
     tag { sample_id }
-    conda = "$baseDir/envs/AMR++_alignment.yaml"
+    conda = "$baseDir/envs/alignment.yaml"
     container = 'enriquedoster/amrplusplus_alignment:latest'
     publishDir "${params.output}/RunResistome", mode: "copy"
 
@@ -42,7 +42,7 @@ process runresistome {
 
 process runsnp {
     tag { sample_id }
-    conda = "$baseDir/envs/AMR++_alignment.yaml"
+    conda = "$baseDir/envs/python.yaml"
     container = 'enriquedoster/amrplusplus_alignment:latest'
     publishDir "${params.output}/RunSNP_Verification", mode: "copy"
 
@@ -59,7 +59,7 @@ process runsnp {
 
 process resistomeresults {
     tag { }
-    conda = "$baseDir/envs/AMR++_alignment.yaml"
+    conda = "$baseDir/envs/python.yaml"
     container = 'enriquedoster/amrplusplus_alignment:latest'
     publishDir "${params.output}/ResistomeResults", mode: "copy"
 
@@ -76,7 +76,7 @@ process resistomeresults {
 
 process runrarefaction {
     tag { sample_id }
-    conda = "$baseDir/envs/AMR++_alignment.yaml"
+    conda = "$baseDir/envs/python.yaml"
     container = 'enriquedoster/amrplusplus_alignment:latest'
     publishDir "${params.output}/RunRarefaction", mode: "copy"
 

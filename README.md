@@ -7,6 +7,7 @@ Overview
 
 ## AMR++ v3 updates
 
+## Brief pipeline demonstration
 Updates
 - SNP confirmation software
 - pipeline structure
@@ -15,12 +16,59 @@ Updates
 - Includes updates to MEGARes v3
 
 
+Create the environment for AMR++. This will work for both the nextflow version and snakemake version.
+
+```bash
+conda create -c conda-forge -n mamba_base mamba
+conda activate mamba_base
+mamba create -c conda-forge -c bioconda -n AMR++ snakemake git nextflow
+mamba activate AMR++
+```
+
+
+Clone the AMR++ repository.
+
+```bash
+mamba activate AMR++
+git clone https://github.com/Microbial-Ecology-Group/AMRplusplus.git
+```
 
 Brief tutorial for nextflow pipeline test run
+```bash
+cd AMRplusplus
+mamba activate AMR++
 
+nextflow run main_AMR++.nf -profile conda --pipeline demo
+```
+
+
+
+
+### Profiles
+
+```-profile conda``` 
+```-profile local``` 
+```-profile docker```
+
+
+### Pipelines
+
+```--pipeline demo``` 
+```--pipeline standard_AMR``` QC trimming > Host DNA removal > Resistome alignment > Resistome results
+```--pipeline fast_AMR```  QC trimming > Resistome alignment > Resistome results
+```--pipeline standard_AMR_wKraken``` QC trimming > Host DNA removal > Resistome alignment > Resistome results 
+Non-host reads > Microbiome analysis
+
+
+## Run SnakeMake Workflow
 
 Brief tutorial for snakemake pipeline test run
+```bash
+cd AMRplusplus
+mamba activate AMR++
 
+snakemake --use-conda --cores <number of threads available>
+```
 
 # Microbial Ecology Group (MEG)
 (https://megares.meglab.org/)

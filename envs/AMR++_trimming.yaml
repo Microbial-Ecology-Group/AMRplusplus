@@ -1,5 +1,0 @@
-name: AMR++_trimming
-channels:
-  - bioconda
-dependencies:
-  - trimmomatic = 0.39

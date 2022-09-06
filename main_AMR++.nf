@@ -57,6 +57,10 @@ workflow {
 
         STANDARD_AMRplusplus_wKraken(fastq_files,params.reference, params.amr, params.annotation, params.kraken_db)
     } 
+    else if(params.pipeline == "multiqc") {
+
+        FASTQ_QC_WF( fastq_files )
+    } 
     else {
             println "ERROR ################################################################"
             println "Please choose a pipeline!!!" 

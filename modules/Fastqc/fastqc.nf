@@ -2,7 +2,7 @@
 
 process fastqc {
     tag "FASTQC on $sample_id"
-    conda = "$baseDir/envs/AMR++_QC.yaml"
+    conda = "$baseDir/envs/fastqc.yaml"
     container = 'enriquedoster/amrplusplus_QC:latest'
 
     publishDir "${params.output}/fastQC", mode: 'copy'
@@ -24,7 +24,7 @@ process fastqc {
 
 process multiqc {
     errorStrategy 'ignore'
-    conda = "$baseDir/envs/AMR++_QC.yaml"
+    conda = "$baseDir/envs/multiqc.yaml"
     container = 'enriquedoster/amrplusplus_QC:latest'
     
     publishDir "${params.output}/multiQC", mode: 'copy',
@@ -45,7 +45,6 @@ process multiqc {
     script:
     """
     cp $config/* .
-    echo "custom_logo: \$PWD/logo.png" >> multiqc_config.yaml
     multiqc -v .
     """
 }
