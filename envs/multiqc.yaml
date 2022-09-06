@@ -1,5 +1,5 @@
-name: AMR++_QC
+name: multiqc
 channels:
   - bioconda
 dependencies:
-  - fastqc = 0.11.8
+  - multiqc

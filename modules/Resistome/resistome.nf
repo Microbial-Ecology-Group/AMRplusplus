@@ -105,3 +105,23 @@ process runrarefaction {
       -t ${threshold}
     """
 }
+
+process plotrarefaction {
+    tag { sample_id }
+    conda = "$baseDir/envs/python.yaml"
+    container = 'enriquedoster/amrplusplus_alignment:latest'
+    publishDir "${params.output}/RarefactionFigures", mode: "copy"
+
+    input:
+        path(rarefaction)
+
+    output:
+        path("*.tsv"), emit: rarefaction
+
+    """
+    mkdir data/
+    mv *.tsv data/
+    mkdir graphs/
+    python $baseDir/bin/rfplot.py --dir ./data --nd --s --sd ./graphs
+    """
+}

@@ -1,4 +1,4 @@
-name: AMR++_QC
+name: fastqc
 channels:
   - bioconda
 dependencies:

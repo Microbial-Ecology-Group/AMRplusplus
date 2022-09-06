@@ -1,3 +1,4 @@
+name: alignment
 channels:
   - bioconda
   - conda-forge
@@ -6,3 +7,4 @@ dependencies:
   - bwa = 0.7.17
   - python = 3.9
   - samtools = 1.15.1
+  - matplotlib = 3.5.3

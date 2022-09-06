@@ -47,15 +47,22 @@ process bwa_align {
     tuple val(pair_id), path(reads) 
 
     output:
-    tuple val(pair_id), path("${pair_id}.bam"), emit: bwa_bam
-    tuple val(pair_id), path("${pair_id}.sam"), emit: bwa_sam
+    tuple val(pair_id), path("${pair_id}.amr.alignment.dedup.bam"), emit: bwa_dedup_bam
+    tuple val(pair_id), path("${pair_id}.amr.alignment.sorted.fix.sorted.bam"), emit: bwa_bam
+    tuple val(pair_id), path("${pair_id}.amr.alignment.dedup.sam"), emit: bwa_dedup_sam
+    tuple val(pair_id), path("${pair_id}.amr.alignment.sam"), emit: bwa_sam
 
     script:
     """
-    bwa mem -t ${task.cpus} ${dbfasta} ${reads} > ${pair_id}.sam
-    samtools view -@ ${task.cpus} -Sb > ${pair_id}.bam
-    # ${params.EXTRAPARS} 
-
+     ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}.amr.alignment.sam
+     ${SAMTOOLS} view -S -b ${pair_id}.amr.alignment.sam > ${pair_id}.amr.alignment.bam
+     ${SAMTOOLS} sort -n ${pair_id}.amr.alignment.bam -o ${pair_id}.amr.alignment.sorted.bam
+     ${SAMTOOLS} fixmate ${pair_id}.amr.alignment.sorted.bam ${pair_id}.amr.alignment.sorted.fix.bam
+     ${SAMTOOLS} sort ${pair_id}.amr.alignment.sorted.fix.bam -o ${pair_id}.amr.alignment.sorted.fix.sorted.bam
+     ${SAMTOOLS} rmdup -S ${pair_id}.amr.alignment.sorted.fix.sorted.bam ${pair_id}.amr.alignment.dedup.bam
+     ${SAMTOOLS} view -h -o ${pair_id}.amr.alignment.dedup.sam ${pair_id}.amr.alignment.dedup.bam
+     rm ${pair_id}.amr.alignment.bam
+     rm ${pair_id}.amr.alignment.sorted*.bam
     """
 }
 

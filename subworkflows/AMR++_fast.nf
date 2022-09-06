@@ -1,4 +1,5 @@
-include { FASTQ_QC_WF } from "$baseDir/subworkflows/fastq_information.nf"
+include { FASTQ_QC_WF} from "$baseDir/subworkflows/fastq_information.nf"
+include { FASTQ_TRIM_WF } from "$baseDir/subworkflows/fastq_QC_trimming.nf"
 include { FASTQ_RESISTOME_WF } from "$baseDir/subworkflows/fastq_resistome.nf"
 
 workflow FAST_AMRplusplus {

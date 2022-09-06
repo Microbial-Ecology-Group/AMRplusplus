@@ -9,16 +9,12 @@ import csv
 import pandas as pd
 import numpy
 
-
-
-
 def parse_cmdline_params(cmdline_params):
 	info = "Removes duplicate FASTQ entries from a FASTQ file"
 	parser = argparse.ArgumentParser(description=info)
 	parser.add_argument('-i', '--input_files', nargs='+', required=True,
         	                help='Use globstar to pass a list of sequence files, (Ex: *.fastq.gz)')
 	return parser.parse_args(cmdline_params)
-
 
 def pull_Phred(fastq_files):
 
@@ -37,7 +33,7 @@ def pull_Phred(fastq_files):
             seq = fp.next()
 
             #seq = seq[10:len(seq)] # Let's not chop off the umi here since we would be checking the quality after UMI removal and not all samples have UMIs
-            
+
             Seqlen_list.append(len(seq))
             #newseq = seq + spacesep + UMI
             plus = fp.next()
@@ -52,9 +48,9 @@ def pull_Phred(fastq_files):
 
             Qlist.append(numpy.mean(Q))
             Plist.append(numpy.mean(P))
-                
+
             num_reads += 1
-                
+
         print(f,"mean_probability_nucleotide_error",numpy.mean(Plist))
         print(f,"mean_phred_score",numpy.mean(Qlist))
         print(f,"total_reads",num_reads)

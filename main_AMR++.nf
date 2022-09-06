@@ -1,5 +1,6 @@
 nextflow.enable.dsl=2
 // Example command:
+// module load python/3.9.3_anaconda2021.11_mamba
 // nextflow run main_AMR++.nf -profile conda --pipeline demo
 // nextflow run main_AMR++.nf -profile conda --pipeline demo --kraken_db /mnt/c/Users/enriq/Dropbox/minikraken_8GB_20200312/
 
@@ -42,14 +43,11 @@ workflow {
     if (params.pipeline == "demo") {
 
         //run with demo params, use params.config
-        
-        FASTQ_KRAKEN_WF(fastq_files, params.kraken_db)
-        //FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
+        FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
         
     } else if(params.pipeline == "standard_AMR") {
 
         STANDARD_AMRplusplus(fastq_files,params.reference, params.amr, params.annotation)
-
         
     } else if(params.pipeline == "fast_AMR") {
 
@@ -57,7 +55,7 @@ workflow {
     } 
     else if(params.pipeline == "standard_AMR_wKraken") {
 
-        STANDARD_AMRplusplus_wKraken(fastq_files,params.reference, params.amr, params.annotation, params.krakendb)
+        STANDARD_AMRplusplus_wKraken(fastq_files,params.reference, params.amr, params.annotation, params.kraken_db)
     } 
     else {
             println "ERROR ################################################################"
