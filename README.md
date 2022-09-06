@@ -41,9 +41,10 @@ nextflow run main_AMR++.nf -profile conda --pipeline demo
 ```
 
 
-## Customizing the pipeline to analyze your data
+# Customizing the pipeline to analyze your data
 
-### Changing the default variables
+
+## Changing the default variables
 
 The pipeline comes with test datain the `data/` directory and uses default paramaters, found in the `params.config` file.
 You can edit this file directly to change the parameters, or you can specify parameters on the command line using ``--<parameter name>```.
@@ -57,10 +58,12 @@ To change the reads that were analyzed, you should specify the ```--reads`` para
 ```nextflow run main_AMR++.nf -profile conda --pipeline demo --reads "path/to/your/reads/*_R{1,2}.fastq.gz" ```
 
 
-### Profiles
+## Profiles
 
 ```-profile conda``` 
+
 ```-profile local``` 
+
 ```-profile docker```
 
 
