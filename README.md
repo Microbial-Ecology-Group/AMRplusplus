@@ -7,7 +7,6 @@ Overview
 
 ## AMR++ v3 updates
 
-## Brief pipeline demonstration
 Updates
 - SNP confirmation software
 - pipeline structure
@@ -50,9 +49,11 @@ The pipeline comes with test datain the `data/` directory and uses default param
 You can edit this file directly to change the parameters, or you can specify parameters on the command line using ``--<parameter name>```.
 
 For example, the default parameters were run using this command:
+
 ```nextflow run main_AMR++.nf -profile conda --pipeline demo```
 
 To change the reads that were analyzed, you should specify the ```--reads`` parameters. Here, we can use regular expressions to point to your samples in a different directory.
+
 ```nextflow run main_AMR++.nf -profile conda --pipeline demo --reads "path/to/your/reads/*_R{1,2}.fastq.gz" ```
 
 
