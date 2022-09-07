@@ -11,3 +11,12 @@ If anaconda or docker is not available to you, in addition to installing the lis
 
   - Java 7+ (Required)
   - Nextflow (Required)
+
+Another option is to use singularity:
+
+```bash
+singularity pull docker://enriquedoster/amrplusplus:latest
+
+nextflow run main_AMR++.nf -profile local --pipeline demo -with-singularity amrplusplus_latest.sif
+
+```

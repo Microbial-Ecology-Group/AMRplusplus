@@ -58,4 +58,6 @@ RUN set -x && \
     find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
     /opt/conda/bin/conda clean -afy && \
     /opt/conda/bin/conda install -c conda-forge mamba && \
-    /opt/conda/bin/mamba install -c conda-forge -c bioconda git python=3 kraken2 krona bracken make
+    /opt/conda/bin/mamba install -c conda-forge -c bioconda kraken2 krona bracken && \
+    conda clean --all 
+    
