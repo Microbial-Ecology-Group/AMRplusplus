@@ -1,6 +1,5 @@
 // Load modules
-params.output_dir = null
-include { fastqc ; multiqc } from '../modules/Fastqc/fastqc' addParams(output_dir)
+include { fastqc ; multiqc } from '../modules/Fastqc/fastqc'
 
 // fastQC
 workflow FASTQ_QC_WF {
@@ -11,8 +10,4 @@ workflow FASTQ_QC_WF {
         fastqc( read_pairs_ch )
         multiqc(fastqc.out.collect(), params.multiqc )
 
-
-    emit:
-        fastqc = fastqc.out   
-        multiqc = multiqc.out
 }
