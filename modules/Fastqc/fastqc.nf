@@ -3,7 +3,7 @@
 process fastqc {
     tag "FASTQC on $sample_id"
     conda = "$baseDir/envs/fastqc.yaml"
-    container = 'enriquedoster/amrplusplus_QC:latest'
+    container = 'enriquedoster/amrplusplus_qc:latest'
 
     publishDir "${params.output}/fastQC", mode: 'copy'
 
@@ -25,7 +25,7 @@ process fastqc {
 process multiqc {
     errorStrategy 'ignore'
     conda = "$baseDir/envs/multiqc.yaml"
-    container = 'enriquedoster/amrplusplus_QC:latest'
+    container = 'enriquedoster/amrplusplus_qc:latest'
     
     publishDir "${params.output}/multiQC", mode: 'copy',
         saveAs: { filename ->
