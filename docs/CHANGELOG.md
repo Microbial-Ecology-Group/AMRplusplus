@@ -1,6 +1,15 @@
 Details on AMR++ updates
 ------------
 
+## 2022-09-06 : AMR++ v3 update
+- Change in repository from [AMR++ v2](https://github.com/meglab-metagenomics/amrplusplus_v2) to this repository under the [microbial ecology group github page](https://github.com/Microbial-Ecology-Group/AMRplusplus). This repository will include all further updates to AMR++. 
+- Addition of [SNP confirmation software](https://github.com/Isabella136/AmrPlusPlus_SNP)
+- pipeline structure
+   - switch to nextflow DSL2 and collection of "pipeline" options
+   - snakemake approach for optimizing storage requirements
+- Includes updates to MEGARes v3
+
+
 ## 2020-05-21 : AMR++ v2.0.2 update
 Fixed a mistake with the config/singularity.config file to correctly call the singularity container anytime that RGI is run.
 

@@ -3,16 +3,7 @@ Overview
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Nextflow](https://img.shields.io/badge/Nextflow-%E2%89%A50.25.1-brightgreen.svg)](https://www.nextflow.io/)
 
-## DRAFT ## DRAFT
-
-## AMR++ v3 updates
-
-Updates
-- SNP confirmation software
-- pipeline structure
- - switch to nextflow DSL2 and collection of "pipeline" options
- - snakemake approach for optimizing storage requirements
-- Includes updates to MEGARes v3
+## AMR++ bioinformatic pipeline
 
 
 Create the environment for AMR++. This will work for both the nextflow version and snakemake version.

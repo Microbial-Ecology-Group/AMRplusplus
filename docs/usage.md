@@ -8,6 +8,24 @@ The `help` parameter displays the available options and commands.
 $ nextflow run main_AmrPlusPlus_v2.nf --help
 ```
 
+## Parameter selection
+    Parameters specified on the command line (--something value)
+
+    Parameters provided using the -params-file option
+
+    Config file specified using the -c my_config option
+
+    The config file named nextflow.config in the current directory
+
+    The config file named nextflow.config in the workflow project directory
+
+    The config file $HOME/.nextflow/config
+
+    Values defined within the pipeline script itself (e.g. main.nf)
+
+
+
+
 ### File Inputs
 
 #### Set custom sequence data

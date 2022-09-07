@@ -1,7 +1,21 @@
 Dependencies
 ------------
 
-AmrPlusPlus uses a variety of open-source tools. The tools used, descriptions, and version specifics are provided below.
+AMR++ uses a variety of open-source tools. The tools used, descriptions, and version specifics are provided below.
+
+### Trimmomatic
+  - Description: Trimmomatic is a tool for removing low quality base pairs (bps) and adapter sequences from raw sequence data.
+  - Version: 0.39
+  - DOI: https://doi.org/10.1093/bioinformatics/btu170
+  
+### FastQC
+  - Description: A quality control tool for high throughput sequence data.
+  - Version: 0.11.8
+
+### multiQC
+  - Description: Create aggregate bioinformatics analysis reports across many samples and tools
+  - Version: 1.6
+  - DOI: https://doi.org/10.1093/bioinformatics/btw354
 
 ### Bedtools
   - Description: Bedtools is a suite of tools that can be used to compute and extract useful information from BAM, BED, and BCF files.
@@ -33,25 +47,18 @@ AmrPlusPlus uses a variety of open-source tools. The tools used, descriptions, a
   - Version: 1.9
   - DOI: https://doi.org/10.1093/bioinformatics/btp352
 
-### SNPFinder
-  - Description: SNPFinder is a haplotype variant caller that can be used for metagenomics datasets.
-  - Version: 0.0.0
-  - DOI: https://doi.org/10.1093/nar/gkw1009
 
-### Trimmomatic
-  - Description: Trimmomatic is a tool for removing low quality base pairs (bps) and adapter sequences from raw sequence data.
-  - Version: 0.39
-  - DOI: https://doi.org/10.1093/bioinformatics/btu170
-  
-### Freebayes
-  - Description: Trimmomatic is a tool for removing low quality base pairs (bps) and adapter sequences from raw sequence data.
-  - Version: 1.3.1
-  - https://arxiv.org/abs/1207.3907v2
-  
-### Resistance Gene Identifier
-   - Description: Trimmomatic is a tool for removing low quality base pairs (bps) and adapter sequences from raw sequence data.
-  - Version: 0.39
-  - https://card.mcmaster.ca/analyze/rgi
-  
+
+# Optional software
+
+### Bracken
+  - Description: Bracken (Bayesian Reestimation of Abundance with KrakEN) is a highly accurate statistical method that computes the abundance of species in DNA sequences from a metagenomics sample.
+  - Version: 2.7
+  - DOI: 10.7717/peerj-cs.104
+
+### Krona
+  - Description: Krona Tools is a set of scripts to create Krona charts from several Bioinformatics tools as well as from text and XML files.
+  - Version: 2.8.1
+  - DOI: https://doi.org/10.1186/1471-2105-12-385
 
   

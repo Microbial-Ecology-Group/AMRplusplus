@@ -7,7 +7,7 @@ The pipeline source code comes with a configuration file that can be used to set
 Customize Environment Variables using profiles
 ----------------------------------------------
 
-The **nextflow.config** contains a section that allows the use of environment "profiles" when running AmrPlusPlus. Further information for each profile can be found within the /config directory. In brief, profiles allow control over how the pipeline is run on different computing clusters. We recommend the "singularity" profile which employs a Singularity container  with all the required bioinformatic tools.
+The **nextflow.config** contains a section that allows the use of environment "profiles" when running AmrPlusPlus. Further information for each profile can be found within the /config directory. In brief, profiles allow control over how the pipeline is run on different computing clusters. We recommend the "conda" profile which employs multiple conda environments with all the required bioinformatic tools.
 
 
 ```bash
@@ -15,20 +15,19 @@ profiles {
   local {
     includeConfig "config/local.config"
   }
-  local_angus {
-    includeConfig "config/local_angus.config"
+  conda {
+    includeConfig "config/conda.config"
+    conda.enabled = true
+    //conda.cacheDir = "$baseDir/envs/"
+    conda.useMamba = true
   }
-  local_MSI {
-    includeConfig "config/local_MSI.config"
+  docker {
+    docker.enabled = true
+    // Docker containers for QC and QC trimming, microbiome, and alignment/resistome
   }
   slurm {
     process.executor = 'slurm'
-    includeConfig "config/slurm.config"
-    process.container = 'shub://meglab-metagenomics/amrplusplus_v2'
-  }
-  singularity {
-    includeConfig "config/singularity.config"
-    process.container = 'shub://meglab-metagenomics/amrplusplus_v2'
+    conda.enabled = true
   }
 }
 ```
@@ -40,64 +39,68 @@ The params section allows you to set the different commmand-line options that ca
 
 If you intend to run multiple samples in parallel, you must specify a glob pattern for your sequence data as shown for the **reads** parameter. For more information on globs, please see this related [article](https://en.wikipedia.org/wiki/Glob_(programming)).
 
+For example, the default parameters can be used to run the pipeline with this command:
+
+```bash
+nextflow run main_AMR++.nf -profile conda --pipeline demo
+```
+
+This will run the default samples through the pipeline and this can be seen below, under the ```--reads``` parameter. To change the reads that were analyzed, you should specify the ```--reads`` parameter on the command line. Here, we can use regular expressions to point to your samples in a different directory.
+
+```bash
+nextflow run main_AMR++.nf -profile conda --pipeline demo --reads "path/to/your/reads/*_R{1,2}.fastq.gz" 
+```
+
 
 By default, the pipeline uses the default minikraken database (~4GB) to classify and assign taxonomic labels to your sequences. As Kraken loads this database into memory, this mini database is particularly useful for people who do not have access to large memory servers. We provide a script to easily download the minikraken database.
 
-> sh download_minikraken.sh
+```bash
+ sh download_minikraken.sh
+ ```
 
-If you would like to use a custom database or the standard Kraken database (~160GB), you will need to build it yourself and modify the **kraken_db** environment variable in the nextflow.config file to point to its location on your machine. 
+If you would like to use a custom database or the standard Kraken database (~160GB), you will need to build it yourself and modify the **kraken_db** environment variable in the ```params.config ``` file to point to its location on your machine. 
 
+Below is a list of all of the AMR++ parameters.
 
 ```bash
 params {
     /* Location of forward and reverse read pairs */
-    reads = "data/raw/*_{1,2}.fastq.gz"
+    reads = "${baseDir}/data/raw/*_R{1,2}.fastq.gz"
 
-    /* Location of adapter sequences */
-    adapters = "data/adapters/nextera.fa"
+    /* Location of reference/host genome */
+    reference = "${baseDir}/data/host/chr21.fasta.gz"
 
-    /* Location of tab delimited adapter sequences */
-    fqc_adapters = "data/adapters/nextera.tab"
-
-    /* Location of host genome index files */
-    host_index = ""
-
-    /* Location of host genome */
-    host = "data/host/chr21.fasta.gz"
+    /* Output directory */
+    output = "test_results"
     
-    /* Kraken database location, default is "none" */   
-    kraken_db = "minikraken2_v2_8GB_201904_UPDATE"
+    /* Kraken database location, default is "null" */   
+    kraken_db = null
 
     /* Location of amr index files */
     amr_index = ""
 
     /* Location of antimicrobial resistance (MEGARes) database */
-    amr = "data/amr/megares_database_v1.02.fasta"
+    amr = "${baseDir}/data/amr/megares_database_v3.00.fasta"
 
     /* Location of amr annotation file */
-    annotation = "data/amr/megares_annotations_v1.02.csv"
-
-    /* Location of SNP metadata */
-    snp_annotation = "data/amr/snp_location_metadata.csv"
+    annotation = "${baseDir}/data/amr/megares_annotations_v3.00.csv"
 
     /* Location of SNP confirmation script */
-    snp_confirmation = "bin/snp_confirmation.py"
-
-    /* Output directory */
-    output = "test_results"
+    snp_confirmation = "${baseDir}/bin/snp_confirmation.py"
 
     /* Number of threads */
-    threads = 10
-    smem_threads = 12
+    threads = 4
 
     /* Trimmomatic trimming parameters */
-    leading = 10
+    adapters = "${baseDir}/data/adapters/nextera.fa"
+
+    leading = 3
     trailing = 3
     slidingwindow = "4:15"
     minlen = 36
 
     /* Resistome threshold */
-    threshold = 80
+    threshold = 10
 
     /* Starting rarefaction level */
     min = 5
@@ -110,6 +113,9 @@ params {
 
     /* Number of iterations to sample at */
     samples = 1
+
+    /* multiQC */
+    multiqc = "$baseDir/data/multiqc"
 
     /* Display help message */
     help = false
