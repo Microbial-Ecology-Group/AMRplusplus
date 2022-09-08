@@ -5,6 +5,7 @@ if( params.adapters ) {
     if( !adapters.exists() ) return adapter_error(adapters)
 }
 
+threads = params.threads
 min = params.min
 max = params.max
 skip = params.skip

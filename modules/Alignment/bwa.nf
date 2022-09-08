@@ -12,7 +12,7 @@ if( params.annotation ) {
     annotation = file(params.annotation)
     if( !annotation.exists() ) return annotation_error(annotation)
 }
-
+threads = params.threads
 
 process index {
     //tag "$referenceindex.simpleName"
@@ -61,8 +61,8 @@ process bwa_align {
      ${SAMTOOLS} sort ${pair_id}.amr.alignment.sorted.fix.bam -o ${pair_id}.amr.alignment.sorted.fix.sorted.bam
      ${SAMTOOLS} rmdup -S ${pair_id}.amr.alignment.sorted.fix.sorted.bam ${pair_id}.amr.alignment.dedup.bam
      ${SAMTOOLS} view -h -o ${pair_id}.amr.alignment.dedup.sam ${pair_id}.amr.alignment.dedup.bam
-     rm ${pair_id}.amr.alignment.bam
-     rm ${pair_id}.amr.alignment.sorted*.bam
+     #rm ${pair_id}.amr.alignment.bam
+     #rm ${pair_id}.amr.alignment.sorted*.bam
     """
 }
 
