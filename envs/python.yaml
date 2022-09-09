@@ -1,10 +1,10 @@
 name: python
 channels:
   - conda-forge
+  - bioconda
 dependencies:
   - python = 3.9
   - matplotlib = 3.5.3
   - numpy = 1.23.1
-  - git = 2.34.1
-  - cxx-compiler = 1.5.0
-  - make = 4.2.1
+  - pysam = 0.19.1
+  - pandas = 1.4.3

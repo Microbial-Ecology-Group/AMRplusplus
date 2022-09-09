@@ -18,26 +18,29 @@ process build_dependencies {
     conda = "$baseDir/envs/python.yaml"
 
     output:
-        path("rarefactionanalyzer"), emit: rarefactionanalyzer
-        path("resistomeanalyzer"), emit: resistomeanalyzer
-        path("AmrPlusPlus_SNP/"), emit: amrsnp
+        path("rarefaction"), emit: rarefactionanalyzer
+        path("resistome"), emit: resistomeanalyzer
+        path("AmrPlusPlus_SNP/*"), emit: amrsnp
 
     """
-    git clone https://github.com/cdeanj/rarefactionanalyzer.git
-    cd rarefactionanalyzer
-    make
-    chmod 777 rarefaction
-    mv rarefaction ../
-    cd ../
-    rm -rf rarefactionanalyzer
+    #git clone https://github.com/cdeanj/rarefactionanalyzer.git
+    #cd rarefactionanalyzer
+    #make
+    #chmod 777 rarefaction
+    #mv rarefaction ../
+    #cd ../
+    #rm -rf rarefactionanalyzer
+    cp $baseDir/bin/rarefaction . 
 
-    git clone https://github.com/cdeanj/resistomeanalyzer.git
-    cd resistomeanalyzer
-    make
-    chmod 777 resistome
-    mv resistome ../
-    cd ../
-    rm -rf resistomeanalyzer
+
+    #git clone https://github.com/cdeanj/resistomeanalyzer.git
+    #cd resistomeanalyzer
+    #make
+    #chmod 777 resistome
+    #mv resistome ../
+    #cd ../
+    #rm -rf resistomeanalyzer
+    cp $baseDir/bin/resistome .
 
     git clone https://github.com/Isabella136/AmrPlusPlus_SNP.git
 

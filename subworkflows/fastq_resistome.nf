@@ -13,7 +13,7 @@ workflow FASTQ_RESISTOME_WF {
 
     main:
         // download resistome and rarefactionanalyzer
-        if (file("${baseDir}/bin/resistome").isEmpty()){
+        if (file("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").isEmpty()){
             build_dependencies()
             resistomeanalyzer = build_dependencies.out.resistomeanalyzer
             rarefactionanalyzer = build_dependencies.out.rarefactionanalyzer

@@ -11,7 +11,7 @@ Create the environment for AMR++. This will work for both the nextflow version a
 ```bash
 conda create -c conda-forge -n mamba_base mamba
 conda activate mamba_base
-mamba create -c conda-forge -c bioconda -n AMR++ snakemake git nextflow
+mamba create -c conda-forge -c bioconda -n AMR++ snakemake nextflow git make cxx-compiler
 mamba activate AMR++
 ```
 
@@ -19,14 +19,12 @@ mamba activate AMR++
 Clone the AMR++ repository.
 
 ```bash
-mamba activate AMR++
 git clone https://github.com/Microbial-Ecology-Group/AMRplusplus.git
 ```
 
 Brief tutorial for nextflow pipeline test run
 ```bash
 cd AMRplusplus
-mamba activate AMR++
 
 nextflow run main_AMR++.nf -profile conda --pipeline demo
 ```
