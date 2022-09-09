@@ -20,7 +20,7 @@ process build_dependencies {
     output:
         path("rarefactionanalyzer"), emit: rarefactionanalyzer
         path("resistomeanalyzer"), emit: resistomeanalyzer
-        path("AmrPlusPlus_SNP/"), emit: resistomeanalyzer
+        path("AmrPlusPlus_SNP/"), emit: amrsnp
 
     """
     git clone https://github.com/cdeanj/rarefactionanalyzer.git
