@@ -20,6 +20,7 @@ process build_dependencies {
     output:
         path("rarefactionanalyzer"), emit: rarefactionanalyzer
         path("resistomeanalyzer"), emit: resistomeanalyzer
+        path("AmrPlusPlus_SNP/"), emit: resistomeanalyzer
 
     """
     git clone https://github.com/cdeanj/rarefactionanalyzer.git
@@ -35,6 +36,8 @@ process build_dependencies {
     chmod 777 resistome
     cd ../
     rm -rf resistomeanalyzer
+
+    git clone https://github.com/Isabella136/AmrPlusPlus_SNP.git
 
     """
 
