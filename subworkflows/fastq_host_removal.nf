@@ -1,6 +1,6 @@
 // Load modules
-include { index as amr_index ; index as host_index } from '../modules/Alignment/bwa' addParams(EXTRAPARS: "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:36")
-include { bwa_align ; bwa_rm_contaminant_fq} from '../modules/Alignment/bwa' addParams(EXTRAPARS: "LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:36")
+include { index as amr_index ; index as host_index } from '../modules/Alignment/bwa'
+include { bwa_align ; bwa_rm_contaminant_fq} from '../modules/Alignment/bwa'
 
 // WC trimming
 workflow FASTQ_RM_HOST_WF {

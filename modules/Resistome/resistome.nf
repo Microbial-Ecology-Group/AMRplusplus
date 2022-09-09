@@ -12,6 +12,40 @@ max = params.max
 skip = params.skip
 samples = params.samples
 
+process build_dependencies {
+    tag { dl_github }
+    publishDir "${baseDir}/bin/", mode: "copy"
+    conda = "$baseDir/envs/git.yaml"
+
+    output:
+        path("rarefactionanalyzer"), emit: rarefactionanalyzer
+        path("resistomeanalyzer"), emit: resistomeanalyzer
+
+    """
+    git clone https://github.com/cdeanj/rarefactionanalyzer.git
+    cd rarefactionanalyzer
+    make
+    chmod 777 rarefaction
+    cd ../
+    rm -rf rarefactionanalyzer
+
+    git clone https://github.com/cdeanj/resistomeanalyzer.git
+    cd resistomeanalyzer
+    make
+    chmod 777 resistome
+    cd ../
+    rm -rf resistomeanalyzer
+
+    """
+
+
+}
+
+
+
+
+
+
 process runresistome {
     tag { sample_id }
     conda = "$baseDir/envs/alignment.yaml"
