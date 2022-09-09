@@ -18,8 +18,8 @@ process build_dependencies {
     conda = "$baseDir/envs/python.yaml"
 
     output:
-        path("rarefaction"), emit: rarefactionanalyzer
-        path("resistome"), emit: resistomeanalyzer
+        path("rarefactionanalyzer"), emit: rarefactionanalyzer
+        path("resistomeanalyzer"), emit: resistomeanalyzer
         path("AmrPlusPlus_SNP/"), emit: amrsnp
 
     """
