@@ -24,7 +24,7 @@ process fastqc {
 
 process multiqc {
     errorStrategy 'ignore'
-    conda = "$baseDir/envs/multiqc.yaml"
+    conda = "$baseDir/envs/fastqc.yaml"
     container = 'enriquedoster/amrplusplus_qc:latest'
     
     publishDir "${params.output}/multiQC", mode: 'copy',

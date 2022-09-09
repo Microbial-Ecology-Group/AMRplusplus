@@ -23,6 +23,7 @@ process build_dependencies {
         path("AmrPlusPlus_SNP/*"), emit: amrsnp
 
     """
+    # Uncomment these sections once the v2 rarefactionanalyzer and resistomeanalyzer repositories are updated, remove cp lines
     #git clone https://github.com/cdeanj/rarefactionanalyzer.git
     #cd rarefactionanalyzer
     #make
@@ -90,6 +91,8 @@ process runsnp {
     conda = "$baseDir/envs/python.yaml"
     container = 'enriquedoster/amrplusplus_alignment:latest'
     publishDir "${params.output}/RunSNP_Verification", mode: "copy"
+
+    errorStrategy = 'ignore'
 
     input:
         tuple val(sample_id), path(sam)
