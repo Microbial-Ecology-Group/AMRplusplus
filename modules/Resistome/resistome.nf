@@ -15,17 +15,19 @@ samples = params.samples
 process build_dependencies {
     tag { dl_github }
     publishDir "${baseDir}/bin/", mode: "copy"
-    conda = "$baseDir/envs/git.yaml"
+    conda = "$baseDir/envs/python.yaml"
 
     output:
-        path("rarefactionanalyzer"), emit: rarefactionanalyzer
-        path("resistomeanalyzer"), emit: resistomeanalyzer
+        path("rarefaction"), emit: rarefactionanalyzer
+        path("resistome"), emit: resistomeanalyzer
+        path("AmrPlusPlus_SNP/"), emit: amrsnp
 
     """
     git clone https://github.com/cdeanj/rarefactionanalyzer.git
     cd rarefactionanalyzer
     make
     chmod 777 rarefaction
+    mv rarefaction ../
     cd ../
     rm -rf rarefactionanalyzer
 
@@ -33,8 +35,11 @@ process build_dependencies {
     cd resistomeanalyzer
     make
     chmod 777 resistome
+    mv resistome ../
     cd ../
     rm -rf resistomeanalyzer
+
+    git clone https://github.com/Isabella136/AmrPlusPlus_SNP.git
 
     """
 
@@ -56,13 +61,16 @@ process runresistome {
         tuple val(sample_id), path(sam)
         path(amr)
         path(annotation)
+        path(resistome)
 
     output:
         tuple val(sample_id), path("${sample_id}*.tsv"), emit: resistome_tsv
         path("${sample_id}.gene.tsv"), emit: resistome_counts
 
+    
+    
     """
-    $baseDir/bin/resistome -ref_fp ${amr} \
+    $resistome -ref_fp ${amr} \
       -annot_fp ${annotation} \
       -sam_fp ${sam} \
       -gene_fp ${sample_id}.gene.tsv \
@@ -82,12 +90,13 @@ process runsnp {
 
     input:
         tuple val(sample_id), path(sam)
+        path(amrsnp)
 
     output:
         tuple val(sample_id), path("${sample_id}_SNPs/*"), emit: snps
 
     """
-    python3 $baseDir/AmrPlusPlus_SNP/SNP_Verification.py -i ${sam} -o ${sample_id}_SNPs
+    python3 $amrsnp/SNP_Verification.py -i ${sam} -o ${sample_id}_SNPs
     """
 }
 
@@ -118,12 +127,13 @@ process runrarefaction {
         tuple val(sample_id), path(sam)
         path(annotation)
         path(amr)
+        path(rarefaction)
 
     output:
         path("*.tsv"), emit: rarefaction
 
     """
-    $baseDir/bin/rarefaction \
+    $rarefaction \
       -ref_fp ${amr} \
       -sam_fp ${sam} \
       -annot_fp ${annotation} \

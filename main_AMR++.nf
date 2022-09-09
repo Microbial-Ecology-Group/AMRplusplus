@@ -39,7 +39,6 @@ include { FASTQ_KRAKEN_WF } from './subworkflows/fastq_microbiome.nf'
 
 
 workflow {
-    
     if (params.pipeline == "demo") {
 
         //run with demo params, use params.config

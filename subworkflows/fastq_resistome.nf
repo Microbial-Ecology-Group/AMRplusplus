@@ -15,17 +15,31 @@ workflow FASTQ_RESISTOME_WF {
         // download resistome and rarefactionanalyzer
         if (file("${baseDir}/bin/resistome").isEmpty()){
             build_dependencies()
+            resistomeanalyzer = build_dependencies.out.resistomeanalyzer
+            rarefactionanalyzer = build_dependencies.out.rarefactionanalyzer
+            amrsnp = build_dependencies.out.amrsnp
+            // Index
+            index(amr)
+            // AMR alignment
+            bwa_align(amr, index.out, read_pairs_ch )
+            runresistome(bwa_align.out.bwa_sam,amr, annotation, resistomeanalyzer )
+            runsnp(bwa_align.out.bwa_sam, amrsnp )
+            resistomeresults(runresistome.out.resistome_counts.collect())
+            runrarefaction(bwa_align.out.bwa_sam, annotation, amr, rarefactionanalyzer)
         }
-        // Index
-        index(amr)
-        // AMR alignment
-        bwa_align(amr, index.out, read_pairs_ch )
-        runresistome(bwa_align.out.bwa_sam,amr, annotation )
-        runsnp(bwa_align.out.bwa_sam )
-        resistomeresults(runresistome.out.resistome_counts.collect())
-        runrarefaction(bwa_align.out.bwa_sam, annotation, amr)
-    emit:
-        rarefaction_results = runrarefaction.out.rarefaction
+        else {
+            amrsnp = file("${baseDir}/bin/AmrPlusPlus_SNP/")
+            resistomeanalyzer = file("${baseDir}/bin/resistome")
+            rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
+            // Index
+            index(amr)
+            // AMR alignment
+            bwa_align(amr, index.out, read_pairs_ch )
+            runresistome(bwa_align.out.bwa_sam,amr, annotation, resistomeanalyzer )
+            runsnp(bwa_align.out.bwa_sam, amrsnp )
+            resistomeresults(runresistome.out.resistome_counts.collect())
+            runrarefaction(bwa_align.out.bwa_sam, annotation, amr, rarefactionanalyzer)
+        }
 
 
 }
