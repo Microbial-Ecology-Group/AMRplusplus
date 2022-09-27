@@ -5,6 +5,7 @@ Overview
 
 
 # MEGARes and the AMR++ bioinformatic pipeline
+(https://megares.meglab.org/)
 
 The MEGARes database contains sequence data for approximately 9,000 hand-curated antimicrobial resistance genes accompanied by an annotation structure that is optimized for use with high throughput sequencing and metagenomic analysis. The acyclical annotation graph of MEGARes allows for accurate, count-based, hierarchical statistical analysis of resistance at the population level, much like microbiome analysis, and is also designed to be used as a training database for the creation of statistical classifiers.
 
