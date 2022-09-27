@@ -6,3 +6,6 @@ dependencies:
   - bedtools = 2.30.0
   - bwa = 0.7.17
   - samtools = 1.15.1
+  - multiqc
+  - fastqc = 0.11.8
+  - trimmomatic = 0.39

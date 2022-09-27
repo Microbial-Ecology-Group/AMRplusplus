@@ -18,7 +18,7 @@ minlen = params.minlen
 
 process runqc {
     tag { sample_id }
-    conda = "$baseDir/envs/trimmomatic.yaml"
+    conda = "$baseDir/envs/alignment.yaml"
     container = 'enriquedoster/amrplusplus_qc:latest'
 
     publishDir "${params.output}/RunQC", mode: 'copy', pattern: '*.fastq.gz',

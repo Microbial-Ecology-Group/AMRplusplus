@@ -1,7 +1,11 @@
 Configuration
 -------------
 
-The pipeline source code comes with a configuration file that can be used to set environment variables or default command-line options. Setting these variables before hand may be useful in situations when you do not want to specify a long list of options from the command line. This configuration file can be found in the root source code directory and is called **nextflow.config**. You can modify this file, save the changes, and run the pipeline directly.
+The pipeline source code comes with two configuration files that can be used to set environment variables and default command-line options. These configuration files can be found in the root source code directory and are called **nextflow.config** and **params.config**.
+
+The **nextflow.config** file mainly contains parameters regarding how AMR++ will run on your computing cluster using the ```--profile``` parameter. 
+
+The **params.config** contains parameters that control which files are being analyzed and parameters for the software in the pipeline. Setting the variables in the **params.config** before hand may be useful in situations when you do not want to specify a long list of options from the command line or want to have a seperate file for each project. You can modify these files, save the changes, and run the pipeline directly. More details below.
 
 
 Customize Environment Variables using profiles
@@ -121,3 +125,18 @@ params {
     help = false
 }
 ```
+
+### Pipelines
+
+```--pipeline demo```    Simple demonstration
+
+```--pipeline standard_AMR```   QC trimming > Host DNA removal > Resistome alignment > Resistome results
+
+```--pipeline fast_AMR```  QC trimming > Resistome alignment > Resistome results
+
+```--pipeline standard_AMR_wKraken```   QC trimming > Host DNA removal > Resistome alignment > Resistome results 
+Non-host reads > Microbiome analysis
+
+
+pipeline fragments
+```--pipeline multiqc```  Evaluate sample QC 

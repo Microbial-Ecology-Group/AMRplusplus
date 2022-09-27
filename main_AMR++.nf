@@ -24,6 +24,7 @@ Channel
 // Default is pipeline is null to warn users below
 params.pipeline = null
 
+
 // Load main pipeline workflows
 
 include { STANDARD_AMRplusplus } from './subworkflows/AMR++_standard.nf' 
@@ -60,6 +61,22 @@ workflow {
 
         FASTQ_QC_WF( fastq_files )
     } 
+    else if(params.pipeline == "trim") {
+
+        FASTQ_TRIM_WF( fastq_files )
+    }
+    else if(params.pipeline == "rmhost") {
+
+        FASTQ_RM_HOST_WF(params.host, fastq_files )
+    } 
+    else if(params.pipeline == "resistome") {
+
+        FASTQ_RESISTOME_WF( fastq_files, params.amr, params.annotation )
+    }  
+    else if(params.pipeline == "kraken") {
+
+        FASTQ_KRAKEN_WF( fastq_files , params.kraken_db)
+    }   
     else {
             println "ERROR ################################################################"
             println "Please choose a pipeline!!!" 

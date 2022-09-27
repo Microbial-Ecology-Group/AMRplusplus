@@ -3,15 +3,48 @@ Overview
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Nextflow](https://img.shields.io/badge/Nextflow-%E2%89%A50.25.1-brightgreen.svg)](https://www.nextflow.io/)
 
-## AMR++ bioinformatic pipeline
+
+# Microbial Ecology Group (MEG)
+(https://megares.meglab.org/)
+
+Our international multidisciplinary group of scientists and educators is addressing the issues of antimicrobial resistance (AMR) and microbial ecology in agriculture through research, outreach, and education. By characterizing risks related to AMR and microbial ecology, our center will identify agricultural production practices that are harmful and can be avoided, while also identifying and promoting production practices and interventions that are beneficial or do no harm to the ecosystem or public health. This will allow society to realize “sustainable intensification” of agriculture.
+
+# MEGARes and the AMR++ bioinformatic pipeline
+(http://megares.meglab.org/amrplusplus/latest/html/v2/)
+
+The MEGARes database contains sequence data for approximately 9,000 hand-curated antimicrobial resistance genes accompanied by an annotation structure that is optimized for use with high throughput sequencing and metagenomic analysis. The acyclical annotation graph of MEGARes allows for accurate, count-based, hierarchical statistical analysis of resistance at the population level, much like microbiome analysis, and is also designed to be used as a training database for the creation of statistical classifiers.
+
+The goal of many metagenomics studies is to characterize the content and relative abundance of sequences of interest from the DNA of a given sample or set of samples. You may want to know what is contained within your sample or how abundant a given sequence is relative to another.
+
+Often, metagenomics is performed when the answer to these questions must be obtained for a large number of targets where techniques like multiplex PCR and other targeted methods would be too cumbersome to perform. AMR++ can process the raw data from the sequencer, identify the fragments of DNA, and count them. It also provides a count of the polymorphisms that occur in each DNA fragment with respect to the reference database.
+
+Additionally, you may want to know if the depth of your sequencing (how many reads you obtain that are on target) is high enough to identify rare organisms (organisms with low abundance relative to others) in your population. This is referred to as rarefaction and is calculated by randomly subsampling your sequence data at intervals between 0% and 100% in order to determine how many targets are found at each depth.
+
+With AMR++, you will obtain alignment count files for each sample that are combined into a count matrix that can be analyzed using any statistical and mathematical techniques that can operate on a matrix of observations.
+
+More Information
+----------------
+
+- [Installation](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/installation.md)
+- [Usage](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/usage.md)
+- [Configuration](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/configuration.md)
+- [Output](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/output.md)
+- [Dependencies](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/dependencies.md)
+- [Software Requirements](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/requirements.md)
+- [FAQs](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/FAQs.md)
+- [Details on AMR++ updates](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/update_details.md)
+- [Contact](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/contact.md)
 
 
-Create the environment for AMR++. This will work for both the nextflow version and snakemake version.
+
+## AMR++ demonstration
+
+Create the anaconda environment for AMR++. This will work for both the nextflow version and snakemake version.
 
 ```bash
 conda create -c conda-forge -n mamba_base mamba
 conda activate mamba_base
-mamba create -c conda-forge -c bioconda -n AMR++ snakemake nextflow git make cxx-compiler
+mamba create -c conda-forge -c bioconda -n AMR++ snakemake nextflow git make cxx-compiler singularity
 mamba activate AMR++
 ```
 
@@ -26,92 +59,52 @@ Brief tutorial for nextflow pipeline test run
 ```bash
 cd AMRplusplus
 
-nextflow run main_AMR++.nf -profile conda --pipeline demo
+# Run command to perform the demonstration pipeline using the singularity profile
+nextflow run main_AMR++.nf -profile singularity --pipeline demo
 ```
 
 
-# Customizing the pipeline to analyze your data
+# Using AMR++ to analyze your data
+
+AMR++ is customizable to suit your computing needs and analyze your data. Primarily, the ```-profile``` paramater allows you to choose between running AMR++ using a singularity container, docker container, anaconda packages, or a local installation of your software. 
+All parameters used to control how AMR++ analyzes your data can also be changed as needed in a variety of ways. For full information, review this [configuration document.](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/configuration.md)
 
 
-## Changing the default variables
+Below is a brief example, the default parameters were run using this command:
 
-The pipeline comes with test datain the `data/` directory and uses default paramaters, found in the `params.config` file.
-You can edit this file directly to change the parameters, or you can specify parameters on the command line using ``--<parameter name>```.
-
-For example, the default parameters were run using this command:
-
-```nextflow run main_AMR++.nf -profile conda --pipeline demo```
+```nextflow run main_AMR++.nf -profile singularity --pipeline demo```
 
 To change the reads that were analyzed, you should specify the ```--reads`` parameters. Here, we can use regular expressions to point to your samples in a different directory.
 
-```nextflow run main_AMR++.nf -profile conda --pipeline demo --reads "path/to/your/reads/*_R{1,2}.fastq.gz" ```
+```nextflow run main_AMR++.nf -profile singularity --pipeline demo --reads "path/to/your/reads/*_R{1,2}.fastq.gz" ```
 
 
-## Profiles
+## Choosing a modified pipeline
 
-```-profile conda``` 
+AMR++ analyzes data by combining workflows that takes a set of sequencing reads through various bioinformatic software. We recommend our standard AMR++ pipeline as a comprehensive way to start from raw sequencing reads, QC assessment, host DNA removal, and resistome analysis with MEGARes. However, users might only want to replicate portions of the pipeline and have more control over their computing needs. Using the ```--pipeline``` parameter, users can change how AMR++ runs.
 
-```-profile local``` 
+* ```--pipeline demo```    
+    * Simple demonstration
 
-```-profile docker```
+* ```--pipeline standard_AMR```   
+    * QC trimming > Host DNA removal > Resistome alignment > Resistome results
 
+* ```--pipeline fast_AMR```
+    * QC trimming > Resistome alignment > Resistome results
 
-### Pipelines
-
-```--pipeline demo```    Simple demonstration
-
-```--pipeline standard_AMR```   QC trimming > Host DNA removal > Resistome alignment > Resistome results
-
-```--pipeline fast_AMR```  QC trimming > Resistome alignment > Resistome results
-
-```--pipeline standard_AMR_wKraken```   QC trimming > Host DNA removal > Resistome alignment > Resistome results 
+* ```--pipeline standard_AMR_wKraken```
+    * QC trimming > Host DNA removal > Resistome alignment > Resistome results 
 Non-host reads > Microbiome analysis
 
+* pipeline fragments
+    * ```--pipeline multiqc```  
+        * Evaluate sample QC 
+    * ```--pipeline trim```  
+        * QC trimming using trimmomatic 
+    * ```--pipeline rmhost```  
+        * Align reads to host DNA using bwa and remove contaminants 
+    * ```--pipeline resistome```  
+        * Align reads to MEGARes using bwa, perform rarefaction and resistome analysis
+    * ```--pipeline kraken```  
+        * Classify reads taxanomically using kraken 
 
-pipeline fragments
-```--pipeline multiqc```  Evaluate sample QC 
-
-
-
-
-## Run SnakeMake Workflow
-
-Brief tutorial for snakemake pipeline test run
-```bash
-cd AMRplusplus
-mamba activate AMR++
-
-snakemake --use-conda --cores <number of threads available>
-```
-
-# Microbial Ecology Group (MEG)
-(https://megares.meglab.org/)
-
-Our international multidisciplinary group of scientists and educators is addressing the issues of antimicrobial resistance (AMR) and microbial ecology in agriculture through research, outreach, and education. By characterizing risks related to AMR and microbial ecology, our center will identify agricultural production practices that are harmful and can be avoided, while also identifying and promoting production practices and interventions that are beneficial or do no harm to the ecosystem or public health. This will allow society to realize “sustainable intensification” of agriculture.
-
-# MEGARes and the AMR++ bioinformatic pipeline
-(http://megares.meglab.org/amrplusplus/latest/html/v2/)
-
-The MEGARes database contains sequence data for approximately 9,000 hand-curated antimicrobial resistance genes accompanied by an annotation structure that is optimized for use with high throughput sequencing and metagenomic analysis. The acyclical annotation graph of MEGARes allows for accurate, count-based, hierarchical statistical analysis of resistance at the population level, much like microbiome analysis, and is also designed to be used as a training database for the creation of statistical classifiers.
-
-The goal of many metagenomics studies is to characterize the content and relative abundance of sequences of interest from the DNA of a given sample or set of samples. You may want to know what is contained within your sample or how abundant a given sequence is relative to another.
-
-Often, metagenomics is performed when the answer to these questions must be obtained for a large number of targets where techniques like multiplex PCR and other targeted methods would be too cumbersome to perform. AmrPlusPlus can process the raw data from the sequencer, identify the fragments of DNA, and count them. It also provides a count of the polymorphisms that occur in each DNA fragment with respect to the reference database.
-
-Additionally, you may want to know if the depth of your sequencing (how many reads you obtain that are on target) is high enough to identify rare organisms (organisms with low abundance relative to others) in your population. This is referred to as rarefaction and is calculated by randomly subsampling your sequence data at intervals between 0% and 100% in order to determine how many targets are found at each depth.
-
-With AMR++, you will obtain alignment count files for each sample that are combined into a count matrix that can be analyzed using any statistical and mathematical techniques that can operate on a matrix of observations.
-
-More Information
-----------------
-
-- [Installation](https://github.com/meglab-metagenomics/amrplusplus_v2/blob/master/docs/installation.md)
-- [Usage](https://github.com/meglab-metagenomics/amrplusplus_v2/blob/master/docs/usage.md)
-- [Configuration](https://github.com/meglab-metagenomics/amrplusplus_v2/blob/master/docs/configuration.md)
-- [Accessing AMR++](https://github.com/meglab-metagenomics/amrplusplus_v2/blob/master/docs/accessing_AMR++.md)
-- [Output](https://github.com/meglab-metagenomics/amrplusplus_v2/blob/master/docs/output.md)
-- [Dependencies](https://github.com/meglab-metagenomics/amrplusplus_v2/blob/master/docs/dependencies.md)
-- [Software Requirements](https://github.com/meglab-metagenomics/amrplusplus_v2/blob/master/docs/requirements.md)
-- [FAQs](https://github.com/meglab-metagenomics/amrplusplus_v2/blob/master/docs/FAQs.md)
-- [Details on AMR++ updates](https://github.com/meglab-metagenomics/amrplusplus_v2/blob/master/docs/update_details.md)
-- [Contact](https://github.com/meglab-metagenomics/amrplusplus_v2/blob/master/docs/contact.md)

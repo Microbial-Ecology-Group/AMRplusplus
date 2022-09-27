@@ -6125,14 +6125,14 @@ MEG_6132|Drugs|Rifampin|Rifampin-resistant_beta-subunit_of_RNA_polymerase_RpoB|R
 MEG_6133|Drugs|Rifampin|Rifampin-resistant_beta-subunit_of_RNA_polymerase_RpoB|RPOB|RequiresSNPConfirmation,Drugs,Rifampin,Rifampin-resistant beta-subunit of RNA polymerase RpoB,RPOB
 MEG_6134|Drugs|Rifampin|Rifampin-resistant_beta-subunit_of_RNA_polymerase_RpoB|RPOB|RequiresSNPConfirmation,Drugs,Rifampin,Rifampin-resistant beta-subunit of RNA polymerase RpoB,RPOB
 MEG_6135|Drugs|Rifampin|Rifampin-resistant_beta-subunit_of_RNA_polymerase_RpoB|RPOB|RequiresSNPConfirmation,Drugs,Rifampin,Rifampin-resistant beta-subunit of RNA polymerase RpoB,RPOB
-MEG_6136|Drugs|Rifampin|Rifampin-resistant_beta-subunit_of_RNA_polymerase_RpoB|RPOB|RequiresSNPConfirmation,Drugs,Rifampin,Rifampin-resistant beta-subunit of RNA polymerase RpoB,RPOB
+MEG_6136|Drugs|Multi-drug_resistance|MDR_mutation|MRPOB|RequiresSNPConfirmation,Drugs,Multi-drug resistance,MDR mutation,MRPOB
 MEG_6138|Drugs|Glycopeptides|Vancomycin-resistant_mutation|RPOC|RequiresSNPConfirmation,Drugs,Glycopeptides,Vancomycin-resistant mutation,RPOC
 MEG_6139|Drugs|Lipopeptides|Daptomycin-resistant_beta-subunit_of_RNA_polymerase_RpoC|RPOCL|RequiresSNPConfirmation,Drugs,Lipopeptides,Daptomycin-resistant beta-subunit of RNA polymerase RpoC,RPOCL
 MEG_6140|Biocides|Multi-biocide_resistance|Multi-biocide_resistance_regulator|RPOS,Biocides,Multi-biocide resistance,Multi-biocide resistance regulator,RPOS
 MEG_6141|Biocides|Multi-biocide_resistance|Multi-biocide_resistance_regulator|RPOS,Biocides,Multi-biocide resistance,Multi-biocide resistance regulator,RPOS
 MEG_6142|Drugs|Mycobacterium_tuberculosis-specific_Drug|Pyrazinamide-resistant_mutant|RPSA|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Pyrazinamide-resistant mutant,RPSA
 MEG_6143|Drugs|Tetracyclines|Tetracycline_resistance_ribosomal_protection_proteins|RPSJ|RequiresSNPConfirmation,Drugs,Tetracyclines,Tetracycline resistance ribosomal protection proteins,RPSJ
-MEG_6144|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|RPSL|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,RPSL
+MEG_6144|Drugs|Aminoglycosides|Aminoglycoside-resistant_30S_ribosomal_protein_S12|RPSL|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 30S ribosomal protein S12,RPSL
 MEG_6145|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|RRSA|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,RRSA
 MEG_6146|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|RRSC|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,RRSC
 MEG_6147|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|RRSH|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,RRSH
@@ -7246,7 +7246,7 @@ MEG_7254|Drugs|betalactams|Class_A_betalactamases|TLA,Drugs,betalactams,Class A 
 MEG_7255|Drugs|Glycopeptides|Bleomycin_resistance_protein|TLMB,Drugs,Glycopeptides,Bleomycin resistance protein,TLMB
 MEG_7256|Drugs|MLS|MLS_resistance_ABC_efflux_pumps|TLRC,Drugs,MLS,MLS resistance ABC efflux pumps,TLRC
 MEG_7257|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|TLRCM,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,TLRCM
-MEG_7258|Drugs|Aminoglycosides|Aminoglycoside-resistant_tlyA|TLYA|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant tlyA,TLYA
+MEG_7258|Drugs|Aminoglycosides|Aminoglycoside-resistant_arabinosyltransferase|TLYA|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant arabinosyltransferase,TLYA
 MEG_7259|Drugs|Rifampin|Rifamycin-resistant_arabinosyltransferase|REMB|RequiresSNPConfirmation,Drugs,Rifampin,Rifamycin-resistant arabinosyltransferase,REMB
 MEG_7260|Drugs|betalactams|Class_B_betalactamases|TMB,Drugs,betalactams,Class B betalactamases,TMB
 MEG_7261|Drugs|betalactams|Class_B_betalactamases|TMB,Drugs,betalactams,Class B betalactamases,TMB
@@ -7857,203 +7857,200 @@ MEG_7865|Multi-compound|Biocide_and_metal_resistance|Biocide_and_metal_resistanc
 MEG_7866|Multi-compound|Biocide_and_metal_resistance|Biocide_and_metal_resistance_protein|ZUPT,Multi-compound,Biocide and metal resistance,Biocide and metal resistance protein,ZUPT
 MEG_7867|Metals|Zinc_resistance|Zinc_resistance_regulator|ZUR,Metals,Zinc resistance,Zinc resistance regulator,ZUR
 MEG_7868|Metals|Zinc_resistance|Zinc_resistance_regulator|ZUR,Metals,Zinc resistance,Zinc resistance regulator,ZUR
-MEG_8150|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRA|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRA
-MEG_8692|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|RPSL|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,RPSL
 MEG_8147|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRA|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRA
-MEG_8474|Drugs|betalactams|Penicillin_binding_protein|PBP5|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP5
-MEG_8256|Drugs|MLS|Macrolide-resistant_23S_rRNA_mutation|MLS23S|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 23S rRNA mutation,MLS23S
+MEG_8677|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|RPSL|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,RPSL
+MEG_8145|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRA|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRA
+MEG_8461|Drugs|betalactams|Penicillin_binding_protein|PBP5|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP5
+MEG_8249|Drugs|MLS|Macrolide-resistant_23S_rRNA_mutation|MLS23S|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 23S rRNA mutation,MLS23S
 MEG_7974|Drugs|betalactams|Class_C_betalactamase_regulator|AMPCR|RequiresSNPConfirmation,Drugs,betalactams,Class C betalactamase regulator,AMPCR
-MEG_8458|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|PARC|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,PARC
-MEG_8648|Drugs|Lipopeptides|Colistin-resistant_mutant|PMRAR|RequiresSNPConfirmation,Drugs,Lipopeptides,Colistin-resistant mutant,PMRAR
-MEG_8688|Drugs|Rifampin|Rifampin-resistant_beta-subunit_of_RNA_polymerase_RpoB|RPOB|RequiresSNPConfirmation,Drugs,Rifampin,Rifampin-resistant beta-subunit of RNA polymerase RpoB,RPOB
+MEG_8445|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|PARC|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,PARC
+MEG_8634|Drugs|Lipopeptides|Colistin-resistant_mutant|PMRAR|RequiresSNPConfirmation,Drugs,Lipopeptides,Colistin-resistant mutant,PMRAR
+MEG_8672|Drugs|Rifampin|Rifampin-resistant_beta-subunit_of_RNA_polymerase_RpoB|RPOB|RequiresSNPConfirmation,Drugs,Rifampin,Rifampin-resistant beta-subunit of RNA polymerase RpoB,RPOB
 MEG_7884|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_regulator|ACRR|RequiresSNPConfirmation,Multi-compound,Drug and biocide resistance,Drug and biocide RND efflux regulator,ACRR
-MEG_8147|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRA|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRA
-MEG_8153|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRB|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRB
-MEG_8300|Drugs|Multi-drug_resistance|MDR_mutant_porin_proteins|OMPK|RequiresSNPConfirmation,Drugs,Multi-drug resistance,MDR mutant porin proteins,OMPK
-MEG_8302|Drugs|betalactams|Mutant_porin_proteins|OMPK36|RequiresSNPConfirmation,Drugs,betalactams,Mutant porin proteins,OMPK36
-MEG_8458|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|PARC|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,PARC
-MEG_8674|Drugs|Multi-drug_resistance|Multi-drug_RND_efflux_regulator|RAMR|RequiresSNPConfirmation,Drugs,Multi-drug resistance,Multi-drug RND efflux regulator,RAMR
-MEG_8692|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|RPSL|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,RPSL
-MEG_8703|Drugs|Mycobacterium_tuberculosis-specific_Drug|MDR_mutant_promoter|RV0678|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,MDR mutant promoter,RV0678
+MEG_8144|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRA|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRA
+MEG_8151|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRB|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRB
+MEG_8289|Drugs|Multi-drug_resistance|MDR_mutant_porin_proteins|OMPK|RequiresSNPConfirmation,Drugs,Multi-drug resistance,MDR mutant porin proteins,OMPK
+MEG_8290|Drugs|betalactams|Mutant_porin_proteins|OMPK36|RequiresSNPConfirmation,Drugs,betalactams,Mutant porin proteins,OMPK36
+MEG_8447|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|PARC|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,PARC
+MEG_8659|Drugs|Multi-drug_resistance|Multi-drug_RND_efflux_regulator|RAMR|RequiresSNPConfirmation,Drugs,Multi-drug resistance,Multi-drug RND efflux regulator,RAMR
+MEG_8678|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|RPSL|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,RPSL
+MEG_8687|Drugs|Mycobacterium_tuberculosis-specific_Drug|MDR_mutant_promoter|RV0678|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,MDR mutant promoter,RV0678
 MEG_7971|Drugs|Mycobacterium_tuberculosis-specific_Drug|Isoniazid-resistant_mutant|AHPC|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Isoniazid-resistant mutant,AHPC
 MEG_7973|Drugs|Mycobacterium_tuberculosis-specific_Drug|Cycloserine-resistant_mutant|ALR|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Cycloserine-resistant mutant,ALR
-MEG_8081|Drugs|Aminoglycosides|Aminoglycoside-resistant_eis_promoter|EIS|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant eis promoter,EIS
-MEG_8082|Drugs|Mycobacterium_tuberculosis-specific_Drug|Ethambutol_resistant_arabinosyltransferase|EMBA|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Ethambutol resistant arabinosyltransferase,EMBA
-MEG_8087|Drugs|Mycobacterium_tuberculosis-specific_Drug|Ethionamide-resistant_mutant|ETHA|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Ethionamide-resistant mutant,ETHA
-MEG_8088|Drugs|Mycobacterium_tuberculosis-specific_Drug|Ethionamide-resistant_mutant|ETHR|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Ethionamide-resistant mutant,ETHR
-MEG_8160|Drugs|Aminoglycosides|Amigolycoside-resistant_idsA|IDSA|RequiresSNPConfirmation,Drugs,Aminoglycosides,Amigolycoside-resistant idsA,IDSA
-MEG_8175|Drugs|Mycobacterium_tuberculosis-specific_Drug|Isoniazid-resistant_mutant|KATG|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Isoniazid-resistant mutant,KATG
-MEG_8283|Drugs|Mycobacterium_tuberculosis-specific_Drug|MDR_mutant_promoter|NUOA|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,MDR mutant promoter,NUOA
-MEG_8457|Drugs|Mycobacterium_tuberculosis-specific_Drug|Pyrazinamide-resistant_mutant|PAND|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Pyrazinamide-resistant mutant,PAND
-MEG_8650|Drugs|Mycobacterium_tuberculosis-specific_Drug|Pyrazinamide-resistant_mutant|PNCA|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Pyrazinamide-resistant mutant,PNCA
-MEG_8685|Drugs|Oxazolidinone|Oxazolidinone-resistant_23S_rRNA_mutation|RPLC|RequiresSNPConfirmation,Drugs,Oxazolidinone,Oxazolidinone-resistant 23S rRNA mutation,RPLC
-MEG_8690|Drugs|Rifampin|Rifampin-resistant_beta-subunit_of_RNA_polymerase_RpoB|RPOCR|RequiresSNPConfirmation,Drugs,Rifampin,Rifampin-resistant beta-subunit of RNA polymerase RpoB,RPOCR
-MEG_8694|Drugs|Oxazolidinone|Oxazolidinone-resistant_23S_rRNA_mutation|RRL|RequiresSNPConfirmation,Drugs,Oxazolidinone,Oxazolidinone-resistant 23S rRNA mutation,RRL
-MEG_8695|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|RRS|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,RRS
-MEG_8736|Drugs|Aminoglycosides|Aminoglycoside-resistant tlyA|TLYA|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant tlyA,TLYA
-MEG_8257|Drugs|MLS|Macrolide-resistant_23S_rRNA_mutation|MLS23S|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 23S rRNA mutation,MLS23S
-MEG_8258|Drugs|MLS|Macrolide-resistant_23S_rRNA_mutation|MLS23S|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 23S rRNA mutation,MLS23S
-MEG_8259|Drugs|MLS|Macrolide-resistant_23S_rRNA_mutation|MLS23S|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 23S rRNA mutation,MLS23S
-MEG_8260|Drugs|MLS|Macrolide-resistant_23S_rRNA_mutation|MLS23S|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 23S rRNA mutation,MLS23S
-MEG_8239|Drugs|MLS|MLS_resistance_ABC_efflux_pumps|MACAB|RequiresSNPConfirmation,Drugs,MLS,MLS resistance ABC efflux pumps,MACAB
-MEG_8270|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_pumps|MTRC|RequiresSNPConfirmation,Multi-compound,Drug and biocide resistance,Drug and biocide RND efflux pumps,MTRC
-MEG_8271|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_regulator|MTRR|RequiresSNPConfirmation,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux regulator,MTRR
-MEG_8637|Drugs|betalactams|Class_A_betalactamases|PENA|RequiresSNPConfirmation,Drugs,betalactams,Class A betalactamases,PENA
-MEG_8645|Drugs|betalactams|Penicillin_binding_protein|PILQ|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PILQ
-MEG_8466|Drugs|betalactams|Penicillin_binding_protein|PBP1|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP1
-MEG_8651|Drugs|Multi-drug_resistance|MDR_mutant_porin_proteins|POR|RequiresSNPConfirmation,Drugs,Multi-drug resistance,MDR mutant porin proteins,POR
-MEG_8691|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|RPSE|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,RPSE
-MEG_8039|Drugs|Anti-malarial|Chloroquine-resistant_transporter|CRT|RequiresSNPConfirmation,Drugs,Anti-malarial,Chloroquine-resistant transporter,CRT
-MEG_8076|Drugs|Trimethoprim|Dihydrofolate_reductase|DHFR|RequiresSNPConfirmation,Drugs,Trimethoprim,Dihydrofolate reductase,DHFR
-MEG_8077|Drugs|Sulfonamides|Sulfonamide-resistant_dihydropteroate_synthases|DHPS|RequiresSNPConfirmation,Drugs,Sulfonamides,Sulfonamide-resistant dihydropteroate synthases,DHPS
-MEG_8174|Drugs|Anti-malarial|Artemisinin-resistant_protein|K13|RequiresSNPConfirmation,Drugs,Anti-malarial,Artemisinin-resistant protein,K13
-MEG_8247|Drugs|Multi-drug_resistance|MDR_mutation|MDR|RequiresSNPConfirmation,Drugs,Multi-drug resistance,MDR mutation,MDR
-MEG_8647|Drugs|Anti-malarial|Piperaquine-resistant_exonuclease|PIP|RequiresSNPConfirmation,Drugs,Anti-malarial,Piperaquine-resistant exonuclease,PIP
+MEG_8078|Drugs|Aminoglycosides|Aminoglycoside-resistant_eis_promoter|EIS|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant eis promoter,EIS
+MEG_8079|Drugs|Mycobacterium_tuberculosis-specific_Drug|Ethambutol_resistant_arabinosyltransferase|EMBA|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Ethambutol resistant arabinosyltransferase,EMBA
+MEG_8084|Drugs|Mycobacterium_tuberculosis-specific_Drug|Ethionamide-resistant_mutant|ETHA|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Ethionamide-resistant mutant,ETHA
+MEG_8085|Drugs|Mycobacterium_tuberculosis-specific_Drug|Ethionamide-resistant_mutant|ETHR|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Ethionamide-resistant mutant,ETHR
+MEG_8157|Drugs|Aminoglycosides|Aminoglycoside-resistant_idsA|IDSA|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant idsA,IDSA
+MEG_8171|Drugs|Mycobacterium_tuberculosis-specific_Drug|Isoniazid-resistant_mutant|KATG|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Isoniazid-resistant mutant,KATG
+MEG_8275|Drugs|Mycobacterium_tuberculosis-specific_Drug|MDR_mutant_promoter|NUOA|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,MDR mutant promoter,NUOA
+MEG_8444|Drugs|Mycobacterium_tuberculosis-specific_Drug|Pyrazinamide-resistant_mutant|PAND|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Pyrazinamide-resistant mutant,PAND
+MEG_8636|Drugs|Mycobacterium_tuberculosis-specific_Drug|Pyrazinamide-resistant_mutant|PNCA|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Pyrazinamide-resistant mutant,PNCA
+MEG_8670|Drugs|Oxazolidinone|Oxazolidinone-resistant_23S_rRNA_mutation|RPLC|RequiresSNPConfirmation,Drugs,Oxazolidinone,Oxazolidinone-resistant 23S rRNA mutation,RPLC
+MEG_8675|Drugs|Rifampin|Rifampin-resistant_beta-subunit_of_RNA_polymerase_RpoB|RPOCR|RequiresSNPConfirmation,Drugs,Rifampin,Rifampin-resistant beta-subunit of RNA polymerase RpoB,RPOCR
+MEG_8679|Drugs|Oxazolidinone|Oxazolidinone-resistant_23S_rRNA_mutation|RRL|RequiresSNPConfirmation,Drugs,Oxazolidinone,Oxazolidinone-resistant 23S rRNA mutation,RRL
+MEG_8680|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|RRS|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,RRS
+MEG_8720|Drugs|Aminoglycosides|Aminoglycoside-resistant_arabinosyltransferase|TLYA|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant arabinosyltransferase,TLYA
+MEG_8250|Drugs|MLS|Macrolide-resistant_23S_rRNA_mutation|MLS23S|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 23S rRNA mutation,MLS23S
+MEG_8251|Drugs|MLS|Macrolide-resistant_23S_rRNA_mutation|MLS23S|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 23S rRNA mutation,MLS23S
+MEG_8252|Drugs|MLS|Macrolide-resistant_23S_rRNA_mutation|MLS23S|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 23S rRNA mutation,MLS23S
+MEG_8253|Drugs|MLS|Macrolide-resistant_23S_rRNA_mutation|MLS23S|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 23S rRNA mutation,MLS23S
+MEG_8234|Drugs|MLS|MLS_resistance_ABC_efflux_pumps|MACAB|RequiresSNPConfirmation,Drugs,MLS,MLS resistance ABC efflux pumps,MACAB
+MEG_8263|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_pumps|MTRC|RequiresSNPConfirmation,Multi-compound,Drug and biocide resistance,Drug and biocide RND efflux pumps,MTRC
+MEG_8264|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_regulator|MTRR|RequiresSNPConfirmation,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux regulator,MTRR
+MEG_8624|Drugs|betalactams|Class_A_betalactamases|PENA|RequiresSNPConfirmation,Drugs,betalactams,Class A betalactamases,PENA
+MEG_8632|Drugs|betalactams|Penicillin_binding_protein|PILQ|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PILQ
+MEG_8453|Drugs|betalactams|Penicillin_binding_protein|PBP1|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP1
+MEG_8637|Drugs|Multi-drug_resistance|MDR_mutant_porin_proteins|POR|RequiresSNPConfirmation,Drugs,Multi-drug resistance,MDR mutant porin proteins,POR
+MEG_8676|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|RPSE|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,RPSE
+MEG_8073|Drugs|Trimethoprim|Dihydrofolate_reductase|DHFR|RequiresSNPConfirmation,Drugs,Trimethoprim,Dihydrofolate reductase,DHFR
+MEG_8074|Drugs|Sulfonamides|Sulfonamide-resistant_dihydropteroate_synthases|DHPS|RequiresSNPConfirmation,Drugs,Sulfonamides,Sulfonamide-resistant dihydropteroate synthases,DHPS
+MEG_8242|Drugs|Multi-drug_resistance|MDR_mutation|MDR|RequiresSNPConfirmation,Drugs,Multi-drug resistance,MDR mutation,MDR
 MEG_7883|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_pumps|ACRB|RequiresSNPConfirmation,Multi-compound,Drug and biocide resistance,Drug and biocide RND efflux pumps,ACRB
-MEG_8147|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRA|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRA
-MEG_8153|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRB|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRB
-MEG_8458|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|PARC|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,PARC
-MEG_8462|Drugs|Aminocoumarins|Aminocoumarin-resistant_DNA_topoisomerases|PARE|RequiresSNPConfirmation,Drugs,Aminocoumarins,Aminocoumarin-resistant DNA topoisomerases,PARE
-MEG_8648|Drugs|Lipopeptides|Colistin-resistant_mutant|PMRAR|RequiresSNPConfirmation,Drugs,Lipopeptides,Colistin-resistant mutant,PMRAR
-MEG_8073|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRB|RequiresSNPConfirmation,Drugs,Trimethoprim,Dihydrofolate reductase,DFRB
-MEG_8103|Drugs|Fusidic_acid|Fusidic_acid-resistant_mutation|FUSA|RequiresSNPConfirmation,Drugs,Fusidic acid,Fusidic acid-resistant mutation,FUSA
-MEG_8145|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GRLA|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GRLA
-MEG_8146|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GRLB|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GRLB
-MEG_8469|Drugs|betalactams|Penicillin_binding_protein|PBP2|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP2
-MEG_8472|Drugs|betalactams|Penicillin_binding_protein|PBP4|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP4
-MEG_8473|Drugs|betalactams|Penicillin_binding_protein|PBP4|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP4
-MEG_8273|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM
-MEG_8233|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
-MEG_8718|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
-MEG_7876|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC6-PRIME
-MEG_8229|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
-MEG_8080|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_ABC_efflux_pumps|EFRA,Multi-compound,Drug and biocide resistance,Drug and biocide ABC efflux pumps,EFRA
-MEG_8230|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_8146|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRA|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRA
+MEG_8150|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRB|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRB
+MEG_8446|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|PARC|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,PARC
+MEG_8449|Drugs|Aminocoumarins|Aminocoumarin-resistant_DNA_topoisomerases|PARE|RequiresSNPConfirmation,Drugs,Aminocoumarins,Aminocoumarin-resistant DNA topoisomerases,PARE
+MEG_8635|Drugs|Lipopeptides|Colistin-resistant_mutant|PMRAR|RequiresSNPConfirmation,Drugs,Lipopeptides,Colistin-resistant mutant,PMRAR
+MEG_8070|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRB|RequiresSNPConfirmation,Drugs,Trimethoprim,Dihydrofolate reductase,DFRB
+MEG_8100|Drugs|Fusidic_acid|Fusidic_acid-resistant_mutation|FUSA|RequiresSNPConfirmation,Drugs,Fusidic acid,Fusidic acid-resistant mutation,FUSA
+MEG_8142|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GRLA|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GRLA
+MEG_8143|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GRLB|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GRLB
+MEG_8456|Drugs|betalactams|Penicillin_binding_protein|PBP2|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP2
+MEG_8459|Drugs|betalactams|Penicillin_binding_protein|PBP4|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP4
+MEG_8460|Drugs|betalactams|Penicillin_binding_protein|PBP4|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP4
+MEG_8265|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM
 MEG_8228|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
-MEG_8219|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
-MEG_8232|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
-MEG_8234|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
-MEG_7931|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C betalactamases,ADC
-MEG_8023|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
-MEG_8712|Drugs|betalactams|Class_A_betalactamases|SHV,Drugs,betalactams,Class A betalactamases,SHV
-MEG_8222|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
-MEG_8221|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
-MEG_8223|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
-MEG_8218|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_8702|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
+MEG_7876|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC6-PRIME
 MEG_8224|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
-MEG_8220|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_8077|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_ABC_efflux_pumps|EFRA,Multi-compound,Drug and biocide resistance,Drug and biocide ABC efflux pumps,EFRA
 MEG_8225|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
-MEG_8226|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
-MEG_7906|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C betalactamases,ADC
+MEG_8223|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_8214|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
 MEG_8227|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
-MEG_8159|Drugs|betalactams|Class_C_betalactamases|IDC,Drugs,betalactams,Class C betalactamases,IDC
-MEG_8158|Drugs|betalactams|Class_C_betalactamases|IDC,Drugs,betalactams,Class C betalactamases,IDC
-MEG_8093|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSL,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSL
-MEG_8101|Drugs|betalactams|Class_A_betalactamases|FRI,Drugs,betalactams,Class A betalactamases,FRI
-MEG_8760|Drugs|betalactams|Class_C_betalactamases|YRC,Drugs,betalactams,Class C betalactamases,YRC
-MEG_8758|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_regulator|YAJC,Multi-compound,Drug and biocide resistance,Drug and biocide RND efflux regulator,YAJC
+MEG_8229|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_7931|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C betalactamases,ADC
+MEG_8022|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
+MEG_8696|Drugs|betalactams|Class_A_betalactamases|SHV,Drugs,betalactams,Class A betalactamases,SHV
+MEG_8217|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_8216|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_8218|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_8213|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_8219|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_8215|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_8220|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_8221|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_7906|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C betalactamases,ADC
+MEG_8222|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_8156|Drugs|betalactams|Class_C_betalactamases|IDC,Drugs,betalactams,Class C betalactamases,IDC
+MEG_8155|Drugs|betalactams|Class_C_betalactamases|IDC,Drugs,betalactams,Class C betalactamases,IDC
+MEG_8090|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSL,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSL
+MEG_8098|Drugs|betalactams|Class_A_betalactamases|FRI,Drugs,betalactams,Class A betalactamases,FRI
+MEG_8743|Drugs|betalactams|Class_C_betalactamases|YRC,Drugs,betalactams,Class C betalactamases,YRC
+MEG_8741|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_regulator|YAJC,Multi-compound,Drug and biocide resistance,Drug and biocide RND efflux regulator,YAJC
 MEG_7907|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C betalactamases,ADC
-MEG_8297|Drugs|betalactams|Mutant_porin_proteins|OMPA,Drugs,betalactams,Mutant porin proteins,OMPA
-MEG_8083|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|EPTB,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,EPTB
-MEG_8038|Drugs|Aminoglycosides|Aminoglycoside_efflux_pumps|CRCB,Drugs,Aminoglycosides,Aminoglycoside efflux pumps,CRCB
-MEG_8236|Drugs|Lipopeptides|Colistin-resistant_mutant|LPSB,Drugs,Lipopeptides,Colistin-resistant mutant,LPSB
-MEG_8235|Drugs|Lipopeptides|Colistin-resistant_mutant|LPSA,Drugs,Lipopeptides,Colistin-resistant mutant,LPSA
+MEG_8288|Drugs|betalactams|Mutant_porin_proteins|OMPA,Drugs,betalactams,Mutant porin proteins,OMPA
+MEG_8080|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|EPTB,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,EPTB
+MEG_8037|Drugs|Aminoglycosides|Aminoglycoside_efflux_pumps|CRCB,Drugs,Aminoglycosides,Aminoglycoside efflux pumps,CRCB
+MEG_8231|Drugs|Lipopeptides|Colistin-resistant_mutant|LPSB,Drugs,Lipopeptides,Colistin-resistant mutant,LPSB
+MEG_8230|Drugs|Lipopeptides|Colistin-resistant_mutant|LPSA,Drugs,Lipopeptides,Colistin-resistant mutant,LPSA
 MEG_7976|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|ARNT,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,ARNT
-MEG_8237|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|LPTD,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,LPTD
-MEG_8308|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8232|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|LPTD,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,LPTD
+MEG_8295|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_7975|Drugs|Aminoglycosides|Aminoglycoside_O-nucleotidyltransferases|ANT3-DPRIME,Drugs,Aminoglycosides,Aminoglycoside O-nucleotidyltransferases,ANT3-DPRIME
-MEG_8036|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|CPRR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,CPRR
-MEG_8037|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|CPRS,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,CPRS
-MEG_8465|Drugs|Multi-drug_resistance|MDR_regulator|PARS,Drugs,Multi-drug resistance,MDR regulator,PARS
-MEG_8464|Drugs|Multi-drug_resistance|MDR_regulator|PARR,Drugs,Multi-drug resistance,MDR regulator,PARR
-MEG_8701|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_pumps|RSMA,Multi-compound,Drug and biocide resistance,Drug and biocide RND efflux pumps,RSMA
-MEG_8678|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB
-MEG_8679|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB
-MEG_8680|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB
-MEG_8684|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB
-MEG_8734|Drugs|Tetracyclines|Tetracycline_inactivation_enzymes|TETX,Drugs,Tetracyclines,Tetracycline inactivation enzymes,TETX
-MEG_8681|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB
-MEG_8265|Drugs|MLS|MLS_resistance_ABC_efflux_pumps|MSRF,Drugs,MLS,MLS resistance ABC efflux pumps,MSRF
-MEG_8268|Drugs|MLS|MLS_resistance_ABC_efflux_pumps|MSRH,Drugs,MLS,MLS resistance ABC efflux pumps,MSRH
-MEG_8248|Drugs|MLS|MLS_resistance_MFS_efflux_pumps|MEFD,Drugs,MLS,MLS resistance MFS efflux pumps,MEFD
-MEG_8676|Drugs|Aminoglycosides|Aminoglycoside_efflux_pumps|RANB,Drugs,Aminoglycosides,Aminoglycoside efflux pumps,RANB
-MEG_8675|Drugs|Aminoglycosides|Aminoglycoside_efflux_pumps|RANA,Drugs,Aminoglycosides,Aminoglycoside efflux pumps,RANA
-MEG_8313|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8312|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8035|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|CPRR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,CPRR
+MEG_8036|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|CPRS,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,CPRS
+MEG_8452|Drugs|Multi-drug_resistance|MDR_regulator|PARS,Drugs,Multi-drug resistance,MDR regulator,PARS
+MEG_8451|Drugs|Multi-drug_resistance|MDR_regulator|PARR,Drugs,Multi-drug resistance,MDR regulator,PARR
+MEG_8686|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_pumps|RSMA,Multi-compound,Drug and biocide resistance,Drug and biocide RND efflux pumps,RSMA
+MEG_8663|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB
+MEG_8664|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB
+MEG_8665|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB
+MEG_8669|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB
+MEG_8718|Drugs|Tetracyclines|Tetracycline_inactivation_enzymes|TETX,Drugs,Tetracyclines,Tetracycline inactivation enzymes,TETX
+MEG_8666|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB
+MEG_8258|Drugs|MLS|MLS_resistance_ABC_efflux_pumps|MSRF,Drugs,MLS,MLS resistance ABC efflux pumps,MSRF
+MEG_8261|Drugs|MLS|MLS_resistance_ABC_efflux_pumps|MSRH,Drugs,MLS,MLS resistance ABC efflux pumps,MSRH
+MEG_8243|Drugs|MLS|MLS_resistance_MFS_efflux_pumps|MEFD,Drugs,MLS,MLS resistance MFS efflux pumps,MEFD
+MEG_8661|Drugs|Aminoglycosides|Aminoglycoside_efflux_pumps|RANB,Drugs,Aminoglycosides,Aminoglycoside efflux pumps,RANB
+MEG_8660|Drugs|Aminoglycosides|Aminoglycoside_efflux_pumps|RANA,Drugs,Aminoglycosides,Aminoglycoside efflux pumps,RANA
+MEG_8300|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8299|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_7873|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC6-PRIME
 MEG_7875|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC6-PRIME
 MEG_7872|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC6-PRIME
 MEG_7874|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC6-PRIME
 MEG_7871|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC6-PRIME
 MEG_7877|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC6-PRIME
-MEG_8310|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8274|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM
-MEG_8314|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8311|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8724|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
-MEG_8091|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSA,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSA
-MEG_8033|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
-MEG_8025|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
-MEG_8026|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
-MEG_8024|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
+MEG_8297|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8266|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM
+MEG_8301|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8298|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8708|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
+MEG_8088|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSA,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSA
 MEG_8032|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
-MEG_8240|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|MCR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,MCR
-MEG_8306|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8727|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
-MEG_8725|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
-MEG_8726|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
-MEG_8721|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
-MEG_8723|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
-MEG_8722|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
-MEG_8719|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
-MEG_8720|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
-MEG_8728|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
-MEG_8598|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8544|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8535|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8534|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8573|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8491|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8482|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8497|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8624|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8525|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8621|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8024|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
+MEG_8025|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
+MEG_8023|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
+MEG_8031|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
+MEG_8235|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|MCR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,MCR
+MEG_8293|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8711|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
+MEG_8709|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
+MEG_8710|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
+MEG_8705|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
+MEG_8707|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
+MEG_8706|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
+MEG_8703|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
+MEG_8704|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
+MEG_8712|Drugs|betalactams|Class_A_betalactamases|TEM,Drugs,betalactams,Class A betalactamases,TEM
+MEG_8585|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8531|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8522|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8521|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8553|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8589|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8609|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8309|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8560|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8478|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8469|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8484|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8611|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8512|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8608|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8508|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8540|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8576|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8596|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8296|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8294|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8307|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8320|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8404|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8319|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8408|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8407|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8391|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8306|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8395|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8394|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_7908|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C betalactamases,ADC
 MEG_7909|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C betalactamases,ADC
-MEG_8377|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8064|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
-MEG_8305|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8379|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8315|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8066|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
+MEG_8364|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8061|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
+MEG_8292|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8366|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8302|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8063|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
+MEG_8062|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
 MEG_8065|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
-MEG_8068|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
-MEG_8067|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
+MEG_8064|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
+MEG_8172|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8173|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8174|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8175|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
 MEG_8176|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_7910|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C betalactamases,ADC
+MEG_7911|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C betalactamases,ADC
 MEG_8177|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
 MEG_8178|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
 MEG_8179|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
 MEG_8180|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_7910|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C betalactamases,ADC
-MEG_7911|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C betalactamases,ADC
 MEG_8181|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
 MEG_8182|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8183|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8184|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8185|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8186|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
 MEG_7881|Drugs|betalactams|Class_A_betalactamases|AAK,Drugs,betalactams,Class A betalactamases,AAK
 MEG_7882|Drugs|betalactams|Class_C_betalactamases|ACC,Drugs,betalactams,Class C betalactamases,ACC
 MEG_7887|Drugs|betalactams|Class_C_betalactamases|ACT,Drugs,betalactams,Class C betalactamases,ACT
@@ -8163,26 +8160,28 @@ MEG_8009|Drugs|betalactams|Class_A_betalactamases|CARB,Drugs,betalactams,Class A
 MEG_8010|Drugs|betalactams|Class_A_betalactamases|CARB,Drugs,betalactams,Class A betalactamases,CARB
 MEG_8012|Drugs|betalactams|Class_A_betalactamases|CARB,Drugs,betalactams,Class A betalactamases,CARB
 MEG_8011|Drugs|betalactams|Class_A_betalactamases|CARB,Drugs,betalactams,Class A betalactamases,CARB
+MEG_8015|Drugs|betalactams|Class_B_betalactamases|CFIA,Drugs,betalactams,Class B betalactamases,CFIA
 MEG_8016|Drugs|betalactams|Class_B_betalactamases|CFIA,Drugs,betalactams,Class B betalactamases,CFIA
-MEG_8017|Drugs|betalactams|Class_B_betalactamases|CFIA,Drugs,betalactams,Class B betalactamases,CFIA
-MEG_8019|Drugs|betalactams|Class_C_betalactamases|CMH,Drugs,betalactams,Class C betalactamases,CMH
-MEG_8028|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
+MEG_8018|Drugs|betalactams|Class_C_betalactamases|CMH,Drugs,betalactams,Class C betalactamases,CMH
 MEG_8027|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
+MEG_8026|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
+MEG_8028|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
 MEG_8029|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
 MEG_8030|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
-MEG_8031|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
-MEG_8034|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
-MEG_8049|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
-MEG_8043|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
-MEG_8050|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
-MEG_8048|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
-MEG_8040|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
+MEG_8033|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
+MEG_8047|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
 MEG_8041|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
+MEG_8048|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
+MEG_8046|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
+MEG_8038|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
+MEG_8039|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
+MEG_8040|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
 MEG_8042|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
+MEG_8043|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
 MEG_8044|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
 MEG_8045|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
-MEG_8046|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
-MEG_8047|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
+MEG_8049|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
+MEG_8050|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
 MEG_8051|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
 MEG_8052|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
 MEG_8053|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
@@ -8191,30 +8190,31 @@ MEG_8055|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A 
 MEG_8056|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
 MEG_8057|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
 MEG_8058|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
-MEG_8059|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
-MEG_8060|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
-MEG_8062|Drugs|betalactams|Class_B_betalactamases|CVI,Drugs,betalactams,Class B betalactamases,CVI
-MEG_8075|Drugs|betalactams|Class_C_betalactamases|DHA,Drugs,betalactams,Class C betalactamases,DHA
-MEG_8078|Drugs|betalactams|Class_B_betalactamases|EBR,Drugs,betalactams,Class B betalactamases,EBR
-MEG_8079|Drugs|betalactams|Class_B_betalactamases|EBR,Drugs,betalactams,Class B betalactamases,EBR
-MEG_8099|Drugs|betalactams|Class_C_betalactamases|FOX,Drugs,betalactams,Class C betalactamases,FOX
-MEG_8100|Drugs|betalactams|Class_C_betalactamases|FOX,Drugs,betalactams,Class C betalactamases,FOX
-MEG_8102|Drugs|betalactams|Class_A_betalactamases|FRI,Drugs,betalactams,Class A betalactamases,FRI
+MEG_8060|Drugs|betalactams|Class_B_betalactamases|CVI,Drugs,betalactams,Class B betalactamases,CVI
+MEG_8072|Drugs|betalactams|Class_C_betalactamases|DHA,Drugs,betalactams,Class C betalactamases,DHA
+MEG_8075|Drugs|betalactams|Class_B_betalactamases|EBR,Drugs,betalactams,Class B betalactamases,EBR
+MEG_8076|Drugs|betalactams|Class_B_betalactamases|EBR,Drugs,betalactams,Class B betalactamases,EBR
+MEG_8096|Drugs|betalactams|Class_C_betalactamases|FOX,Drugs,betalactams,Class C betalactamases,FOX
+MEG_8097|Drugs|betalactams|Class_C_betalactamases|FOX,Drugs,betalactams,Class C betalactamases,FOX
+MEG_8099|Drugs|betalactams|Class_A_betalactamases|FRI,Drugs,betalactams,Class A betalactamases,FRI
+MEG_8103|Drugs|betalactams|Class_A_betalactamases|GES,Drugs,betalactams,Class A betalactamases,GES
+MEG_8104|Drugs|betalactams|Class_A_betalactamases|GES,Drugs,betalactams,Class A betalactamases,GES
+MEG_8105|Drugs|betalactams|Class_A_betalactamases|GES,Drugs,betalactams,Class A betalactamases,GES
 MEG_8106|Drugs|betalactams|Class_A_betalactamases|GES,Drugs,betalactams,Class A betalactamases,GES
 MEG_8107|Drugs|betalactams|Class_A_betalactamases|GES,Drugs,betalactams,Class A betalactamases,GES
-MEG_8108|Drugs|betalactams|Class_A_betalactamases|GES,Drugs,betalactams,Class A betalactamases,GES
-MEG_8109|Drugs|betalactams|Class_A_betalactamases|GES,Drugs,betalactams,Class A betalactamases,GES
-MEG_8110|Drugs|betalactams|Class_A_betalactamases|GES,Drugs,betalactams,Class A betalactamases,GES
+MEG_8108|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
+MEG_8109|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
+MEG_8110|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8111|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8112|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8113|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8114|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8115|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8116|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
+MEG_8138|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8117|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8118|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8119|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
-MEG_8141|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8120|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8121|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8122|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
@@ -8228,71 +8228,79 @@ MEG_8129|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B 
 MEG_8130|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8131|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8132|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
+MEG_8139|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8133|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8134|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8135|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
-MEG_8142|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8136|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
 MEG_8137|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
-MEG_8138|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
-MEG_8139|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
-MEG_8140|Drugs|betalactams|Class_B_betalactamases|GOB,Drugs,betalactams,Class B betalactamases,GOB
-MEG_8161|Drugs|betalactams|Class_A_betalactamases|IMI,Drugs,betalactams,Class A betalactamases,IMI
-MEG_8162|Drugs|betalactams|Class_A_betalactamases|IMI,Drugs,betalactams,Class A betalactamases,IMI
-MEG_8169|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
-MEG_8164|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
-MEG_8168|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
-MEG_8165|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
+MEG_8158|Drugs|betalactams|Class_A_betalactamases|IMI,Drugs,betalactams,Class A betalactamases,IMI
+MEG_8159|Drugs|betalactams|Class_A_betalactamases|IMI,Drugs,betalactams,Class A betalactamases,IMI
 MEG_8166|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
+MEG_8161|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
+MEG_8165|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
+MEG_8162|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
+MEG_8163|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
+MEG_8164|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
 MEG_8167|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
-MEG_8170|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
-MEG_8171|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
-MEG_8172|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
-MEG_8190|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8191|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8192|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8193|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8204|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8205|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8206|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8207|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8194|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8199|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8195|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8196|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8197|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8198|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8168|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
+MEG_8169|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
+MEG_8186|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8187|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8188|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8189|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
 MEG_8200|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
 MEG_8201|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
 MEG_8202|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
 MEG_8203|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8208|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8209|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8210|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8231|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
-MEG_8262|Drugs|betalactams|Class_C_betalactamases|MOX,Drugs,betalactams,Class C betalactamases,MOX
-MEG_8263|Drugs|betalactams|Class_C_betalactamases|MOX,Drugs,betalactams,Class C betalactamases,MOX
-MEG_8276|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM
-MEG_8277|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM
-MEG_8278|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM
+MEG_8190|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8195|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8191|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8192|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8193|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8194|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8196|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8197|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8198|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8199|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8204|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8205|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8206|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8226|Drugs|betalactams|Class_A_betalactamases|LEN,Drugs,betalactams,Class A betalactamases,LEN
+MEG_8255|Drugs|betalactams|Class_C_betalactamases|MOX,Drugs,betalactams,Class C betalactamases,MOX
+MEG_8256|Drugs|betalactams|Class_C_betalactamases|MOX,Drugs,betalactams,Class C betalactamases,MOX
+MEG_8268|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM
+MEG_8269|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM
+MEG_8270|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM
+MEG_8276|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
+MEG_8277|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
+MEG_8278|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
+MEG_8279|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
+MEG_8280|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
+MEG_8281|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
+MEG_8282|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
+MEG_8283|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
 MEG_8284|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
 MEG_8285|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
 MEG_8286|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
-MEG_8287|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
-MEG_8288|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
-MEG_8289|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
-MEG_8290|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
-MEG_8291|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
-MEG_8292|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
-MEG_8293|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
-MEG_8294|Drugs|betalactams|Class_A_betalactamases|OKP,Drugs,betalactams,Class A betalactamases,OKP
-MEG_8388|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8375|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8304|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8305|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8303|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8320|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8321|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8308|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8309|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8310|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8311|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8312|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8313|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8314|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8315|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8316|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8317|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8318|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8316|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8333|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8334|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8321|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8319|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8322|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8323|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8324|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
@@ -8304,6 +8312,8 @@ MEG_8329|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D 
 MEG_8330|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8331|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8332|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8333|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8334|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8335|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8336|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8337|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
@@ -8332,10 +8342,10 @@ MEG_8359|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D 
 MEG_8360|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8361|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8362|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8396|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8363|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8364|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8365|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8366|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8388|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8367|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8368|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8369|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
@@ -8343,84 +8353,84 @@ MEG_8370|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D 
 MEG_8371|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8372|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8373|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8374|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8375|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8409|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8376|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8374|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8377|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8378|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8401|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8379|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8380|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8381|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8382|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8383|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8389|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8384|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8390|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8385|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8386|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8389|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8387|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8390|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8391|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8406|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8392|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8393|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8394|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8395|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8396|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8402|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8397|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8403|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8398|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8399|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8400|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8419|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8401|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8402|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8403|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8404|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8405|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8406|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8407|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8408|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8409|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8410|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8411|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8412|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8413|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8414|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8415|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8416|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8417|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8418|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8420|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8421|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8422|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8423|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8424|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8478|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8465|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8462|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8463|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8464|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8516|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8517|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8518|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8519|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8520|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8523|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8524|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8525|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8526|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8527|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8528|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8529|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8530|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8466|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8467|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8468|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8470|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8471|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8472|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8473|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8474|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8475|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8476|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8477|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8529|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8530|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8531|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8532|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8533|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8536|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8537|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8538|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8539|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8540|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8541|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8542|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8543|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8479|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8480|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8481|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8482|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8483|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8484|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8485|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8486|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8487|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8488|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8489|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8490|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8491|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8492|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8493|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8494|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8495|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8496|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8497|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8498|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8499|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8500|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
@@ -8431,25 +8441,24 @@ MEG_8504|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C 
 MEG_8505|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8506|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8507|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8508|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8509|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8510|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8511|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8512|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8513|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8514|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8515|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8516|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8517|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8518|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8519|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8520|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8522|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8523|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8524|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8526|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8527|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8528|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8532|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8533|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8534|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8535|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8536|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8537|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8538|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8539|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8541|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8542|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8543|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8544|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8545|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8546|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8547|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
@@ -8458,13 +8467,13 @@ MEG_8549|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C 
 MEG_8550|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8551|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8552|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8553|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8554|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8555|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8556|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8557|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8558|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8559|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8560|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8561|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8562|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8563|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
@@ -8477,9 +8486,9 @@ MEG_8569|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C 
 MEG_8570|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8571|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8572|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8573|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8574|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8575|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8576|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8577|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8578|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8579|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
@@ -8488,18 +8497,18 @@ MEG_8581|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C 
 MEG_8582|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8583|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8584|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8585|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8586|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8587|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8588|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8589|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8590|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8591|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8592|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8593|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8594|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8595|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8596|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8597|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8598|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8599|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8600|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8601|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
@@ -8509,9 +8518,8 @@ MEG_8604|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C 
 MEG_8605|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8606|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8607|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8608|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8609|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8610|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8611|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8612|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8613|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8614|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
@@ -8521,231 +8529,206 @@ MEG_8617|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C 
 MEG_8618|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8619|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8620|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
+MEG_8621|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8622|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
 MEG_8623|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8625|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8626|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8627|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8628|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8629|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8630|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8631|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8632|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8633|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8634|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8635|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8636|Drugs|betalactams|Class_C_betalactamases|PDC,Drugs,betalactams,Class C betalactamases,PDC
-MEG_8638|Drugs|betalactams|Class_A_betalactamases|PER,Drugs,betalactams,Class A betalactamases,PER
-MEG_8639|Drugs|betalactams|Class_A_betalactamases|PER,Drugs,betalactams,Class A betalactamases,PER
-MEG_8640|Drugs|betalactams|Class_A_betalactamases|PER,Drugs,betalactams,Class A betalactamases,PER
-MEG_8642|Drugs|betalactams|Class_B_betalactamases|PFM,Drugs,betalactams,Class B betalactamases,PFM
-MEG_8643|Drugs|betalactams|Class_B_betalactamases|PFM,Drugs,betalactams,Class B betalactamases,PFM
-MEG_8644|Drugs|betalactams|Class_B_betalactamases|PFM,Drugs,betalactams,Class B betalactamases,PFM
-MEG_8655|Drugs|betalactams|Class_B_betalactamases|PST,Drugs,betalactams,Class B betalactamases,PST
-MEG_8699|Drugs|betalactams|Class_D_betalactamases|RSD2,Drugs,betalactams,Class D betalactamases,RSD2
-MEG_8700|Drugs|betalactams|Class_D_betalactamases|RSD2,Drugs,betalactams,Class D betalactamases,RSD2
-MEG_8713|Drugs|betalactams|Class_A_betalactamases|SHV,Drugs,betalactams,Class A betalactamases,SHV
-MEG_8714|Drugs|betalactams|Class_A_betalactamases|SHV,Drugs,betalactams,Class A betalactamases,SHV
-MEG_8715|Drugs|betalactams|Class_A_betalactamases|SHV,Drugs,betalactams,Class A betalactamases,SHV
-MEG_8717|Drugs|betalactams|Class_C_betalactamases|SRT,Drugs,betalactams,Class C betalactamases,SRT
-MEG_8743|Drugs|betalactams|Class_A_betalactamases|VEB,Drugs,betalactams,Class A betalactamases,VEB
-MEG_8744|Drugs|betalactams|Class_A_betalactamases|VEB,Drugs,betalactams,Class A betalactamases,VEB
-MEG_8745|Drugs|betalactams|Class_A_betalactamases|VEB,Drugs,betalactams,Class A betalactamases,VEB
-MEG_8746|Drugs|betalactams|Class_A_betalactamases|VEB,Drugs,betalactams,Class A betalactamases,VEB
-MEG_8747|Drugs|betalactams|Class_A_betalactamases|VEB,Drugs,betalactams,Class A betalactamases,VEB
-MEG_8748|Drugs|betalactams|Class_A_betalactamases|VEB,Drugs,betalactams,Class A betalactamases,VEB
-MEG_8749|Drugs|betalactams|Class_B_betalactamases|VIM,Drugs,betalactams,Class B betalactamases,VIM
-MEG_8750|Drugs|betalactams|Class_B_betalactamases|VIM,Drugs,betalactams,Class B betalactamases,VIM
-MEG_8751|Drugs|betalactams|Class_B_betalactamases|VIM,Drugs,betalactams,Class B betalactamases,VIM
-MEG_8752|Drugs|betalactams|Class_B_betalactamases|VIM,Drugs,betalactams,Class B betalactamases,VIM
-MEG_8753|Drugs|betalactams|Class_B_betalactamases|VIM,Drugs,betalactams,Class B betalactamases,VIM
-MEG_8754|Drugs|betalactams|Class_B_betalactamases|VIM,Drugs,betalactams,Class B betalactamases,VIM
-MEG_8755|Drugs|betalactams|Class_B_betalactamases|VIM,Drugs,betalactams,Class B betalactamases,VIM
-MEG_8759|Drugs|betalactams|Class_B_betalactamases|YEM,Drugs,betalactams,Class B betalactamases,YEM
-MEG_8281|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_pumps|NORC,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux pumps,NORC
-MEG_8246|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_pumps|MDE,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux pumps,MDE
-MEG_8709|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_pumps|SEPA,Multi-compound,Drug and biocide resistance,Drug and biocide RND efflux pumps,SEPA
-MEG_8708|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_pumps|SDRM,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux pumps,SDRM
-MEG_8641|Drugs|betalactams|Class_B_betalactamases|PFM,Drugs,betalactams,Class B betalactamases,PFM
-MEG_8275|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM
-MEG_8304|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8687|Drugs|Rifampin|Rifampin-resistant_beta-subunit_of_RNA_polymerase_RpoB|RPOB,Drugs,Rifampin,Rifampin-resistant beta-subunit of RNA polymerase RpoB,RPOB
-MEG_8704|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|SALB,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,SALB
-MEG_8705|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|SALC,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,SALC
-MEG_8706|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|SALD,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,SALD
-MEG_8707|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|SALE,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,SALE
-MEG_8086|Drugs|MLS|23S_rRNA_methyltransferases|ERM52,Drugs,MLS,23S rRNA methyltransferases,ERM52
-MEG_8266|Drugs|MLS|MLS_resistance_ABC_efflux_pumps|MSRG,Drugs,MLS,MLS resistance ABC efflux pumps,MSRG
-MEG_8269|Drugs|MLS|MLS_resistance_ABC_efflux_pumps|MSRL,Drugs,MLS,MLS resistance ABC efflux pumps,MSRL
-MEG_8249|Drugs|MLS|MLS_resistance_MFS_efflux_pumps|MEFF,Drugs,MLS,MLS resistance MFS efflux pumps,MEFF
-MEG_8085|Drugs|MLS|23S_rRNA_methyltransferases|ERM51,Drugs,MLS,23S rRNA methyltransferases,ERM51
-MEG_8251|Drugs|MLS|MLS_resistance_MFS_efflux_pumps|MEFJ,Drugs,MLS,MLS resistance MFS efflux pumps,MEFJ
-MEG_8677|Drugs|Metronidazole|rdxA_nitroimidazole_reductase|RDXA,Drugs,Metronidazole,rdxA nitroimidazole reductase,RDXA
-MEG_8741|Drugs|betalactams|Class_B_betalactamases|VAM,Drugs,betalactams,Class B betalactamases,VAM
-MEG_8084|Drugs|MLS|23S_rRNA_methyltransferases|ERM50,Drugs,MLS,23S rRNA methyltransferases,ERM50
-MEG_8098|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSY,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSY
-MEG_8241|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|MCR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,MCR
-MEG_8238|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|LSAD,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,LSAD
-MEG_8654|Drugs|betalactams|Class_C_betalactamases|PRC,Drugs,betalactams,Class C betalactamases,PRC
-MEG_8189|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8187|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8094|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSM,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSM
-MEG_8095|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSM,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSM
-MEG_8096|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSM,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSM
+MEG_8625|Drugs|betalactams|Class_A_betalactamases|PER,Drugs,betalactams,Class A betalactamases,PER
+MEG_8626|Drugs|betalactams|Class_A_betalactamases|PER,Drugs,betalactams,Class A betalactamases,PER
+MEG_8627|Drugs|betalactams|Class_A_betalactamases|PER,Drugs,betalactams,Class A betalactamases,PER
+MEG_8629|Drugs|betalactams|Class_B_betalactamases|PFM,Drugs,betalactams,Class B betalactamases,PFM
+MEG_8630|Drugs|betalactams|Class_B_betalactamases|PFM,Drugs,betalactams,Class B betalactamases,PFM
+MEG_8631|Drugs|betalactams|Class_B_betalactamases|PFM,Drugs,betalactams,Class B betalactamases,PFM
+MEG_8641|Drugs|betalactams|Class_B_betalactamases|PST,Drugs,betalactams,Class B betalactamases,PST
+MEG_8684|Drugs|betalactams|Class_D_betalactamases|RSD2,Drugs,betalactams,Class D betalactamases,RSD2
+MEG_8685|Drugs|betalactams|Class_D_betalactamases|RSD2,Drugs,betalactams,Class D betalactamases,RSD2
+MEG_8697|Drugs|betalactams|Class_A_betalactamases|SHV,Drugs,betalactams,Class A betalactamases,SHV
+MEG_8698|Drugs|betalactams|Class_A_betalactamases|SHV,Drugs,betalactams,Class A betalactamases,SHV
+MEG_8699|Drugs|betalactams|Class_A_betalactamases|SHV,Drugs,betalactams,Class A betalactamases,SHV
+MEG_8701|Drugs|betalactams|Class_C_betalactamases|SRT,Drugs,betalactams,Class C betalactamases,SRT
+MEG_8726|Drugs|betalactams|Class_A_betalactamases|VEB,Drugs,betalactams,Class A betalactamases,VEB
+MEG_8727|Drugs|betalactams|Class_A_betalactamases|VEB,Drugs,betalactams,Class A betalactamases,VEB
+MEG_8728|Drugs|betalactams|Class_A_betalactamases|VEB,Drugs,betalactams,Class A betalactamases,VEB
+MEG_8729|Drugs|betalactams|Class_A_betalactamases|VEB,Drugs,betalactams,Class A betalactamases,VEB
+MEG_8730|Drugs|betalactams|Class_A_betalactamases|VEB,Drugs,betalactams,Class A betalactamases,VEB
+MEG_8731|Drugs|betalactams|Class_A_betalactamases|VEB,Drugs,betalactams,Class A betalactamases,VEB
+MEG_8732|Drugs|betalactams|Class_B_betalactamases|VIM,Drugs,betalactams,Class B betalactamases,VIM
+MEG_8733|Drugs|betalactams|Class_B_betalactamases|VIM,Drugs,betalactams,Class B betalactamases,VIM
+MEG_8734|Drugs|betalactams|Class_B_betalactamases|VIM,Drugs,betalactams,Class B betalactamases,VIM
+MEG_8735|Drugs|betalactams|Class_B_betalactamases|VIM,Drugs,betalactams,Class B betalactamases,VIM
+MEG_8736|Drugs|betalactams|Class_B_betalactamases|VIM,Drugs,betalactams,Class B betalactamases,VIM
+MEG_8737|Drugs|betalactams|Class_B_betalactamases|VIM,Drugs,betalactams,Class B betalactamases,VIM
+MEG_8738|Drugs|betalactams|Class_B_betalactamases|VIM,Drugs,betalactams,Class B betalactamases,VIM
+MEG_8742|Drugs|betalactams|Class_B_betalactamases|YEM,Drugs,betalactams,Class B betalactamases,YEM
+MEG_8273|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_pumps|NORC,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux pumps,NORC
+MEG_8241|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_pumps|MDE,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux pumps,MDE
+MEG_8693|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_pumps|SEPA,Multi-compound,Drug and biocide resistance,Drug and biocide RND efflux pumps,SEPA
+MEG_8692|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_pumps|SDRM,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux pumps,SDRM
+MEG_8628|Drugs|betalactams|Class_B_betalactamases|PFM,Drugs,betalactams,Class B betalactamases,PFM
+MEG_8267|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM
+MEG_8291|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8674|Drugs|Rifampin|Rifampin-resistant_beta-subunit_of_RNA_polymerase_RpoB|RPOB,Drugs,Rifampin,Rifampin-resistant beta-subunit of RNA polymerase RpoB,RPOB
+MEG_8688|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|SALB,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,SALB
+MEG_8689|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|SALC,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,SALC
+MEG_8690|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|SALD,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,SALD
+MEG_8691|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|SALE,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,SALE
+MEG_8083|Drugs|MLS|23S_rRNA_methyltransferases|ERM52,Drugs,MLS,23S rRNA methyltransferases,ERM52
+MEG_8259|Drugs|MLS|MLS_resistance_ABC_efflux_pumps|MSRG,Drugs,MLS,MLS resistance ABC efflux pumps,MSRG
+MEG_8262|Drugs|MLS|MLS_resistance_ABC_efflux_pumps|MSRL,Drugs,MLS,MLS resistance ABC efflux pumps,MSRL
+MEG_8244|Drugs|MLS|MLS_resistance_MFS_efflux_pumps|MEFF,Drugs,MLS,MLS resistance MFS efflux pumps,MEFF
+MEG_8082|Drugs|MLS|23S_rRNA_methyltransferases|ERM51,Drugs,MLS,23S rRNA methyltransferases,ERM51
+MEG_8246|Drugs|MLS|MLS_resistance_MFS_efflux_pumps|MEFJ,Drugs,MLS,MLS resistance MFS efflux pumps,MEFJ
+MEG_8662|Drugs|Metronidazole|rdxA_nitroimidazole_reductase|RDXA,Drugs,Metronidazole,rdxA nitroimidazole reductase,RDXA
+MEG_8724|Drugs|betalactams|Class_B_betalactamases|VAM,Drugs,betalactams,Class B betalactamases,VAM
+MEG_8081|Drugs|MLS|23S_rRNA_methyltransferases|ERM50,Drugs,MLS,23S rRNA methyltransferases,ERM50
+MEG_8095|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSY,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSY
+MEG_8236|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|MCR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,MCR
+MEG_8233|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|LSAD,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,LSAD
+MEG_8640|Drugs|betalactams|Class_C_betalactamases|PRC,Drugs,betalactams,Class C betalactamases,PRC
+MEG_8185|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8183|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8091|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSM,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSM
+MEG_8092|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSM,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSM
+MEG_8093|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSM,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSM
 MEG_8008|Drugs|betalactams|Class_A_betalactamases|BLAZ,Drugs,betalactams,Class A betalactamases,BLAZ
-MEG_8188|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8279|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMG,Drugs,Metronidazole,nim nitroimidazole reductase,NIMG
-MEG_8280|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMK,Drugs,Metronidazole,nim nitroimidazole reductase,NIMK
-MEG_8733|Drugs|Tetracyclines|Tetracycline_inactivation_enzymes|TETX,Drugs,Tetracyclines,Tetracycline inactivation enzymes,TETX
-MEG_8682|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB
-MEG_8683|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB
-MEG_8656|Drugs|Multi-drug_resistance|MDR_regulator|PVRR|RequiresSNPConfirmation,Drugs,Multi-drug resistance,MDR regulator,PVRR
-MEG_8702|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_pumps|RSMA|RequiresSNPConfirmation,Multi-compound,Drug and biocide resistance,Drug and biocide RND efflux pumps,RSMA
-MEG_8013|Drugs|betalactams|Mutant_porin_proteins|CARO|RequiresSNPConfirmation,Drugs,betalactams,Mutant porin proteins,CARO
-MEG_8303|Drugs|betalactams|Mutant_porin_proteins|OPRD|RequiresSNPConfirmation,Drugs,betalactams,Mutant porin proteins,OPRD
-MEG_8739|Drugs|Fosfomycin|Fosfomycin_target_mutation|UHPA|RequiresSNPConfirmation,Drugs,Fosfomycin,Fosfomycin target mutation,UHPA
-MEG_8063|Drugs|Fosfomycin|Fosfomycin_target_mutation|CYAA|RequiresSNPConfirmation,Drugs,Fosfomycin,Fosfomycin target mutation,CYAA
-MEG_8299|Drugs|Multi-drug_resistance|MDR_mutant_porin_proteins|OMPK|RequiresSNPConfirmation,Drugs,Multi-drug resistance,MDR mutant porin proteins,OMPK
-MEG_8301|Drugs|betalactams|Mutant_porin_proteins|OMPK36|RequiresSNPConfirmation,Drugs,betalactams,Mutant porin proteins,OMPK36
-MEG_8272|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_regulator|MVAT|RequiresSNPConfirmation,Multi-compound,Drug and biocide resistance,Drug and biocide RND efflux regulator,MVAT
-MEG_8298|Drugs|betalactams|Mutant_porin_proteins|OMPC|RequiresSNPConfirmation,Drugs,betalactams,Mutant porin proteins,OMPC
-MEG_8216|Drugs|betalactams|Mutant_porin_proteins|LAMB|RequiresSNPConfirmation,Drugs,betalactams,Mutant porin proteins,LAMB
-MEG_8295|Drugs|Multi-drug_resistance|MDR_mutant_porin_proteins|OMP1|RequiresSNPConfirmation,Drugs,Multi-drug resistance,MDR mutant porin proteins,OMP1
-MEG_8255|Drugs|Oxazolidinone|Oxazolidinone_efflux_pump|MLDAD|RequiresSNPConfirmation,Drugs,Oxazolidinone,Oxazolidinone efflux pump,MLDAD
-MEG_8254|Drugs|Multi-drug_resistance|MDR_mutant_porin_proteins|MIPA|RequiresSNPConfirmation,Drugs,Multi-drug resistance,MDR mutant porin proteins,MIPA
-MEG_8463|Drugs|Aminocoumarins|Aminocoumarin-resistant_DNA_topoisomerases|PARE|RequiresSNPConfirmation,Drugs,Aminocoumarins,Aminocoumarin-resistant DNA topoisomerases,PARE
-MEG_8156|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRB|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRB
-MEG_8296|Drugs|betalactams|Mutant_porin_proteins|OMP36|RequiresSNPConfirmation,Drugs,betalactams,Mutant porin proteins,OMP36
-MEG_8461|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|PARC|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,PARC
-MEG_8264|Drugs|Mycobacterium_tuberculosis-specific_Drug|Isoniazid-resistant_mutant|MSHA|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Isoniazid-resistant mutant,MSHA
-MEG_8089|Drugs|Sulfonamides|Sulfonamide-resistant_dihydropteroate_synthases|FOLP|RequiresSNPConfirmation,Drugs,Sulfonamides,Sulfonamide-resistant dihydropteroate synthases,FOLP
-MEG_8157|Drugs|Spiropyrimidinetriones|Zoliflodacin-resistant_DNA_topoisomerases|GYRBZ|RequiresSNPConfirmation,Drugs,Spiropyrimidinetriones,Zoliflodacin-resistant DNA topoisomerases,GYRBZ
-MEG_8151|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRA|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRA
-MEG_8468|Drugs|betalactams|Penicillin_binding_protein|PBP1|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP1
-MEG_8646|Drugs|betalactams|Penicillin_binding_protein|PILQ|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PILQ
-MEG_8740|Drugs|Pleuromutilin|Pleuromutilin-resistant_23S_rRNA_mutation|UL3|RequiresSNPConfirmation,Drugs,Pleuromutilin,Pleuromutilin-resistant 23S rRNA mutation,UL3
-MEG_8152|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRA|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRA
-MEG_8155|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRB|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRB
-MEG_8471|Drugs|betalactams|Penicillin_binding_protein|PBP3|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP3
-MEG_8470|Drugs|betalactams|Penicillin_binding_protein|PBP2|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP2
-MEG_8467|Drugs|betalactams|Penicillin_binding_protein|PBP1|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP1
-MEG_8104|Drugs|Metronidazole|fxr_nitroimidazole_reductase|FXRA|RequiresSNPConfirmation,Drugs,Metronidazole,fxr nitroimidazole reductase,FXRA
-MEG_8689|Drugs|Rifampin|Rifampin-resistant_beta-subunit_of_RNA_polymerase_RpoB|RPOB|RequiresSNPConfirmation,Drugs,Rifampin,Rifampin-resistant beta-subunit of RNA polymerase RpoB,RPOB
-MEG_8686|Drugs|MLS|Macrolide-resistant_50S_rRNA_mutation|RPLD|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 50S rRNA mutation,RPLD
-MEG_8261|Drugs|MLS|Macrolide-resistant_23S_rRNA_mutation|MLS23S|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 23S rRNA mutation,MLS23S
-MEG_8456|Drugs|Pleuromutilin|Pleuromutilin-resistant_23S_rRNA_mutation|P23S|RequiresSNPConfirmation,Drugs,Pleuromutilin,Pleuromutilin-resistant 23S rRNA mutation,P23S
-MEG_8021|Drugs|Phenicol|Phenicol_resistance_MFS_efflux_pumps|CML,Drugs,Phenicol,Phenicol resistance MFS efflux pumps,CML
-MEG_8092|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSA,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSA
-MEG_8014|Drugs|Phenicol|Chloramphenicol_acetyltransferases|CATA,Drugs,Phenicol,Chloramphenicol acetyltransferases,CATA
-MEG_8449|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8428|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8435|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8184|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8271|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMG,Drugs,Metronidazole,nim nitroimidazole reductase,NIMG
+MEG_8272|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMK,Drugs,Metronidazole,nim nitroimidazole reductase,NIMK
+MEG_8717|Drugs|Tetracyclines|Tetracycline_inactivation_enzymes|TETX,Drugs,Tetracyclines,Tetracycline inactivation enzymes,TETX
+MEG_8667|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB
+MEG_8668|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB
+MEG_8450|Drugs|Aminocoumarins|Aminocoumarin-resistant_DNA_topoisomerases|PARE|RequiresSNPConfirmation,Drugs,Aminocoumarins,Aminocoumarin-resistant DNA topoisomerases,PARE
+MEG_8153|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRB|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRB
+MEG_8287|Drugs|betalactams|Mutant_porin_proteins|OMP36|RequiresSNPConfirmation,Drugs,betalactams,Mutant porin proteins,OMP36
+MEG_8448|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|PARC|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,PARC
+MEG_8257|Drugs|Mycobacterium_tuberculosis-specific_Drug|Isoniazid-resistant_mutant|MSHA|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Isoniazid-resistant mutant,MSHA
+MEG_8086|Drugs|Sulfonamides|Sulfonamide-resistant_dihydropteroate_synthases|FOLP|RequiresSNPConfirmation,Drugs,Sulfonamides,Sulfonamide-resistant dihydropteroate synthases,FOLP
+MEG_8154|Drugs|Spiropyrimidinetriones|Zoliflodacin-resistant_DNA_topoisomerases|GYRBZ|RequiresSNPConfirmation,Drugs,Spiropyrimidinetriones,Zoliflodacin-resistant DNA topoisomerases,GYRBZ
+MEG_8148|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRA|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRA
+MEG_8455|Drugs|betalactams|Penicillin_binding_protein|PBP1|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP1
+MEG_8633|Drugs|betalactams|Penicillin_binding_protein|PILQ|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PILQ
+MEG_8723|Drugs|Pleuromutilin|Pleuromutilin-resistant_23S_rRNA_mutation|UL3|RequiresSNPConfirmation,Drugs,Pleuromutilin,Pleuromutilin-resistant 23S rRNA mutation,UL3
+MEG_8149|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRA|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRA
+MEG_8152|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRB|RequiresSNPConfirmation,Drugs,Fluoroquinolones,Fluoroquinolone-resistant DNA topoisomerases,GYRB
+MEG_8458|Drugs|betalactams|Penicillin_binding_protein|PBP3|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP3
+MEG_8457|Drugs|betalactams|Penicillin_binding_protein|PBP2|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP2
+MEG_8454|Drugs|betalactams|Penicillin_binding_protein|PBP1|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP1
+MEG_8101|Drugs|Metronidazole|fxr_nitroimidazole_reductase|FXRA|RequiresSNPConfirmation,Drugs,Metronidazole,fxr nitroimidazole reductase,FXRA
+MEG_8673|Drugs|Rifampin|Rifampin-resistant_beta-subunit_of_RNA_polymerase_RpoB|RPOB|RequiresSNPConfirmation,Drugs,Rifampin,Rifampin-resistant beta-subunit of RNA polymerase RpoB,RPOB
+MEG_8671|Drugs|MLS|Macrolide-resistant_50S_rRNA_mutation|RPLD|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 50S rRNA mutation,RPLD
+MEG_8254|Drugs|MLS|Macrolide-resistant_23S_rRNA_mutation|MLS23S|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 23S rRNA mutation,MLS23S
+MEG_8443|Drugs|Pleuromutilin|Pleuromutilin-resistant_23S_rRNA_mutation|P23S|RequiresSNPConfirmation,Drugs,Pleuromutilin,Pleuromutilin-resistant 23S rRNA mutation,P23S
+MEG_8020|Drugs|Phenicol|Phenicol_resistance_MFS_efflux_pumps|CML,Drugs,Phenicol,Phenicol resistance MFS efflux pumps,CML
+MEG_8089|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSA,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSA
+MEG_8013|Drugs|Phenicol|Chloramphenicol_acetyltransferases|CATA,Drugs,Phenicol,Chloramphenicol acetyltransferases,CATA
+MEG_8436|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8415|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8422|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8005|Drugs|betalactams|Class_B_betalactamases|BLAB,Drugs,betalactams,Class B betalactamases,BLAB
 MEG_7870|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC3-PRIME,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC3-PRIME
 MEG_8006|Drugs|betalactams|Class_B_betalactamases|BLAB,Drugs,betalactams,Class B betalactamases,BLAB
-MEG_8454|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8737|Drugs|Multi-drug_resistance|Multi-drug_RND_efflux_pumps|TOPR,Drugs,Multi-drug resistance,Multi-drug RND efflux pumps,TOPR
-MEG_8267|Drugs|MLS|MLS_resistance_ABC_efflux_pumps|MSRG,Drugs,MLS,MLS resistance ABC efflux pumps,MSRG
-MEG_8250|Drugs|MLS|MLS_resistance_MFS_efflux_pumps|MEFF,Drugs,MLS,MLS resistance MFS efflux pumps,MEFF
-MEG_8431|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8441|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8721|Drugs|Multi-drug_resistance|Multi-drug_RND_efflux_pumps|TOPR,Drugs,Multi-drug resistance,Multi-drug RND efflux pumps,TOPR
+MEG_8260|Drugs|MLS|MLS_resistance_ABC_efflux_pumps|MSRG,Drugs,MLS,MLS resistance ABC efflux pumps,MSRG
+MEG_8245|Drugs|MLS|MLS_resistance_MFS_efflux_pumps|MEFF,Drugs,MLS,MLS resistance MFS efflux pumps,MEFF
+MEG_8418|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_7878|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC6-PRIME
-MEG_8022|Drugs|Phenicol|Phenicol_resistance_MFS_efflux_pumps|CML,Drugs,Phenicol,Phenicol resistance MFS efflux pumps,CML
-MEG_8252|Drugs|Multi-drug_resistance|Multi-drug_RND_efflux_pumps|MEXC1,Drugs,Multi-drug resistance,Multi-drug RND efflux pumps,MEXC1
-MEG_8253|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_pumps|MEXD1,Multi-compound,Drug and biocide resistance,Drug and biocide RND efflux pumps,MEXD1
-MEG_8433|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8731|Drugs|Tetracyclines|Tetracycline_resistance_MFS_efflux_pumps|TET64,Drugs,Tetracyclines,Tetracycline resistance MFS efflux pumps,TET64
-MEG_8668|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRB,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRB
-MEG_8697|Drugs|betalactams|Class_C_betalactamases|RSC,Drugs,betalactams,Class C betalactamases,RSC
-MEG_8698|Drugs|betalactams|Class_D_betalactamases|RSD1,Drugs,betalactams,Class D betalactamases,RSD1
-MEG_8105|Drugs|Aminoglycosides|Gentamicin-resistant_ATP-binding_protein|GAR,Drugs,Aminoglycosides,Gentamicin-resistant ATP-binding protein,GAR
-MEG_8444|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8021|Drugs|Phenicol|Phenicol_resistance_MFS_efflux_pumps|CML,Drugs,Phenicol,Phenicol resistance MFS efflux pumps,CML
+MEG_8247|Drugs|Multi-drug_resistance|Multi-drug_RND_efflux_pumps|MEXC1,Drugs,Multi-drug resistance,Multi-drug RND efflux pumps,MEXC1
+MEG_8248|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_pumps|MEXD1,Multi-compound,Drug and biocide resistance,Drug and biocide RND efflux pumps,MEXD1
+MEG_8420|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8715|Drugs|Tetracyclines|Tetracycline_resistance_MFS_efflux_pumps|TET64,Drugs,Tetracyclines,Tetracycline resistance MFS efflux pumps,TET64
+MEG_8653|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRB,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRB
+MEG_8682|Drugs|betalactams|Class_C_betalactamases|RSC,Drugs,betalactams,Class C betalactamases,RSC
+MEG_8683|Drugs|betalactams|Class_D_betalactamases|RSD1,Drugs,betalactams,Class D betalactamases,RSD1
+MEG_8102|Drugs|Aminoglycosides|Gentamicin-resistant_ATP-binding_protein|GAR,Drugs,Aminoglycosides,Gentamicin-resistant ATP-binding protein,GAR
+MEG_8431|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8007|Drugs|betalactams|Class_A_betalactamases|BLAPAM,Drugs,betalactams,Class A betalactamases,BLAPAM
-MEG_8072|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
-MEG_8035|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
-MEG_8670|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRB,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRB
-MEG_8244|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|MCR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,MCR
-MEG_8667|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRA,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRA
-MEG_7904|Drugs|betalactams|Class_C_betalactamases|ACT,Drugs,betalactams,Class C betalactamases,ACT
-MEG_8432|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8729|Drugs|Tetracyclines|Tetracycline_resistance_MFS_efflux_pumps|TET62,Drugs,Tetracyclines,Tetracycline resistance MFS efflux pumps,TET62
 MEG_8069|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
-MEG_8071|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
-MEG_8735|Drugs|Tetracyclines|Tetracycline_inactivation_enzymes|TETX,Drugs,Tetracyclines,Tetracycline inactivation enzymes,TETX
-MEG_8097|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSU,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSU
-MEG_8673|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRVC,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRVC
-MEG_8245|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|MCR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,MCR
-MEG_8652|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|POXT,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,POXT
-MEG_8211|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8434|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8669|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRB,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRB
+MEG_8034|Drugs|betalactams|Class_C_betalactamases|CMY,Drugs,betalactams,Class C betalactamases,CMY
+MEG_8655|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRB,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRB
+MEG_8239|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|MCR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,MCR
+MEG_8652|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRA,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRA
+MEG_7904|Drugs|betalactams|Class_C_betalactamases|ACT,Drugs,betalactams,Class C betalactamases,ACT
+MEG_8419|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8713|Drugs|Tetracyclines|Tetracycline_resistance_MFS_efflux_pumps|TET62,Drugs,Tetracyclines,Tetracycline resistance MFS efflux pumps,TET62
+MEG_8066|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
+MEG_8068|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
+MEG_8719|Drugs|Tetracyclines|Tetracycline_inactivation_enzymes|TETX,Drugs,Tetracyclines,Tetracycline inactivation enzymes,TETX
+MEG_8094|Drugs|Fosfomycin|Fosfomycin_thiol_transferases|FOSU,Drugs,Fosfomycin,Fosfomycin thiol transferases,FOSU
+MEG_8658|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRVC,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRVC
+MEG_8240|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|MCR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,MCR
+MEG_8638|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|POXT,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,POXT
+MEG_8207|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8421|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8654|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRB,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRB
 MEG_7972|Drugs|betalactams|Class_B_betalactamases|AIM,Drugs,betalactams,Class B betalactamases,AIM
+MEG_8416|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8681|Drugs|betalactams|Class_A_betalactamases|RSA,Drugs,betalactams,Class A betalactamases,RSA
+MEG_8695|Drugs|betalactams|Class_C_betalactamases|SFDC,Drugs,betalactams,Class C betalactamases,SFDC
+MEG_8417|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8212|Drugs|betalactams|Class_C_betalactamases|LAQ,Drugs,betalactams,Class C betalactamases,LAQ
+MEG_8694|Drugs|betalactams|Class_A_betalactamases|SFC,Drugs,betalactams,Class A betalactamases,SFC
+MEG_8160|Drugs|betalactams|Class_A_betalactamases|IMI,Drugs,betalactams,Class A betalactamases,IMI
+MEG_8274|Drugs|Aminoglycosides|16S_rRNA_methyltransferases|NPMB,Drugs,Aminoglycosides,16S rRNA methyltransferases,NPMB
+MEG_8423|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8424|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8425|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8426|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8427|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8428|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8429|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8696|Drugs|betalactams|Class_A_betalactamases|RSA,Drugs,betalactams,Class A betalactamases,RSA
-MEG_8711|Drugs|betalactams|Class_C_betalactamases|SFDC,Drugs,betalactams,Class C betalactamases,SFDC
 MEG_8430|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8217|Drugs|betalactams|Class_C_betalactamases|LAQ,Drugs,betalactams,Class C betalactamases,LAQ
-MEG_8710|Drugs|betalactams|Class_A_betalactamases|SFC,Drugs,betalactams,Class A betalactamases,SFC
-MEG_8163|Drugs|betalactams|Class_A_betalactamases|IMI,Drugs,betalactams,Class A betalactamases,IMI
-MEG_8282|Drugs|Aminoglycosides|16S_rRNA_methyltransferases|NPMB,Drugs,Aminoglycosides,16S rRNA methyltransferases,NPMB
-MEG_8436|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8437|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8438|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8432|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8433|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8434|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8208|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8209|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8210|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
+MEG_8442|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_7968|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C betalactamases,ADC
+MEG_8170|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
+MEG_8435|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_7905|Drugs|betalactams|Class_C_betalactamases|ACT,Drugs,betalactams,Class C betalactamases,ACT
+MEG_8211|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
 MEG_8439|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_8440|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8441|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8442|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8443|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8445|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8446|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8447|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8212|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8213|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8214|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8455|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_7968|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C betalactamases,ADC
-MEG_8173|Drugs|betalactams|Class_B_betalactamases|IMP,Drugs,betalactams,Class B betalactamases,IMP
-MEG_8448|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_7905|Drugs|betalactams|Class_C_betalactamases|ACT,Drugs,betalactams,Class C betalactamases,ACT
-MEG_8215|Drugs|betalactams|Class_A_betalactamases|KPC,Drugs,betalactams,Class A betalactamases,KPC
-MEG_8452|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8453|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_7969|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C betalactamases,ADC
-MEG_8061|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
-MEG_8757|Drugs|betalactams|Class_B_betalactamases|WUS,Drugs,betalactams,Class B betalactamases,WUS
-MEG_8664|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_SMR_efflux_pumps|QACH,Multi-compound,Drug and biocide resistance,Drug and biocide SMR efflux pumps,QACH
-MEG_8018|Drugs|betalactams|Class_A_betalactamases|CME,Drugs,betalactams,Class A betalactamases,CME
+MEG_8059|Drugs|betalactams|Class_A_betalactamases|CTX,Drugs,betalactams,Class A betalactamases,CTX
+MEG_8740|Drugs|betalactams|Class_B_betalactamases|WUS,Drugs,betalactams,Class B betalactamases,WUS
+MEG_8649|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_SMR_efflux_pumps|QACH,Multi-compound,Drug and biocide resistance,Drug and biocide SMR efflux pumps,QACH
+MEG_8017|Drugs|betalactams|Class_A_betalactamases|CME,Drugs,betalactams,Class A betalactamases,CME
 MEG_7879|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC6-PRIME
-MEG_8742|Drugs|Glycopeptides|VanR-type_regulator|VANRS,Drugs,Glycopeptides,VanR-type regulator,VANRS
-MEG_8020|Drugs|Phenicol|Phenicol_resistance_MFS_efflux_pumps|CML,Drugs,Phenicol,Phenicol resistance MFS efflux pumps,CML
-MEG_8070|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
-MEG_8451|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8074|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRE,Drugs,Trimethoprim,Dihydrofolate reductase,DFRE
-MEG_8738|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|TVAB,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,TVAB
-MEG_8426|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8425|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8725|Drugs|Glycopeptides|VanR-type_regulator|VANRS,Drugs,Glycopeptides,VanR-type regulator,VANRS
+MEG_8019|Drugs|Phenicol|Phenicol_resistance_MFS_efflux_pumps|CML,Drugs,Phenicol,Phenicol resistance MFS efflux pumps,CML
+MEG_8067|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA
+MEG_8438|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8071|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRE,Drugs,Trimethoprim,Dihydrofolate reductase,DFRE
+MEG_8722|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|TVAB,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,TVAB
+MEG_8413|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8412|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
 MEG_7880|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC6-PRIME
-MEG_8672|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRE,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRE
-MEG_8730|Drugs|Tetracyclines|Tetracycline_resistance_MFS_efflux_pumps|TET63,Drugs,Tetracyclines,Tetracycline resistance MFS efflux pumps,TET63
-MEG_8450|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8144|Drugs|Aminoglycosides|Gentamicin-resistant_ATP-binding_protein|GRDA,Drugs,Aminoglycosides,Gentamicin-resistant ATP-binding protein,GRDA
-MEG_8427|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
-MEG_8143|Drugs|Aminoglycosides|Gentamicin-resistant_ATP-binding_protein|GRDA,Drugs,Aminoglycosides,Gentamicin-resistant ATP-binding protein,GRDA
+MEG_8657|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRE,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRE
+MEG_8714|Drugs|Tetracyclines|Tetracycline_resistance_MFS_efflux_pumps|TET63,Drugs,Tetracyclines,Tetracycline resistance MFS efflux pumps,TET63
+MEG_8437|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8141|Drugs|Aminoglycosides|Gentamicin-resistant_ATP-binding_protein|GRDA,Drugs,Aminoglycosides,Gentamicin-resistant ATP-binding protein,GRDA
+MEG_8414|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA
+MEG_8140|Drugs|Aminoglycosides|Gentamicin-resistant_ATP-binding_protein|GRDA,Drugs,Aminoglycosides,Gentamicin-resistant ATP-binding protein,GRDA
 MEG_7869|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC3,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC3
-MEG_8756|Drugs|betalactams|Class_B_betalactamases|VMB,Drugs,betalactams,Class B betalactamases,VMB
-MEG_8243|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|MCR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,MCR
-MEG_8242|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|MCR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,MCR
-MEG_8090|Biocides|Aldehyde_resistance|Aldehyde_degradation|FORMA,Biocides,Aldehyde resistance,Aldehyde degradation,FORMA
-MEG_8657|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_pumps|QACAB,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux pumps,QACAB
-MEG_8659|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_pumps|QACAB,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux pumps,QACAB
-MEG_8660|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_SMR_efflux_pumps|QACC,Multi-compound,Drug and biocide resistance,Drug and biocide SMR efflux pumps,QACC
-MEG_8661|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_SMR_efflux_pumps|QACD,Multi-compound,Drug and biocide resistance,Drug and biocide SMR efflux pumps,QACD
-MEG_8662|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_SMR_efflux_pumps|QACF,Multi-compound,Drug and biocide resistance,Drug and biocide SMR efflux pumps,QACF
-MEG_8663|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_SMR_efflux_pumps|QACG,Multi-compound,Drug and biocide resistance,Drug and biocide SMR efflux pumps,QACG
-MEG_8665|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_SMR_efflux_pumps|QACH,Multi-compound,Drug and biocide resistance,Drug and biocide SMR efflux pumps,QACH
-MEG_8666|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_SMR_efflux_pumps|QACL,Multi-compound,Drug and biocide resistance,Drug and biocide SMR efflux pumps,QACL
-MEG_8658|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_pumps|QACAB,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux pumps,QACAB
-MEG_8716|Multi-compount|Biocide_and_metal_resistance|Biocide_and_metal_ABC_efflux_pumps|SITABCD,Multi-compount,Biocide and metal resistance,Biocide and metal ABC efflux pumps,SITABCD
-MEG_8653|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|POXT,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,POXT
-MEG_8015|Drugs|Phenicol|Chloramphenicol_acetyltransferases|CATT,Drugs,Phenicol,Chloramphenicol acetyltransferases,CATT
-MEG_8671|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRB,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRB
-MEG_8732|Drugs|Tetracyclines|Tetracycline_resistance_ribosomal_protection_proteins|TETO,Drugs,Tetracyclines,Tetracycline resistance ribosomal protection proteins,TETO
+MEG_8739|Drugs|betalactams|Class_B_betalactamases|VMB,Drugs,betalactams,Class B betalactamases,VMB
+MEG_8238|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|MCR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,MCR
+MEG_8237|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|MCR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,MCR
+MEG_8087|Biocides|Aldehyde_resistance|Aldehyde_degradation|FORMA,Biocides,Aldehyde resistance,Aldehyde degradation,FORMA
+MEG_8642|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_pumps|QACAB,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux pumps,QACAB
+MEG_8644|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_pumps|QACAB,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux pumps,QACAB
+MEG_8645|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_SMR_efflux_pumps|QACC,Multi-compound,Drug and biocide resistance,Drug and biocide SMR efflux pumps,QACC
+MEG_8646|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_SMR_efflux_pumps|QACD,Multi-compound,Drug and biocide resistance,Drug and biocide SMR efflux pumps,QACD
+MEG_8647|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_SMR_efflux_pumps|QACF,Multi-compound,Drug and biocide resistance,Drug and biocide SMR efflux pumps,QACF
+MEG_8648|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_SMR_efflux_pumps|QACG,Multi-compound,Drug and biocide resistance,Drug and biocide SMR efflux pumps,QACG
+MEG_8650|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_SMR_efflux_pumps|QACH,Multi-compound,Drug and biocide resistance,Drug and biocide SMR efflux pumps,QACH
+MEG_8651|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_SMR_efflux_pumps|QACL,Multi-compound,Drug and biocide resistance,Drug and biocide SMR efflux pumps,QACL
+MEG_8643|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_pumps|QACAB,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux pumps,QACAB
+MEG_8700|Multi-compount|Biocide_and_metal_resistance|Biocide_and_metal_ABC_efflux_pumps|SITABCD,Multi-compount,Biocide and metal resistance,Biocide and metal ABC efflux pumps,SITABCD
+MEG_8639|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|POXT,Drugs,Multi-drug resistance,Multi-drug ABC efflux pumps,POXT
+MEG_8014|Drugs|Phenicol|Chloramphenicol_acetyltransferases|CATT,Drugs,Phenicol,Chloramphenicol acetyltransferases,CATT
+MEG_8656|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRB,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRB
+MEG_8716|Drugs|Tetracyclines|Tetracycline_resistance_ribosomal_protection_proteins|TETO,Drugs,Tetracyclines,Tetracycline resistance ribosomal protection proteins,TETO
