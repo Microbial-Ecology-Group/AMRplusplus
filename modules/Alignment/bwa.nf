@@ -15,10 +15,14 @@ if( params.annotation ) {
 threads = params.threads
 
 process index {
-    //tag "$referenceindex.simpleName"
-    publishDir "${params.output}/BuildBWAIndex", mode: "copy"
-    conda = "$baseDir/envs/alignment.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
+    label "alignment"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
+    publishDir "${params.output}/Alignment/BWA_Index", mode: "copy"
 
     input:
     path fasta
@@ -36,43 +40,57 @@ process index {
 
 process bwa_align {
     tag "$pair_id"
-    publishDir "${params.output}/AlignToDB", mode: "copy"
+    label "alignment"
 
-    conda = "$baseDir/envs/alignment.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
+    publishDir "${params.output}/Alignment/SAM_files", mode: "copy",
+        saveAs: { filename ->
+            if(filename.indexOf(".alignment.sam") > 0) "Standard/$filename"
+            else if(filename.indexOf(".alignment.dedup.sam") > 0) "Deduped/$filename"
+            else {}
+        }
 
     input:
-    path dbfasta
-    path indexfiles 
-    tuple val(pair_id), path(reads) 
+        path dbfasta
+        path indexfiles 
+        tuple val(pair_id), path(reads) 
 
     output:
-    tuple val(pair_id), path("${pair_id}.amr.alignment.dedup.bam"), emit: bwa_dedup_bam
-    tuple val(pair_id), path("${pair_id}.amr.alignment.sorted.fix.sorted.bam"), emit: bwa_bam
-    tuple val(pair_id), path("${pair_id}.amr.alignment.dedup.sam"), emit: bwa_dedup_sam
-    tuple val(pair_id), path("${pair_id}.amr.alignment.sam"), emit: bwa_sam
+        tuple val(pair_id), path("${pair_id}.alignment.dedup.sam"), emit: bwa_dedup_sam
+        tuple val(pair_id), path("${pair_id}.alignment.sam"), emit: bwa_sam
 
-    script:
     """
-     ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}.amr.alignment.sam
-     ${SAMTOOLS} view -S -b ${pair_id}.amr.alignment.sam > ${pair_id}.amr.alignment.bam
-     ${SAMTOOLS} sort -n ${pair_id}.amr.alignment.bam -o ${pair_id}.amr.alignment.sorted.bam
-     ${SAMTOOLS} fixmate ${pair_id}.amr.alignment.sorted.bam ${pair_id}.amr.alignment.sorted.fix.bam
-     ${SAMTOOLS} sort ${pair_id}.amr.alignment.sorted.fix.bam -o ${pair_id}.amr.alignment.sorted.fix.sorted.bam
-     ${SAMTOOLS} rmdup -S ${pair_id}.amr.alignment.sorted.fix.sorted.bam ${pair_id}.amr.alignment.dedup.bam
-     ${SAMTOOLS} view -h -o ${pair_id}.amr.alignment.dedup.sam ${pair_id}.amr.alignment.dedup.bam
-     #rm ${pair_id}.amr.alignment.bam
-     #rm ${pair_id}.amr.alignment.sorted*.bam
+     ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}.alignment.sam
+     ${SAMTOOLS} view -S -b ${pair_id}.alignment.sam > ${pair_id}.alignment.bam
+     ${SAMTOOLS} sort -n ${pair_id}.alignment.bam -o ${pair_id}.alignment.sorted.bam
+     ${SAMTOOLS} fixmate ${pair_id}.alignment.sorted.bam ${pair_id}.alignment.sorted.fix.bam
+     ${SAMTOOLS} sort ${pair_id}.alignment.sorted.fix.bam -o ${pair_id}.alignment.sorted.fix.sorted.bam
+     ${SAMTOOLS} rmdup -S ${pair_id}.alignment.sorted.fix.sorted.bam ${pair_id}.alignment.dedup.bam
+     ${SAMTOOLS} view -h -o ${pair_id}.alignment.dedup.sam ${pair_id}.alignment.dedup.bam
+     rm ${pair_id}.alignment.bam
+     rm ${pair_id}.alignment.sorted*.bam
+     rm ${pair_id}.alignment.dedup.bam
     """
 }
 
 process bwa_rm_contaminant_fq {
     tag { pair_id }
+    label "alignment"
 
-    publishDir "${params.output}/AlignReadsToHost", mode: "copy"
-
-    conda = "$baseDir/envs/alignment.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3 
+ 
+    publishDir "${params.output}/HostRemoval", mode: "copy",
+        saveAs: { filename ->
+            if(filename.indexOf("fastq.gz") > 0) "NonHostFastq/$filename"
+            else {}
+        }
 
     input:
     path hostfasta
@@ -81,6 +99,7 @@ process bwa_rm_contaminant_fq {
 
     output:
     tuple val(pair_id), path("${pair_id}.non.host.R*.fastq.gz"), emit: nonhost_reads
+    path("${pair_id}.samtools.idxstats"), emit: host_rm_stats
     
     """
     ${BWA} mem ${hostfasta} ${reads[0]} ${reads[1]} -t ${threads} > ${pair_id}.host.sam
@@ -96,5 +115,29 @@ process bwa_rm_contaminant_fq {
 
     """
 
+}
 
+process HostRemovalStats {
+    tag { sample_id }
+    label "alignment"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3 
+
+    publishDir "${params.output}/Results", mode: "copy",
+        saveAs: { filename ->
+            if(filename.indexOf(".stats") > 0) "Stats/$filename"
+        }
+
+    input:
+        file(host_rm_stats)
+
+    output:
+        path("host.removal.stats"), emit: combo_host_rm_stats
+
+    """
+    ${PYTHON3} $baseDir/bin/samtools_idxstats.py -i ${host_rm_stats} -o host.removal.stats
+    """
 }

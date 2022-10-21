@@ -50,7 +50,7 @@ def output_amr_analytic_data(outfile, S, L):
         local_sample_names = []
         for sample, dat in S.items():
             local_sample_names.append(sample)
-        amr.write('gene_accession'.join(local_sample_names) + '\n')
+        amr.write('gene_accession' + ',' + ','.join(local_sample_names) + '\n')
         for label in L:
             local_counts = []
             amr.write(label + ',')

@@ -1,10 +1,10 @@
-title: "Nextflow RNA-seq demo"
-subtitle: "A pipeline for quantification of genomic features from short read data"
+title: "AMR++ Bioinformatic pipeline"
+subtitle: "A pipeline meant to aid in the analysis of raw sequencing reads to characterize the profile of antimicrobial resistance genes, or resistome."
 
 report_header_info:
-    - Contact E-mail: 'paolo.ditommaso@gmail.com'
-    - Application Type: 'RNA-seq'
-    - Project Type: 'Nextflow demo'
+    - Contact E-mail: 'meglab.metagenomics@gmail.com'
+    - Application Type: 'AMR++'
+    - Project Type: 'FastQC analysis'
 
 custom_logo_url: 'https://www.nextflow.io'
 custom_logo_title: 'Center for Genomic Regulation'

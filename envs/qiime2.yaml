@@ -1,0 +1,5 @@
+channels:
+  - qiime2
+dependencies:
+  - python=3.8
+  - qiime2

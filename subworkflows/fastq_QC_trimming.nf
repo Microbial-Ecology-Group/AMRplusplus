@@ -1,5 +1,5 @@
 // Load modules
-include { runqc } from '../modules/Trimming/trimmomatic'
+include { runqc ; QCstats } from '../modules/Trimming/trimmomatic'
 
 // WC trimming
 workflow FASTQ_TRIM_WF {
@@ -10,6 +10,8 @@ workflow FASTQ_TRIM_WF {
         //index( hostindex )
         //bwa_align( index.out, read_pairs_ch )
         runqc(read_pairs_ch)
+        QCstats(runqc.out.trimmomatic_stats.collect())
+        
     emit:
         //bwa_align = bwa_align.out
         trimmed_reads = runqc.out.paired_fastq  

@@ -12,10 +12,19 @@ max = params.max
 skip = params.skip
 samples = params.samples
 
+deduped = params.deduped
+prefix = params.prefix
+
 process build_dependencies {
-    tag { dl_github }
+    tag { dl_dependencies }
+    label "python"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
     publishDir "${baseDir}/bin/", mode: "copy"
-    conda = "$baseDir/envs/python.yaml"
 
     output:
         path("rarefaction"), emit: rarefactionanalyzer
@@ -44,6 +53,7 @@ process build_dependencies {
     cp $baseDir/bin/resistome .
 
     git clone https://github.com/Isabella136/AmrPlusPlus_SNP.git
+    chmod -R 777 AmrPlusPlus_SNP/
 
     """
 
@@ -51,15 +61,20 @@ process build_dependencies {
 }
 
 
-
-
-
-
 process runresistome {
     tag { sample_id }
-    conda = "$baseDir/envs/alignment.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
-    publishDir "${params.output}/RunResistome", mode: "copy"
+    label "python"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
+    publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
+        saveAs: { filename ->
+            if(filename.indexOf(".tsv") > 0) "ResistomeCounts/$filename"
+            else {}
+        }
 
     input:
         tuple val(sample_id), path(sam)
@@ -69,7 +84,7 @@ process runresistome {
 
     output:
         tuple val(sample_id), path("${sample_id}*.tsv"), emit: resistome_tsv
-        path("${sample_id}.gene.tsv"), emit: resistome_counts
+        path("${sample_id}.${prefix}.gene.tsv"), emit: resistome_counts
 
     
     
@@ -77,57 +92,52 @@ process runresistome {
     $resistome -ref_fp ${amr} \
       -annot_fp ${annotation} \
       -sam_fp ${sam} \
-      -gene_fp ${sample_id}.gene.tsv \
-      -group_fp ${sample_id}.group.tsv \
-      -mech_fp ${sample_id}.mechanism.tsv \
-      -class_fp ${sample_id}.class.tsv \
-      -type_fp ${sample_id}.type.tsv \
+      -gene_fp ${sample_id}.${prefix}.gene.tsv \
+      -group_fp ${sample_id}.${prefix}.group.tsv \
+      -mech_fp ${sample_id}.${prefix}.mechanism.tsv \
+      -class_fp ${sample_id}.${prefix}.class.tsv \
+      -type_fp ${sample_id}.${prefix}.type.tsv \
       -t ${threshold}
-    """
-}
-
-process runsnp {
-    tag { sample_id }
-    conda = "$baseDir/envs/python.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
-    publishDir "${params.output}/RunSNP_Verification", mode: "copy"
-
-    errorStrategy = 'ignore'
-
-    input:
-        tuple val(sample_id), path(sam)
-        path(amrsnp)
-
-    output:
-        tuple val(sample_id), path("${sample_id}_SNPs/*"), emit: snps
-
-    """
-    python3 $amrsnp/SNP_Verification.py -i ${sam} -o ${sample_id}_SNPs
     """
 }
 
 process resistomeresults {
     tag { }
-    conda = "$baseDir/envs/python.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
-    publishDir "${params.output}/ResistomeResults", mode: "copy"
+    label "python"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+    
+    publishDir "${params.output}/Results", mode: "copy"
 
     input:
         path(resistomes)
 
     output:
-        path("AMR_analytic_matrix.csv"), emit: raw_count_matrix
+        path("${prefix}_analytic_matrix.csv"), emit: raw_count_matrix
+        path("${prefix}_analytic_matrix.csv"), emit: snp_count_matrix, optional: true
 
     """
-    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o AMR_analytic_matrix.csv
+    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ${prefix}_analytic_matrix.csv
     """
 }
 
 process runrarefaction {
     tag { sample_id }
-    conda = "$baseDir/envs/python.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
-    publishDir "${params.output}/RunRarefaction", mode: "copy"
+    label "python"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
+    publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
+        saveAs: { filename ->
+            if(filename.indexOf(".tsv") > 0) "Rarefaction/Counts/$filename"
+            else {}
+        }
 
     input:
         tuple val(sample_id), path(sam)
@@ -158,20 +168,96 @@ process runrarefaction {
 
 process plotrarefaction {
     tag { sample_id }
-    conda = "$baseDir/envs/python.yaml"
-    container = 'enriquedoster/amrplusplus_alignment:latest'
-    publishDir "${params.output}/RarefactionFigures", mode: "copy"
+    label "python"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
+    publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
+        saveAs: { filename ->
+            if(filename.indexOf("graphs/*.png") > 0) "Rarefaction/Figures/$filename"
+            else {}
+        }
 
     input:
         path(rarefaction)
 
     output:
-        path("*.tsv"), emit: rarefaction
+        path("graphs/*.png"), emit: plots
 
     """
     mkdir data/
     mv *.tsv data/
     mkdir graphs/
     python $baseDir/bin/rfplot.py --dir ./data --nd --s --sd ./graphs
+    """
+}
+
+
+process runsnp {
+    tag {sample_id}
+    label "python"
+
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
+    publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
+        saveAs: { filename ->
+            if(filename.indexOf("_SNPs/*") > 0) "SNP_verification/$filename"
+            else {}
+        }
+
+    errorStrategy = 'ignore'
+
+    input:
+        tuple val(sample_id), path(sam_resistome)
+        path(snp_count_matrix)
+
+    output:
+        path("${sample_id}*_count_col"), emit: snp_counts
+        path("${sample_id}*_SNPs/*")
+
+    """
+    cp -r $baseDir/bin/AmrPlusPlus_SNP/* .
+
+    python3 SNP_Verification.py -c config.ini -a -i ${sam_resistome} -o ${sample_id}_${prefix}_SNPs --count_matrix ${snp_count_matrix}
+
+    cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${snp_count_matrix}` ${snp_count_matrix} > ${sample_id}_${prefix}_SNP_count_col
+
+    """
+}
+
+
+process snpresults {
+    tag {sample_id}
+    label "python"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+    
+    publishDir "${params.output}/Results", mode: "copy"
+
+    errorStrategy = 'ignore'
+
+    input:
+        path(snp_counts)
+        path(snp_count_matrix)
+
+    output:
+        path("*_analytic_matrix.csv"), emit: snp_matrix
+
+    """
+
+    cut -d ',' -f 1 ${snp_count_matrix} > gene_accession_labels
+    paste gene_accession_labels ${snp_counts} > SNPconfirmed_${prefix}_analytic_matrix.csv
+
+
     """
 }

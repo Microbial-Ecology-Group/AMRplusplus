@@ -21,12 +21,11 @@ Channel
 .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
 .set { fastq_files }
 
-// Default is pipeline is null to warn users below
+
+// Load null pipeline
 params.pipeline = null
 
-
 // Load main pipeline workflows
-
 include { STANDARD_AMRplusplus } from './subworkflows/AMR++_standard.nf' 
 include { FAST_AMRplusplus } from './subworkflows/AMR++_fast.nf'
 include { STANDARD_AMRplusplus_wKraken } from './subworkflows/AMR++_standard_wKraken.nf'
@@ -37,11 +36,16 @@ include { FASTQ_TRIM_WF } from './subworkflows/fastq_QC_trimming.nf'
 include { FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf' 
 include { FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
 include { FASTQ_KRAKEN_WF } from './subworkflows/fastq_microbiome.nf'
+include { FASTQ_QIIME2_WF } from './subworkflows/fastq_16S_qiime2.nf'
+
 
 
 workflow {
-    if (params.pipeline == "demo") {
-
+    if (params.pipeline == null) {
+        log.info """\
+        Running a demonstration of AMR++
+        ===================================
+        """
         //run with demo params, use params.config
         FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
         
@@ -57,15 +61,15 @@ workflow {
 
         STANDARD_AMRplusplus_wKraken(fastq_files,params.reference, params.amr, params.annotation, params.kraken_db)
     } 
-    else if(params.pipeline == "multiqc") {
+    else if(params.pipeline == "eval_qc") {
 
         FASTQ_QC_WF( fastq_files )
     } 
-    else if(params.pipeline == "trim") {
+    else if(params.pipeline == "trim_qc") {
 
         FASTQ_TRIM_WF( fastq_files )
     }
-    else if(params.pipeline == "rmhost") {
+    else if(params.pipeline == "rm_host") {
 
         FASTQ_RM_HOST_WF(params.host, fastq_files )
     } 
@@ -76,7 +80,20 @@ workflow {
     else if(params.pipeline == "kraken") {
 
         FASTQ_KRAKEN_WF( fastq_files , params.kraken_db)
-    }   
+    }
+    else if(params.pipeline == "qiime2") {
+        Channel
+            .fromFilePairs( params.reads, flat: true )
+            .ifEmpty { exit 1, "Read pair files could not be found: ${params.reads}" }
+            .map { name, forward, reverse -> [ forward.drop(forward.findLastIndexOf{"/"})[0], forward, reverse ] } //extract file name
+            .map { name, forward, reverse -> [ name.toString().take(name.toString().indexOf("_")), forward, reverse ] } //extract sample name
+            .map { name, forward, reverse -> [ name +","+ forward + ",forward\n" + name +","+ reverse +",reverse" ] } //prepare basic synthax
+            .flatten()
+            .collectFile(name: 'manifest.txt', newLine: true, storeDir: "${params.output}/demux", seed: "sample-id,absolute-filepath,direction")
+            .set { ch_manifest }
+        
+        FASTQ_QIIME2_WF( ch_manifest , params.dada2_db)
+    }
     else {
             println "ERROR ################################################################"
             println "Please choose a pipeline!!!" 

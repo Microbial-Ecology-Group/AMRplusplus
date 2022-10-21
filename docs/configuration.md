@@ -126,17 +126,47 @@ params {
 }
 ```
 
-### Pipelines
+## Selecting the correct pipeline
 
-```--pipeline demo```    Simple demonstration
-
-```--pipeline standard_AMR```   QC trimming > Host DNA removal > Resistome alignment > Resistome results
-
-```--pipeline fast_AMR```  QC trimming > Resistome alignment > Resistome results
-
-```--pipeline standard_AMR_wKraken```   QC trimming > Host DNA removal > Resistome alignment > Resistome results 
-Non-host reads > Microbiome analysis
-
-
-pipeline fragments
-```--pipeline multiqc```  Evaluate sample QC 
+Main pipeline options
+  * Simple demonstration 
+    ```bash
+    --pipeline demo
+    ```   
+  * Standard AMR pipeline ( QC trimming > Host DNA removal > Resistome alignment > Resistome results)
+    ```bash
+    --pipeline standard_AMR
+    ```  
+  * Fast AMR pipeline (QC trimming > Resistome alignment > Resistome results)
+    ```bash
+    --pipeline fast_AMR
+    ``` 
+  * AMR pipeline with kraken ( QC trimming > Host DNA removal > Resistome alignment > Resistome results) & (Non-host reads > Microbiome analysis)
+    ```bash
+    --pipeline standard_AMR_wKraken
+    ``` 
+  * 16S Microbiome analysis with qiime2 (DADA2 QC > Classification with SILVA)
+    ```bash
+    --pipeline qiime2
+    ``` 
+Pipeline fragments
+  * Evaluate QC with multiQC
+    ```bash
+    --pipeline eval_qc
+    ``` 
+  * QC trimming with trimmomatic
+    ```bash
+    --pipeline trim_qc
+    ``` 
+  * Align reads to host DNA and remove contaminants
+    ```bash
+    --pipeline rm_host
+    ``` 
+  * Only perform AMR++ resistome analysis
+    ```bash
+    --pipeline resistome
+    ``` 
+  * Only perform microbiome analysis with Kraken
+    ```bash
+    --pipeline kraken
+    ``` 

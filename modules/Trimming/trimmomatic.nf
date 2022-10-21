@@ -18,10 +18,14 @@ minlen = params.minlen
 
 process runqc {
     tag { sample_id }
-    conda = "$baseDir/envs/alignment.yaml"
-    container = 'enriquedoster/amrplusplus_qc:latest'
+    label "trimming"
 
-    publishDir "${params.output}/RunQC", mode: 'copy', pattern: '*.fastq.gz',
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
+    publishDir "${params.output}/QC_trimming", mode: 'copy', pattern: '*.fastq.gz',
         saveAs: { filename ->
             if(filename.indexOf("P.fastq.gz") > 0) "Paired/$filename"
             else if(filename.indexOf("U.fastq.gz") > 0) "Unpaired/$filename"
@@ -48,5 +52,31 @@ process runqc {
       MINLEN:${minlen} \
       2> ${sample_id}.trimmomatic.stats.log
       
+    """
+}
+
+process QCstats {
+    tag { sample_id }
+    label "python"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
+    publishDir "${params.output}/Results", mode: 'copy',
+        saveAs: { filename ->
+            if(filename.indexOf(".stats") > 0) "Stats/$filename"
+            else {}
+        }
+
+    input:
+        file(stats)
+
+    output:
+        path("trimmomatic.stats"), emit: combo_trim_stats
+
+    """
+    ${PYTHON3} $baseDir/bin/trimmomatic_stats.py -i ${stats} -o trimmomatic.stats
     """
 }

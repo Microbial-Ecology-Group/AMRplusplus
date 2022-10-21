@@ -3,15 +3,19 @@ params.readlen = 150
 
 process runkraken {
     tag { sample_id }
-    conda = "$baseDir/envs/microbiome.yaml"
-    container = 'enriquedoster/amrplusplus_microbiome:latest'
+    label "microbiome"
 
-    publishDir "${params.output}/RunKraken", mode: 'copy',
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
+    publishDir "${params.output}/MicrobiomeAnalysis", mode: 'copy',
         saveAs: { filename ->
-            if(filename.indexOf(".kraken.raw") > 0) "Standard/$filename"
-            else if(filename.indexOf(".kraken.report") > 0) "Standard_report/$filename"
-            else if(filename.indexOf(".kraken.filtered.report") > 0) "Filtered_report/$filename"
-            else if(filename.indexOf(".kraken.filtered.raw") > 0) "Filtered/$filename"
+            if(filename.indexOf(".kraken.raw") > 0) "Kraken/standard/$filename"
+            else if(filename.indexOf(".kraken.report") > 0) "Kraken/standard_report/$filename"
+            else if(filename.indexOf(".kraken.filtered.report") > 0) "Kraken/filtered_report/$filename"
+            else if(filename.indexOf(".kraken.filtered.raw") > 0) "Kraken/filtered/$filename"
             else {}
         }
 
@@ -41,9 +45,14 @@ process runkraken {
 
 process krakenresults {
     tag { }
-    conda = "$baseDir/envs/microbiome.yaml"
-    container = 'enriquedoster/amrplusplus_microbiome:latest'
-    publishDir "${params.output}/KrakenResults", mode: "copy"
+    label "python"
+
+    memory { 2.GB * task.attempt }
+    time { 1.hour * task.attempt }
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
+    publishDir "${params.output}/Results/", mode: 'copy'
 
     input:
         path(kraken_reports)
@@ -57,7 +66,8 @@ process krakenresults {
 }
 
 process runbracken {
-
+    label "microbiome"
+    
     input:
        tuple val(sample_id), path(krakenout)
        tuple val(sample_id), path(krakenout_filtered)
@@ -81,6 +91,7 @@ process runbracken {
 }
 
 process kronadb {
+    label "microbiome"
     output:
         file("krona_db/taxonomy.tab") optional true into krona_db_ch // is this a value ch?
 
@@ -95,7 +106,7 @@ process kronadb {
 
 process kronafromkraken {
     publishDir params.outdir, mode: 'copy'
-
+    label "microbiome"
     input:
         file(x) from kraken2krona_ch.collect()
         //file(y) from kaiju2krona_ch.collect()

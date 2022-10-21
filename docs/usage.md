@@ -126,3 +126,11 @@ $ nextflow run main_AMR++.nf \
 ```
 $ nextflow run main_AMR++.nf --threads 8
 ```
+
+## Run AMR++ with SLURM
+
+Adding the ```-bg``` flag submits AMR++ to the SLURM queue and when combined with a "slurm" profile, jobs will be submitted for each individual process in the pipeline.
+
+```
+nextflow run main_AMR++.nf -profile local_slurm --snp Y -bg > bg-log.out
+```
