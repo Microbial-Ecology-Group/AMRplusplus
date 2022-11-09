@@ -1,8 +1,0 @@
-Aug-29 22:25:51.670 [main] DEBUG nextflow.cli.Launcher - $> nextflow run rnaseq-analysis-2.nf -profile standard --multiqc /home/enrique/Dropbox/Projects/AMR++_v3_update/nfcamp-tutorial/multiqc -resume
-Aug-29 22:25:51.744 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 22.04.5
-Aug-29 22:25:51.848 [main] DEBUG nextflow.cli.Launcher - Operation aborted
-nextflow.exception.AbortOperationException: Cannot find script file: rnaseq-analysis-2.nf
-	at nextflow.cli.CmdRun.getScriptFile(CmdRun.groovy:419)
-	at nextflow.cli.CmdRun.run(CmdRun.groovy:287)
-	at nextflow.cli.Launcher.run(Launcher.groovy:480)
-	at nextflow.cli.Launcher.main(Launcher.groovy:639)

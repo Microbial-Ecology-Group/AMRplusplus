@@ -10,50 +10,130 @@ The output directories created by the pipeline are named after the module that p
 
 Files without sample prefixes are a result of aggregation. For example, the files **host.removal.stats** and **trimmomatic.stats** provide count matrices for the number of reads discarded as a result of host-dna removal and number of trimmed reads for each sample. 
 
+Below is an example of all of the results created with a test run of AMR++.
+
 ```bash
-├── RunQC
+test_results
+├── Alignment
+│   ├── BWA_Index
+│   │   ├── chr21.fasta.gz.amb
+│   │   ├── chr21.fasta.gz.ann
+│   │   ├── chr21.fasta.gz.bwt
+│   │   ├── chr21.fasta.gz.pac
+│   │   ├── chr21.fasta.gz.sa
+│   │   ├── megares_database_v3.00.fasta.amb
+│   │   ├── megares_database_v3.00.fasta.ann
+│   │   ├── megares_database_v3.00.fasta.bwt
+│   │   ├── megares_database_v3.00.fasta.pac
+│   │   └── megares_database_v3.00.fasta.sa
+│   └── SAM_files
+│       ├── Deduped
+│       │   ├── S1_test.alignment.dedup.sam
+│       │   ├── S2_test.alignment.dedup.sam
+│       │   └── S3_test.alignment.dedup.sam
+│       └── Standard
+│           ├── S1_test.alignment.sam
+│           ├── S2_test.alignment.sam
+│           └── S3_test.alignment.sam
+├── HostRemoval
+│   └── NonHostFastq
+│       ├── S1_test.non.host.R1.fastq.gz
+│       ├── S1_test.non.host.R2.fastq.gz
+│       ├── S2_test.non.host.R1.fastq.gz
+│       ├── S2_test.non.host.R2.fastq.gz
+│       ├── S3_test.non.host.R1.fastq.gz
+│       └── S3_test.non.host.R2.fastq.gz
+├── QC_analysis
+│   ├── FastQC
+│   │   ├── S1_test_fastqc_logs
+│   │   │   ├── S1_test_R1_fastqc.html
+│   │   │   ├── S1_test_R1_fastqc.zip
+│   │   │   ├── S1_test_R2_fastqc.html
+│   │   │   └── S1_test_R2_fastqc.zip
+│   │   ├── S2_test_fastqc_logs
+│   │   │   ├── S2_test_R1_fastqc.html
+│   │   │   ├── S2_test_R1_fastqc.zip
+│   │   │   ├── S2_test_R2_fastqc.html
+│   │   │   └── S2_test_R2_fastqc.zip
+│   │   └── S3_test_fastqc_logs
+│   │       ├── S3_test_R1_fastqc.html
+│   │       ├── S3_test_R1_fastqc.zip
+│   │       ├── S3_test_R2_fastqc.html
+│   │       └── S3_test_R2_fastqc.zip
+│   └── MultiQC_stats
+│       └── multiqc_report.html
+├── QC_trimming
 │   ├── Paired
-│   │   ├── SRR532663.1P.fastq
-│   │   └── SRR532663.2P.fastq
-│   ├── Stats
-│   │   └── trimmomatic.stats
+│   │   ├── S1_test.1P.fastq.gz
+│   │   ├── S1_test.2P.fastq.gz
+│   │   ├── S2_test.1P.fastq.gz
+│   │   ├── S2_test.2P.fastq.gz
+│   │   ├── S3_test.1P.fastq.gz
+│   │   └── S3_test.2P.fastq.gz
 │   └── Unpaired
-│       ├── SRR532663.1U.fastq
-│       └── SRR532663.2U.fastq
-├── BuildHostIndex
-│   ├── chr21.fasta.amb
-│   ├── chr21.fasta.ann
-│   ├── chr21.fasta.bwt
-│   ├── chr21.fasta.pac
-│   └── chr21.fasta.sa
-├── AlignReadsToHost
-│   └── SRR532663.host.sam
-├── NonHostReads
-│   ├── SRR532663.non.host.R1.fastq
-│   └── SRR532663.non.host.R2.fastq
-├── RemoveHostDNA
-│   ├── HostRemovalStats
-│   │   └── host.removal.stats
-│   └── NonHostBAM
-│       └── SRR532663.host.sorted.removed.bam
-├── AlignToAMR
-│   └── SRR532663.amr.alignment.sam
-├── RunResistome
-│   └── SRR532663.gene.tsv
-├── ResistomeResults
-│   └── AMR_analytic_matrix.csv
-├── RunRarefaction
-│   ├── SRR532663.class.tsv
-│   ├── SRR532663.gene.tsv
-│   ├── SRR532663.group.tsv
-│   └── SRR532663.mech.tsv
-├── RunKraken
-│   └── SRR532663.kraken.report
-│   └── SRR532663.kraken.filtered.report
-├── KrakenResults
-│   └── kraken_analytic_matrix.csv
-├── FilteredKrakenResults
-│   └── filtered_kraken_analytic_matrix.csv
+│       ├── S1_test.1U.fastq.gz
+│       ├── S1_test.2U.fastq.gz
+│       ├── S2_test.1U.fastq.gz
+│       ├── S2_test.2U.fastq.gz
+│       ├── S3_test.1U.fastq.gz
+│       └── S3_test.2U.fastq.gz
+├── ResistomeAnalysis
+│   ├── Rarefaction
+│   │   └── Counts
+│   │       ├── S1_test.class.tsv
+│   │       ├── S1_test.gene.tsv
+│   │       ├── S1_test.group.tsv
+│   │       ├── S1_test.mech.tsv
+│   │       ├── S1_test.type.tsv
+│   │       ├── S2_test.class.tsv
+│   │       ├── S2_test.gene.tsv
+│   │       ├── S2_test.group.tsv
+│   │       ├── S2_test.mech.tsv
+│   │       ├── S2_test.type.tsv
+│   │       ├── S3_test.class.tsv
+│   │       ├── S3_test.gene.tsv
+│   │       ├── S3_test.group.tsv
+│   │       ├── S3_test.mech.tsv
+│   │       └── S3_test.type.tsv
+│   └── ResistomeCounts
+│       ├── S1_test.AMR.class.tsv
+│       ├── S1_test.AMR.gene.tsv
+│       ├── S1_test.AMR.group.tsv
+│       ├── S1_test.AMR.mechanism.tsv
+│       ├── S1_test.AMR.type.tsv
+│       ├── S1_test.dedup_AMR.class.tsv
+│       ├── S1_test.dedup_AMR.gene.tsv
+│       ├── S1_test.dedup_AMR.group.tsv
+│       ├── S1_test.dedup_AMR.mechanism.tsv
+│       ├── S1_test.dedup_AMR.type.tsv
+│       ├── S2_test.AMR.class.tsv
+│       ├── S2_test.AMR.gene.tsv
+│       ├── S2_test.AMR.group.tsv
+│       ├── S2_test.AMR.mechanism.tsv
+│       ├── S2_test.AMR.type.tsv
+│       ├── S2_test.dedup_AMR.class.tsv
+│       ├── S2_test.dedup_AMR.gene.tsv
+│       ├── S2_test.dedup_AMR.group.tsv
+│       ├── S2_test.dedup_AMR.mechanism.tsv
+│       ├── S2_test.dedup_AMR.type.tsv
+│       ├── S3_test.AMR.class.tsv
+│       ├── S3_test.AMR.gene.tsv
+│       ├── S3_test.AMR.group.tsv
+│       ├── S3_test.AMR.mechanism.tsv
+│       ├── S3_test.AMR.type.tsv
+│       ├── S3_test.dedup_AMR.class.tsv
+│       ├── S3_test.dedup_AMR.gene.tsv
+│       ├── S3_test.dedup_AMR.group.tsv
+│       ├── S3_test.dedup_AMR.mechanism.tsv
+│       └── S3_test.dedup_AMR.type.tsv
+└── Results
+    ├── AMR_analytic_matrix.csv
+    ├── SNPconfirmed_AMR_analytic_matrix.csv
+    ├── SNPconfirmed_dedup_AMR_analytic_matrix.csv
+    ├── Stats
+    │   ├── host.removal.stats
+    │   └── trimmomatic.stats
+    └── dedup_AMR_analytic_matrix.csv
 
 
 
