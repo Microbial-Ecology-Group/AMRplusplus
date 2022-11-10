@@ -1,5 +1,5 @@
 
-Getting started
+Getting started with AMR++
 -----------------
 
 To get started, view the [Installation document](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/installation.md) to determine the best way to install AMR++ to your computing cluster.
