@@ -1,0 +1,6 @@
+name: trimmomatic
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - trimmomatic = 0.39

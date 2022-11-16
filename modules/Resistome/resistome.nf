@@ -63,7 +63,7 @@ process build_dependencies {
 
 process runresistome {
     tag { sample_id }
-    label "python"
+    label "alignment"
 
     memory { 2.GB * task.attempt }
     time { 1.hour * task.attempt }
@@ -77,7 +77,7 @@ process runresistome {
         }
 
     input:
-        tuple val(sample_id), path(sam)
+        tuple val(sample_id), path(bam)
         path(amr)
         path(annotation)
         path(resistome)
@@ -89,15 +89,19 @@ process runresistome {
     
     
     """
+    samtools view -h ${bam} > converted.sam
+    
     $resistome -ref_fp ${amr} \
       -annot_fp ${annotation} \
-      -sam_fp ${sam} \
+      -sam_fp converted.sam \
       -gene_fp ${sample_id}.${prefix}.gene.tsv \
       -group_fp ${sample_id}.${prefix}.group.tsv \
       -mech_fp ${sample_id}.${prefix}.mechanism.tsv \
       -class_fp ${sample_id}.${prefix}.class.tsv \
       -type_fp ${sample_id}.${prefix}.type.tsv \
       -t ${threshold}
+
+    rm converted.sam
     """
 }
 
@@ -149,9 +153,11 @@ process runrarefaction {
         path("*.tsv"), emit: rarefaction
 
     """
+    samtools view -h ${bam} > converted.sam
+
     $rarefaction \
       -ref_fp ${amr} \
-      -sam_fp ${sam} \
+      -sam_fp converted.sam \
       -annot_fp ${annotation} \
       -gene_fp ${sample_id}.gene.tsv \
       -group_fp ${sample_id}.group.tsv \
@@ -163,6 +169,8 @@ process runrarefaction {
       -skip ${skip} \
       -samples ${samples} \
       -t ${threshold}
+
+    rm converted.sam
     """
 }
 
@@ -215,7 +223,7 @@ process runsnp {
     errorStrategy = 'ignore'
 
     input:
-        tuple val(sample_id), path(sam_resistome)
+        tuple val(sample_id), path(bam)
         path(snp_count_matrix)
 
     output:
@@ -225,9 +233,13 @@ process runsnp {
     """
     cp -r $baseDir/bin/AmrPlusPlus_SNP/* .
 
-    python3 SNP_Verification.py -c config.ini -a -i ${sam_resistome} -o ${sample_id}_${prefix}_SNPs --count_matrix ${snp_count_matrix}
+    samtools view -h ${bam} > converted.sam
+
+    python3 SNP_Verification.py -c config.ini -a -i converted.sam -o ${sample_id}_${prefix}_SNPs --count_matrix ${snp_count_matrix}
 
     cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${snp_count_matrix}` ${snp_count_matrix} > ${sample_id}_${prefix}_SNP_count_col
+
+    rm converted.sam
 
     """
 }

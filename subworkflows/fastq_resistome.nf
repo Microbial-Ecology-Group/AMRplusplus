@@ -31,21 +31,21 @@ workflow FASTQ_RESISTOME_WF {
         // AMR alignment
         bwa_align(amr, index.out, read_pairs_ch )
         // Split sections below for standard and dedup_ed results
-        runresistome(bwa_align.out.bwa_sam,amr, annotation, resistomeanalyzer )
+        runresistome(bwa_align.out.bwa_bam,amr, annotation, resistomeanalyzer )
         resistomeresults(runresistome.out.resistome_counts.collect())
-        runrarefaction(bwa_align.out.bwa_sam, annotation, amr, rarefactionanalyzer)
+        runrarefaction(bwa_align.out.bwa_bam, annotation, amr, rarefactionanalyzer)
         plotrarefaction(runrarefaction.out.rarefaction.collect())
         // Add SNP confirmation
         if (params.snp == "Y") {
-            runsnp(bwa_align.out.bwa_sam, resistomeresults.out.snp_count_matrix)
+            runsnp(bwa_align.out.bwa_bam, resistomeresults.out.snp_count_matrix)
             snpresults(runsnp.out.snp_counts.collect(), resistomeresults.out.snp_count_matrix )
         }
         // Add analysis of deduped counts
         if (params.deduped == "Y"){
-            dedup_runresistome(bwa_align.out.bwa_dedup_sam,amr, annotation, resistomeanalyzer )
+            dedup_runresistome(bwa_align.out.bwa_dedup_bam,amr, annotation, resistomeanalyzer )
             dedup_resistomeresults(dedup_runresistome.out.resistome_counts.collect())
             if (params.snp == "Y") {
-                dedup_runsnp(bwa_align.out.bwa_dedup_sam, dedup_resistomeresults.out.snp_count_matrix) 
+                dedup_runsnp(bwa_align.out.bwa_dedup_bam, dedup_resistomeresults.out.snp_count_matrix) 
                 dedup_snpresults(dedup_runsnp.out.snp_counts.collect(), dedup_resistomeresults.out.snp_count_matrix )
             }
         }
