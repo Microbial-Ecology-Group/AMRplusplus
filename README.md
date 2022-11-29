@@ -47,7 +47,7 @@ mamba activate AMR++
 Clone the AMR++ repository.
 
 ```bash
-git clone https://github.com/EnriqueDoster/AMRplusplus.git
+git clone https://github.com/Microbial-Ecology-Group/AMRplusplus.git
 ```
 
 Brief tutorial for nextflow pipeline test run
