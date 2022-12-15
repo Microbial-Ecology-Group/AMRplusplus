@@ -66,7 +66,7 @@ process runresistome {
     label "alignment"
 
     memory { 2.GB * task.attempt }
-    time { 1.hour * task.attempt }
+    time { 2.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 
@@ -144,7 +144,7 @@ process runrarefaction {
         }
 
     input:
-        tuple val(sample_id), path(sam)
+        tuple val(sample_id), path(bam)
         path(annotation)
         path(amr)
         path(rarefaction)
