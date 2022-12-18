@@ -64,18 +64,18 @@ process bwa_align {
         tuple val(pair_id), path("${pair_id}.alignment.sorted.bam"), emit: bwa_bam
 
     """
-     ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}.alignment.sam
-     ${SAMTOOLS} view -S -b ${pair_id}.alignment.sam > ${pair_id}.alignment.bam
-     rm ${pair_id}.alignment.sam
-     ${SAMTOOLS} sort -n ${pair_id}.alignment.bam -o ${pair_id}.alignment.sorted.bam
-     rm ${pair_id}.alignment.bam
-     ${SAMTOOLS} fixmate ${pair_id}.alignment.sorted.bam ${pair_id}.alignment.sorted.fix.bam
-     ${SAMTOOLS} sort ${pair_id}.alignment.sorted.fix.bam -o ${pair_id}.alignment.sorted.fix.sorted.bam
-     rm ${pair_id}.alignment.sorted.fix.bam 
-     ${SAMTOOLS} rmdup -S ${pair_id}.alignment.sorted.fix.sorted.bam ${pair_id}.alignment.dedup.bam
-     rm ${pair_id}.alignment.sorted.fix.sorted.bam
-     ${SAMTOOLS} view -h -o ${pair_id}.alignment.dedup.sam ${pair_id}.alignment.dedup.bam
-     rm ${pair_id}.alignment.dedup.sam 
+    ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}.alignment.sam
+    ${SAMTOOLS} view -@ ${threads} -S -b ${pair_id}.alignment.sam > ${pair_id}.alignment.bam
+    rm ${pair_id}.alignment.sam
+    ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}.alignment.bam -o ${pair_id}.alignment.sorted.bam
+    rm ${pair_id}.alignment.bam
+    ${SAMTOOLS} fixmate -@ ${threads} ${pair_id}.alignment.sorted.bam ${pair_id}.alignment.sorted.fix.bam
+    ${SAMTOOLS} sort -@ ${threads} ${pair_id}.alignment.sorted.fix.bam -o ${pair_id}.alignment.sorted.fix.sorted.bam
+    rm ${pair_id}.alignment.sorted.fix.bam
+    ${SAMTOOLS} rmdup -S ${pair_id}.alignment.sorted.fix.sorted.bam ${pair_id}.alignment.dedup.bam
+    rm ${pair_id}.alignment.sorted.fix.sorted.bam
+    ${SAMTOOLS} view -@ ${threads} -h -o ${pair_id}.alignment.dedup.sam ${pair_id}.alignment.dedup.bam
+    rm ${pair_id}.alignment.dedup.sam
     """
 }
 
