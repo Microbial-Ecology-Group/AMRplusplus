@@ -65,8 +65,8 @@ process runresistome {
     tag { sample_id }
     label "alignment"
 
-    memory { 2.GB * task.attempt }
-    time { 2.hour * task.attempt }
+    memory { 3.GB * task.attempt }
+    time { 3.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 
@@ -109,8 +109,8 @@ process resistomeresults {
     tag { }
     label "python"
 
-    memory { 2.GB * task.attempt }
-    time { 1.hour * task.attempt }
+    memory { 3.GB * task.attempt }
+    time { 2.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
     
@@ -132,8 +132,8 @@ process runrarefaction {
     tag { sample_id }
     label "python"
 
-    memory { 2.GB * task.attempt }
-    time { 1.hour * task.attempt }
+    memory { 3.GB * task.attempt }
+    time { 2.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 
@@ -178,8 +178,8 @@ process plotrarefaction {
     tag { sample_id }
     label "python"
 
-    memory { 2.GB * task.attempt }
-    time { 1.hour * task.attempt }
+    memory { 3.GB * task.attempt }
+    time { 2.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 
@@ -209,8 +209,8 @@ process runsnp {
     label "python"
 
 
-    memory { 2.GB * task.attempt }
-    time { 1.hour * task.attempt }
+    memory { 3.GB * task.attempt }
+    time { 2.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 
@@ -249,8 +249,8 @@ process snpresults {
     tag {sample_id}
     label "python"
 
-    memory { 2.GB * task.attempt }
-    time { 1.hour * task.attempt }
+    memory { 3.GB * task.attempt }
+    time { 2.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
     
