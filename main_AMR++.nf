@@ -45,6 +45,11 @@ workflow {
         log.info """\
         Running a demonstration of AMR++
         ===================================
+        To include SNP analysis, add `--snp Y` to your command.
+        ===================================        
+        To include deduplicated count analysis, add `--deduped Y` to your command. 
+        Please be aware that adding deduplicated counts will significantly increase run time and temp file storage requirements.
+        ===================================
         """
         //run with demo params, use params.config
         FAST_AMRplusplus(fastq_files, params.amr, params.annotation)

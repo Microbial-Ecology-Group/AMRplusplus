@@ -44,12 +44,13 @@ process multiqc {
         }
     
     input:
-    path 'data*/*' 
-    path config
+        path 'data*/*' 
+        path config
 
     output:
-    path 'multiqc_report.html'
-    path 'multiqc_general_stats.txt'
+        path 'multiqc_report.html'
+        path 'multiqc_general_stats.txt'
+        path 'multiqc_data/'
 
     script:
     """
