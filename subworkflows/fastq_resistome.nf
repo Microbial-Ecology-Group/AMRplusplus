@@ -2,10 +2,7 @@
 include { index ; bwa_align } from '../modules/Alignment/bwa'
 
 // resistome
-include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
-
-// dedup resistome
-include { runresistome as dedup_runresistome ; runsnp as dedup_runsnp; resistomeresults as dedup_resistomeresults ; snpresults as dedup_snpresults} from '../modules/Resistome/resistome' addParams(prefix: 'dedup_AMR')
+include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults ; runresistome as dedup_runresistome ; runsnp as dedup_runsnp; resistomeresults as dedup_resistomeresults ; snpresults as dedup_snpresults} from '../modules/Resistome/resistome' addParams(prefix: 'dedup_AMR')
 
 workflow FASTQ_RESISTOME_WF {
     take: 
