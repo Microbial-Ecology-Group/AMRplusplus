@@ -5,7 +5,7 @@ include { index ; bwa_align } from '../modules/Alignment/bwa'
 include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
 
 // Deduped functions with prefix for name
-include {runresistome as dedup_runresistome ; runsnp as dedup_runsnp; resistomeresults as dedup_resistomeresults ; snpresults as dedup_snpresults} from '../modules/Resistome/resistome' addParams(prefix: 'dedup_AMR')
+include {runresistome as runresistome_dedup ; runsnp as runsnp_dedup; resistomeresults as resistomeresults_dedup ; snpresults as snpresults_dedup} from '../modules/Resistome/resistome' addParams(prefix: 'dedup_AMR')
 
 workflow FASTQ_RESISTOME_WF {
     take: 
@@ -42,11 +42,11 @@ workflow FASTQ_RESISTOME_WF {
         }
         // Add analysis of deduped counts
         if (params.deduped == "Y"){
-            dedup_runresistome(bwa_align.out.bwa_dedup_bam,amr, annotation, resistomeanalyzer )
-            dedup_resistomeresults(dedup_runresistome.out.resistome_counts.collect())
+            runresistome_dedup(bwa_align.out.bwa_dedup_bam,amr, annotation, resistomeanalyzer )
+            resistomeresults_dedup(runresistome_dedup.out.resistome_counts.collect())
             if (params.snp == "Y") {
-                dedup_runsnp(bwa_align.out.bwa_dedup_bam, dedup_resistomeresults.out.snp_count_matrix) 
-                dedup_snpresults(dedup_runsnp.out.snp_counts.collect(), dedup_resistomeresults.out.snp_count_matrix )
+                runsnp_dedup(bwa_align.out.bwa_dedup_bam, resistomeresults_dedup.out.snp_count_matrix) 
+                snpresults_dedup(runsnp_dedup.out.snp_counts.collect(), resistomeresults_dedup.out.snp_count_matrix )
             }
         }
 }

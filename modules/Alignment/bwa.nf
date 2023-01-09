@@ -49,10 +49,10 @@ process bwa_align {
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 
-    publishDir "${params.output}/Alignment/SAM_files", mode: "copy",
+    publishDir "${params.output}/Alignment/BAM_files", mode: "copy",
         saveAs: { filename ->
-            if(filename.indexOf(".alignment.sam") > 0) "Standard/$filename"
-            else if(filename.indexOf(".alignment.dedup.sam") > 0) "Deduped/$filename"
+            if(filename.indexOf(".alignment.bam") > 0) "Standard/$filename"
+            else if(filename.indexOf(".alignment.dedup.bam") > 0) "Deduped/$filename"
             else {}
         }
 
