@@ -35,7 +35,7 @@ ls test_QC_stats/
 # Look at the multiqc_report.html and modify the params.config file to change trimming parameters.
 
 # Now, you can run just the QC trimming step with trimmomatic, by using the "--pipeline trim_qc" flag. Change output and work directory.
-nextflow run main_AMR++.nf -profile singularity --pipeline eval_qc --output test_QC_trimming -w work_trim
+nextflow run main_AMR++.nf -profile singularity --pipeline trim_qc --output test_QC_trimming -w work_trim
 
 # If the pipeline completes without issue, remember to erase your "work" directories to save storage space.
 
