@@ -51,7 +51,7 @@ process bwa_align {
 
     publishDir "${params.output}/Alignment/BAM_files", mode: "copy",
         saveAs: { filename ->
-            if(filename.indexOf(".alignment.bam") > 0) "Standard/$filename"
+            if(filename.indexOf(".alignment.sorted.bam") > 0) "Standard/$filename"
             else if(filename.indexOf(".alignment.dedup.bam") > 0) "Deduped/$filename"
             else {}
         }
@@ -62,9 +62,9 @@ process bwa_align {
         tuple val(pair_id), path(reads) 
 
     output:
-        tuple val(pair_id), path("${pair_id}.alignment.dedup.bam"), emit: bwa_dedup_bam, optional: true
         tuple val(pair_id), path("${pair_id}.alignment.sorted.bam"), emit: bwa_bam
-
+        tuple val(pair_id), path("${pair_id}.alignment.dedup.bam"), emit: bwa_dedup_bam, optional: true
+        
     script:
     if( deduped == "N")
         """

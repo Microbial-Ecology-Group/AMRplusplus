@@ -38,6 +38,9 @@ include { FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
 include { FASTQ_KRAKEN_WF } from './subworkflows/fastq_microbiome.nf'
 include { FASTQ_QIIME2_WF } from './subworkflows/fastq_16S_qiime2.nf'
 
+// Load BAM subworkflows
+include { BAM_RESISTOME_WF } from './subworkflows/bam_resistome.nf'
+
 
 
 workflow {
@@ -99,11 +102,21 @@ workflow {
         
         FASTQ_QIIME2_WF( ch_manifest , params.dada2_db)
     }
+    else if(params.pipeline == "bam_resistome"){
+        Channel
+        .fromPath(params.bam_files)
+        .map { file -> [ id:file.baseName,file:file] }
+        .set {bam_files_ch}
+        
+        BAM_RESISTOME_WF( bam_files_ch , params.amr, params.annotation )
+
+    }
+
     else {
             println "ERROR ################################################################"
             println "Please choose a pipeline!!!" 
             println ""
-            println "To test the pipeline, use the \"demo\" pipeline :"
+            println "To test the pipeline, use the \"demo\" pipeline or omit the pipeline flag:"
             println ""
             println "ERROR ################################################################"
             println "Exiting ..."

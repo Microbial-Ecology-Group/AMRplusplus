@@ -130,7 +130,7 @@ process resistomeresults {
 
 process runrarefaction {
     tag { sample_id }
-    label "python"
+    label "alignment"
 
     memory { 3.GB * task.attempt }
     time { 2.hour * task.attempt }
