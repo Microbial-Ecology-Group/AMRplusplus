@@ -66,7 +66,7 @@ process runresistome {
     label "alignment"
 
     memory { 3.GB * task.attempt }
-    time { 3.hour * task.attempt }
+    time { 6.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 
@@ -110,7 +110,7 @@ process resistomeresults {
     label "python"
 
     memory { 3.GB * task.attempt }
-    time { 2.hour * task.attempt }
+    time { 4.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
     
@@ -133,7 +133,7 @@ process runrarefaction {
     label "alignment"
 
     memory { 3.GB * task.attempt }
-    time { 2.hour * task.attempt }
+    time { 3.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 

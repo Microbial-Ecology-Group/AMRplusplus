@@ -45,7 +45,7 @@ process bwa_align {
     label "alignment"
 
     memory { 4.GB * task.attempt }
-    time { 4.hour * task.attempt }
+    time { 8.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 
@@ -64,7 +64,7 @@ process bwa_align {
     output:
         tuple val(pair_id), path("${pair_id}.alignment.sorted.bam"), emit: bwa_bam
         tuple val(pair_id), path("${pair_id}.alignment.dedup.bam"), emit: bwa_dedup_bam, optional: true
-        
+
     script:
     if( deduped == "N")
         """
@@ -98,7 +98,7 @@ process bwa_rm_contaminant_fq {
     label "alignment"
 
     memory { 4.GB * task.attempt }
-    time { 3.hour * task.attempt }
+    time { 4.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3 
  
