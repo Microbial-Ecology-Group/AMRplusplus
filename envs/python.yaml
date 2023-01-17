@@ -8,3 +8,4 @@ dependencies:
   - numpy = 1.23.1
   - pysam = 0.19.1
   - pandas = 1.4.3
+  - samtools = 1.15.1

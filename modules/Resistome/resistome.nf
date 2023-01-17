@@ -66,7 +66,7 @@ process runresistome {
     label "alignment"
 
     memory { 3.GB * task.attempt }
-    time { 6.hour * task.attempt }
+    time { 5.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 
@@ -89,11 +89,11 @@ process runresistome {
     
     
     """
-    samtools view -h ${bam} > converted.sam
+    samtools view -h ${bam} > ${sample_id}.sam
     
     $resistome -ref_fp ${amr} \
       -annot_fp ${annotation} \
-      -sam_fp converted.sam \
+      -sam_fp ${sample_id}.sam \
       -gene_fp ${sample_id}.${prefix}.gene.tsv \
       -group_fp ${sample_id}.${prefix}.group.tsv \
       -mech_fp ${sample_id}.${prefix}.mechanism.tsv \
@@ -101,7 +101,7 @@ process runresistome {
       -type_fp ${sample_id}.${prefix}.type.tsv \
       -t ${threshold}
 
-    rm converted.sam
+    rm ${sample_id}.sam
     """
 }
 
@@ -153,11 +153,11 @@ process runrarefaction {
         path("*.tsv"), emit: rarefaction
 
     """
-    samtools view -h ${bam} > converted.sam
+    samtools view -h ${bam} > ${sample_id}.sam
 
     $rarefaction \
       -ref_fp ${amr} \
-      -sam_fp converted.sam \
+      -sam_fp ${sample_id}.sam \
       -annot_fp ${annotation} \
       -gene_fp ${sample_id}.gene.tsv \
       -group_fp ${sample_id}.group.tsv \
@@ -170,7 +170,7 @@ process runrarefaction {
       -samples ${samples} \
       -t ${threshold}
 
-    rm converted.sam
+    rm ${sample_id}.sam
     """
 }
 
