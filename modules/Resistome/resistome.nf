@@ -94,11 +94,11 @@ process runresistome {
     $resistome -ref_fp ${amr} \
       -annot_fp ${annotation} \
       -sam_fp ${sample_id}.sam \
-      -gene_fp ${sample_id}.${prefix}.gene.tsv \
-      -group_fp ${sample_id}.${prefix}.group.tsv \
-      -mech_fp ${sample_id}.${prefix}.mechanism.tsv \
-      -class_fp ${sample_id}.${prefix}.class.tsv \
-      -type_fp ${sample_id}.${prefix}.type.tsv \
+      -gene_fp ${sample_id}_${prefix}_gene.tsv \
+      -group_fp ${sample_id}_${prefix}_group.tsv \
+      -mech_fp ${sample_id}_${prefix}_mechanism.tsv \
+      -class_fp ${sample_id}_${prefix}_class.tsv \
+      -type_fp ${sample_id}_${prefix}_type.tsv \
       -t ${threshold}
 
     rm ${sample_id}.sam
@@ -159,11 +159,11 @@ process runrarefaction {
       -ref_fp ${amr} \
       -sam_fp ${sample_id}.sam \
       -annot_fp ${annotation} \
-      -gene_fp ${sample_id}.gene.tsv \
-      -group_fp ${sample_id}.group.tsv \
-      -mech_fp ${sample_id}.mech.tsv \
-      -class_fp ${sample_id}.class.tsv \
-      -type_fp ${sample_id}.type.tsv \
+      -gene_fp ${sample_id}_gene.tsv \
+      -group_fp ${sample_id}_group.tsv \
+      -mech_fp ${sample_id}_mech.tsv \
+      -class_fp ${sample_id}_class.tsv \
+      -type_fp ${sample_id}_type.tsv \
       -min ${min} \
       -max ${max} \
       -skip ${skip} \
@@ -185,7 +185,7 @@ process plotrarefaction {
 
     publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
         saveAs: { filename ->
-            if(filename.indexOf("graphs/*.png") > 0) "Rarefaction/Figures/$filename"
+            if(filename.indexOf(".png") > 0) "Rarefaction/Figures/$filename"
             else {}
         }
 
@@ -193,13 +193,12 @@ process plotrarefaction {
         path(rarefaction)
 
     output:
-        path("graphs/*.png"), emit: plots
+        path("*.png"), emit: plots
 
     """
     mkdir data/
     mv *.tsv data/
-    mkdir graphs/
-    python $baseDir/bin/rfplot.py --dir ./data --nd --s --sd ./graphs
+    python $baseDir/bin/rfplot.py --dir ./data --nd --s --sd .
     """
 }
 
@@ -216,7 +215,7 @@ process runsnp {
 
     publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
         saveAs: { filename ->
-            if(filename.indexOf("_SNPs/*") > 0) "SNP_verification/$filename"
+            if(filename.indexOf("*_SNPs/${sample_id}/.csv") > 0) "SNP_verification/$filename"
             else {}
         }
 
@@ -228,18 +227,18 @@ process runsnp {
 
     output:
         path("${sample_id}*_count_col"), emit: snp_counts
-        path("${sample_id}*_SNPs/*")
+        path("${sample_id}*_SNPs/${sample_id}/*")
 
     """
     cp -r $baseDir/bin/AmrPlusPlus_SNP/* .
 
-    samtools view -h ${bam} > converted.sam
+    samtools view -h ${bam} > ${sample_id}.sam
 
-    python3 SNP_Verification.py -c config.ini -a -i converted.sam -o ${sample_id}_${prefix}_SNPs --count_matrix ${snp_count_matrix}
+    python3 SNP_Verification.py -c config.ini -a -i ${sample_id}.sam -o ${sample_id}_${prefix}_SNPs --count_matrix ${snp_count_matrix}
 
     cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${snp_count_matrix}` ${snp_count_matrix} > ${sample_id}_${prefix}_SNP_count_col
 
-    rm converted.sam
+    rm ${sample_id}.sam
 
     """
 }
