@@ -94,11 +94,11 @@ process runresistome {
     $resistome -ref_fp ${amr} \
       -annot_fp ${annotation} \
       -sam_fp ${sample_id}.sam \
-      -gene_fp ${sample_id}_${prefix}_gene.tsv \
-      -group_fp ${sample_id}_${prefix}_group.tsv \
-      -mech_fp ${sample_id}_${prefix}_mechanism.tsv \
-      -class_fp ${sample_id}_${prefix}_class.tsv \
-      -type_fp ${sample_id}_${prefix}_type.tsv \
+      -gene_fp ${sample_id}.${prefix}.gene.tsv \
+      -group_fp ${sample_id}.${prefix}.group.tsv \
+      -mech_fp ${sample_id}.${prefix}.mechanism.tsv \
+      -class_fp ${sample_id}.${prefix}.class.tsv \
+      -type_fp ${sample_id}.${prefix}.type.tsv \
       -t ${threshold}
 
     rm ${sample_id}.sam
@@ -159,11 +159,11 @@ process runrarefaction {
       -ref_fp ${amr} \
       -sam_fp ${sample_id}.sam \
       -annot_fp ${annotation} \
-      -gene_fp ${sample_id}_gene.tsv \
-      -group_fp ${sample_id}_group.tsv \
-      -mech_fp ${sample_id}_mech.tsv \
-      -class_fp ${sample_id}_class.tsv \
-      -type_fp ${sample_id}_type.tsv \
+      -gene_fp ${sample_id}.gene.tsv \
+      -group_fp ${sample_id}.group.tsv \
+      -mech_fp ${sample_id}.mech.tsv \
+      -class_fp ${sample_id}.class.tsv \
+      -type_fp ${sample_id}.type.tsv \
       -min ${min} \
       -max ${max} \
       -skip ${skip} \
