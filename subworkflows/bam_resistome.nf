@@ -29,7 +29,7 @@ workflow BAM_RESISTOME_WF {
         // Add SNP confirmation
         if (params.snp == "Y") {
             runsnp(bam_ch, resistomeresults.out.snp_count_matrix)
-            snpresults(runsnp.out.snp_counts.collect(), resistomeresults.out.snp_count_matrix )
+            snpresults(runsnp.out.snp_counts.collect())
         }
 }
 

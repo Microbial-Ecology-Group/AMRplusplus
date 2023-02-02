@@ -215,7 +215,8 @@ process runsnp {
 
     publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
         saveAs: { filename ->
-            if(filename.indexOf("${sample_id}.${prefix}_SNPs/${sample_id}/*.csv") > 0) "SNP_verification/$filename"
+            if(filename.indexOf(".csv") > 0) "SNP_verification/$filename"
+            else if(filename.indexOf(".tsv") > 0 ) "SNP_verification_counts/$filename"
             else {}
         }
 
@@ -240,7 +241,7 @@ process runsnp {
 
     cut -d ',' -f 1 ${snp_count_matrix} > gene_accession_labels
 
-    paste gene_accession_labels ${sample_id}_${prefix}_SNP_count_col > ${sample_id}.SNP_confirmed_gene.tsv
+    paste gene_accession_labels ${sample_id}.${prefix}_SNP_count_col > ${sample_id}.SNP_confirmed_gene.tsv
 
 
     rm ${sample_id}.sam
@@ -270,7 +271,7 @@ process snpresults {
 
     """
 
-    ${PYTHON3} $baseDir/bin/snp_long_to_wide.py -i ${snp_counts} -o ${prefix}_analytic_matrix.csv
+    ${PYTHON3} $baseDir/bin/snp_long_to_wide.py -i ${snp_counts} -o SNPconfirmed_${prefix}_analytic_matrix.csv
 
     """
 }
