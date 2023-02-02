@@ -25,7 +25,7 @@ workflow BAM_DEDUP_RESISTOME_WF {
         resistomeresults_dedup(runresistome_dedup.out.resistome_counts.collect())
         if (params.snp == "Y") {
             runsnp_dedup(bam_ch, resistomeresults_dedup.out.snp_count_matrix) 
-            snpresults_dedup(runsnp_dedup.out.snp_counts.collect(), resistomeresults_dedup.out.snp_count_matrix )
+            snpresults_dedup(runsnp_dedup.out.snp_counts.collect())
         }
 }
 

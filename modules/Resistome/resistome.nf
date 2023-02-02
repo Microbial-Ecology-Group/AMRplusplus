@@ -215,7 +215,7 @@ process runsnp {
 
     publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
         saveAs: { filename ->
-            if(filename.indexOf("*_SNPs/${sample_id}/.csv") > 0) "SNP_verification/$filename"
+            if(filename.indexOf("${sample_id}.${prefix}_SNPs/${sample_id}/*.csv") > 0) "SNP_verification/$filename"
             else {}
         }
 
@@ -226,17 +226,22 @@ process runsnp {
         path(snp_count_matrix)
 
     output:
-        path("${sample_id}*_count_col"), emit: snp_counts
-        path("${sample_id}*_SNPs/${sample_id}/*")
+        path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
+        path("${sample_id}.${prefix}_SNPs/${sample_id}/*")
 
     """
     cp -r $baseDir/bin/AmrPlusPlus_SNP/* .
 
     samtools view -h ${bam} > ${sample_id}.sam
 
-    python3 SNP_Verification.py -c config.ini -a -i ${sample_id}.sam -o ${sample_id}_${prefix}_SNPs --count_matrix ${snp_count_matrix}
+    python3 SNP_Verification.py -c config.ini -a -i ${sample_id}.sam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix}
 
-    cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${snp_count_matrix}` ${snp_count_matrix} > ${sample_id}_${prefix}_SNP_count_col
+    cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${snp_count_matrix}` ${snp_count_matrix} > ${sample_id}.${prefix}_SNP_count_col
+
+    cut -d ',' -f 1 ${snp_count_matrix} > gene_accession_labels
+
+    paste gene_accession_labels ${sample_id}_${prefix}_SNP_count_col > ${sample_id}.SNP_confirmed_gene.tsv
+
 
     rm ${sample_id}.sam
 
@@ -259,16 +264,13 @@ process snpresults {
 
     input:
         path(snp_counts)
-        path(snp_count_matrix)
 
     output:
         path("*_analytic_matrix.csv"), emit: snp_matrix
 
     """
 
-    cut -d ',' -f 1 ${snp_count_matrix} > gene_accession_labels
-    paste gene_accession_labels ${snp_counts} > SNPconfirmed_${prefix}_analytic_matrix.csv
-
+    ${PYTHON3} $baseDir/bin/snp_long_to_wide.py -i ${snp_counts} -o ${prefix}_analytic_matrix.csv
 
     """
 }
