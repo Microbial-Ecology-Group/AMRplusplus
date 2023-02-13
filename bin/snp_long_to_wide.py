@@ -25,6 +25,8 @@ def snp_load_data(file_name_list):
                 if not entry:
                     continue
                 entry = entry.split('\t')
+                if entry[0] == '':
+                   continue
                 count = float(entry[1])
                 gene_name = entry[0]
                 try:
