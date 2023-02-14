@@ -51,8 +51,8 @@ process bwa_align {
 
     publishDir "${params.output}/Alignment/BAM_files", mode: "copy",
         saveAs: { filename ->
-            if(filename.indexOf(".alignment.sorted.bam") > 0) "Standard/$filename"
-            else if(filename.indexOf(".alignment.dedup.bam") > 0) "Deduped/$filename"
+            if(filename.indexOf("_alignment_sorted.bam") > 0) "Standard/$filename"
+            else if(filename.indexOf("_alignment_dedup.bam") > 0) "Deduped/$filename"
             else {}
         }
 
@@ -62,32 +62,32 @@ process bwa_align {
         tuple val(pair_id), path(reads) 
 
     output:
-        tuple val(pair_id), path("${pair_id}.alignment.sorted.bam"), emit: bwa_bam
-        tuple val(pair_id), path("${pair_id}.alignment.dedup.bam"), emit: bwa_dedup_bam, optional: true
+        tuple val(pair_id), path("${pair_id}_alignment_sorted.bam"), emit: bwa_bam
+        tuple val(pair_id), path("${pair_id}_alignment_dedup.bam"), emit: bwa_dedup_bam, optional: true
 
     script:
     if( deduped == "N")
         """
-        ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}.alignment.sam
-        ${SAMTOOLS} view -@ ${threads} -S -b ${pair_id}.alignment.sam > ${pair_id}.alignment.bam
-        rm ${pair_id}.alignment.sam
-        ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}.alignment.bam -o ${pair_id}.alignment.sorted.bam
-        rm ${pair_id}.alignment.bam
+        ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
+        ${SAMTOOLS} view -@ ${threads} -S -b ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
+        rm ${pair_id}_alignment.sam
+        ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
+        rm ${pair_id}_alignment.bam
         """
     else if( deduped == "Y")
         """
-        ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}.alignment.sam
-        ${SAMTOOLS} view -@ ${threads} -S -b ${pair_id}.alignment.sam > ${pair_id}.alignment.bam
-        rm ${pair_id}.alignment.sam
-        ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}.alignment.bam -o ${pair_id}.alignment.sorted.bam
-        rm ${pair_id}.alignment.bam
-        ${SAMTOOLS} fixmate -@ ${threads} ${pair_id}.alignment.sorted.bam ${pair_id}.alignment.sorted.fix.bam
-        ${SAMTOOLS} sort -@ ${threads} ${pair_id}.alignment.sorted.fix.bam -o ${pair_id}.alignment.sorted.fix.sorted.bam
-        rm ${pair_id}.alignment.sorted.fix.bam
-        ${SAMTOOLS} rmdup -S ${pair_id}.alignment.sorted.fix.sorted.bam ${pair_id}.alignment.dedup.bam
-        rm ${pair_id}.alignment.sorted.fix.sorted.bam
-        ${SAMTOOLS} view -@ ${threads} -h -o ${pair_id}.alignment.dedup.sam ${pair_id}.alignment.dedup.bam
-        rm ${pair_id}.alignment.dedup.sam
+        ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
+        ${SAMTOOLS} view -@ ${threads} -S -b ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
+        rm ${pair_id}_alignment.sam
+        ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
+        rm ${pair_id}_alignment.bam
+        ${SAMTOOLS} fixmate -@ ${threads} ${pair_id}_alignment_sorted.bam ${pair_id}_alignment_sorted_fix.bam
+        ${SAMTOOLS} sort -@ ${threads} ${pair_id}_alignment_sorted_fix.bam -o ${pair_id}_alignment_sorted_fix.sorted.bam
+        rm ${pair_id}_alignment_sorted_fix.bam
+        ${SAMTOOLS} rmdup -S ${pair_id}_alignment_sorted_fix.sorted.bam ${pair_id}_alignment_dedup.bam
+        rm ${pair_id}_alignment_sorted_fix.sorted.bam
+        ${SAMTOOLS} view -@ ${threads} -h -o ${pair_id}_alignment_dedup.sam ${pair_id}_alignment_dedup.bam
+        rm ${pair_id}_alignment_dedup.sam
         """
     else
         error "Invalid deduplication flag --deduped: ${deduped}. Please use --deduped Y for deduplicated counts, or avoid using this flag altogether to skip this error."
