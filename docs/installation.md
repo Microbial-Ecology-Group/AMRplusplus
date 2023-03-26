@@ -3,6 +3,8 @@ This section will help you get started with running the AMR++ pipeline. This tut
 
 There are four main ways that you can install and run AMR++, based on what is easiest for your computing cluster and whether conda, singularity, or docker is already installed. 
 
+Based on our experience, we recommend following the instructions to [install miniconda without "sudo" permissions](#installing-miniconda-without-sudo-permissions).
+
 Usually, you'll have to install nextflow, unless it's available to be loaded as module in your HPC.
 * [Install Nextflow](#installing-nextflow)
 
@@ -79,6 +81,7 @@ Optionally, you can create the conda environment prior to running AMR++.
 
 ```bash
 # If you haven't created the conda AMR++ environment as instructed above, go ahead and do that here:
+# If you have mamba installed, you can swap "conda" with "mamba" for faster installation.
 conda env create -f envs/AMR++_env.yaml
 # Now activate the conda environment
 conda activate activate AMR++_env
@@ -128,7 +131,7 @@ Like Singularity, Docker is another tool management option that is often availab
 # Download AMR++ repository
 git clone https://github.com/Microbial-Ecology-Group/AMRplusplus.git
 
-# Navigate into direcotry
+# Navigate into directory
 cd AMRplusplus
 
 # Run command with docker profile
