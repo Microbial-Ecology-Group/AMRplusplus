@@ -92,11 +92,11 @@ AMR++ analyzes data by combining workflows that takes a set of sequencing reads 
 Non-host reads > Microbiome analysis
 
 * pipeline fragments
-    * ```--pipeline multiqc```  
+    * ```--pipeline eval_qc```  
         * Evaluate sample QC 
-    * ```--pipeline trim```  
+    * ```--pipeline trim_qc```  
         * QC trimming using trimmomatic 
-    * ```--pipeline rmhost```  
+    * ```--pipeline rm_host```  
         * Align reads to host DNA using bwa and remove contaminants 
     * ```--pipeline resistome```  
         * Align reads to MEGARes using bwa, perform rarefaction and resistome analysis

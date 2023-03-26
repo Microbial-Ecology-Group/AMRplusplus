@@ -19,8 +19,6 @@ deduped = params.deduped
 process index {
     label "alignment"
 
-    memory { 2.GB * task.attempt }
-    time { 1.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 
@@ -44,8 +42,6 @@ process bwa_align {
     tag "$pair_id"
     label "alignment"
 
-    memory { 4.GB * task.attempt }
-    time { 8.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 
@@ -97,8 +93,6 @@ process bwa_rm_contaminant_fq {
     tag { pair_id }
     label "alignment"
 
-    memory { 4.GB * task.attempt }
-    time { 4.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3 
  
@@ -139,8 +133,6 @@ process HostRemovalStats {
     tag { sample_id }
     label "alignment"
 
-    memory { 3.GB * task.attempt }
-    time { 2.hour * task.attempt }
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3 
 

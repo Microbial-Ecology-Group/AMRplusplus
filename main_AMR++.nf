@@ -44,7 +44,7 @@ include { BAM_RESISTOME_WF } from './subworkflows/bam_resistome.nf'
 
 
 workflow {
-    if (params.pipeline == null) {
+    if (params.pipeline == null || params.pipeline == "demo") {
         log.info """\
         Running a demonstration of AMR++
         ===================================
