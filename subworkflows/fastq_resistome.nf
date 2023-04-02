@@ -7,6 +7,10 @@ include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefac
 // Deduped resistome
 include { BAM_DEDUP_RESISTOME_WF } from '../subworkflows/bam_deduped_resistome.nf'
 
+if( params.amr_index ) {
+    amr_index_files = Channel.fromPath(params.amr_index).toSortedList()
+}
+
 workflow FASTQ_RESISTOME_WF {
     take: 
         read_pairs_ch
@@ -27,9 +31,12 @@ workflow FASTQ_RESISTOME_WF {
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
         }
         // Index
-        index(amr)
+        if( !params.amr_index_files ) {    
+            index(amr)
+            amr_index_files = index.out
+        }
         // AMR alignment
-        bwa_align(amr, index.out, read_pairs_ch )
+        bwa_align(amr,amr_index_files, read_pairs_ch )
         // Split sections below for standard and dedup_ed results
         runresistome(bwa_align.out.bwa_bam,amr, annotation, resistomeanalyzer )
         resistomeresults(runresistome.out.resistome_counts.collect())

@@ -31,7 +31,7 @@ process index {
     path fasta
 
     output: 
-    path("${fasta}*"), emit: bwaindex
+    path("*"), emit: bwaindex
 
     script:
     """
@@ -56,6 +56,7 @@ process bwa_align {
         }
 
     input:
+        path reffasta
         path indexfiles 
         tuple val(pair_id), path(reads) 
 
@@ -66,7 +67,7 @@ process bwa_align {
     script:
     if( deduped == "N")
         """
-        ${BWA} mem ${indexfiles} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
+        ${BWA} mem ${reffasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
         ${SAMTOOLS} view -@ ${threads} -S -b ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
         rm ${pair_id}_alignment.sam
         ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
