@@ -13,7 +13,13 @@ if( params.annotation ) {
     if( !annotation.exists() ) return annotation_error(annotation)
 }
 
+if ( params.amr_index ) {
+    amr_index = Channel.fromPath(params.amr_index).toSortedList()
+}
 
+if ( params.reference_index ) {
+    reference_index = Channel.fromPath(params.reference_index).toSortedList()
+}
 
 threads = params.threads
 
@@ -31,7 +37,7 @@ process index {
     path fasta
 
     output: 
-    path("*"), emit: bwaindex
+    path("${fasta}.*"), emit: bwaindex
 
     script:
     """
@@ -56,7 +62,6 @@ process bwa_align {
         }
 
     input:
-        path reffasta
         path indexfiles 
         tuple val(pair_id), path(reads) 
 
@@ -67,7 +72,7 @@ process bwa_align {
     script:
     if( deduped == "N")
         """
-        ${BWA} mem ${reffasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
+        ${BWA} mem ${indexfiles[0]} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
         ${SAMTOOLS} view -@ ${threads} -S -b ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
         rm ${pair_id}_alignment.sam
         ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
@@ -75,7 +80,7 @@ process bwa_align {
         """
     else if( deduped == "Y")
         """
-        ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
+        ${BWA} mem ${indexfiles[0]} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
         ${SAMTOOLS} view -@ ${threads} -S -b ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
         rm ${pair_id}_alignment.sam
         ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
@@ -106,8 +111,7 @@ process bwa_rm_contaminant_fq {
         }
 
     input:
-    path hostfasta
-    path indexes
+    path indexfiles
     tuple val(pair_id), path(reads) 
 
     output:
@@ -115,7 +119,7 @@ process bwa_rm_contaminant_fq {
     path("${pair_id}.samtools.idxstats"), emit: host_rm_stats
     
     """
-    ${BWA} mem ${hostfasta} ${reads[0]} ${reads[1]} -t ${threads} > ${pair_id}.host.sam
+    ${BWA} mem ${indexfiles[0]} ${reads[0]} ${reads[1]} -t ${threads} > ${pair_id}.host.sam
     ${SAMTOOLS} view -bS ${pair_id}.host.sam | ${SAMTOOLS} sort -@ ${threads} -o ${pair_id}.host.sorted.bam
     rm ${pair_id}.host.sam
     ${SAMTOOLS} index ${pair_id}.host.sorted.bam && ${SAMTOOLS} idxstats ${pair_id}.host.sorted.bam > ${pair_id}.samtools.idxstats

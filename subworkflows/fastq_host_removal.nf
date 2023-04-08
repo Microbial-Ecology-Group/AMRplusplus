@@ -2,11 +2,7 @@
 include { index as amr_index ; index as host_index } from '../modules/Alignment/bwa'
 include { bwa_align ; bwa_rm_contaminant_fq ; HostRemovalStats} from '../modules/Alignment/bwa'
 
-
-if( params.host_index ) {
-    host_index_files = Channel.fromPath(params.reference_index).toSortedList()
-    //if( host_index.isEmpty() ) return index_error(host_index)
-}
+import java.nio.file.Paths
 
 // WC trimming
 workflow FASTQ_RM_HOST_WF {
@@ -14,13 +10,20 @@ workflow FASTQ_RM_HOST_WF {
         hostfasta
         read_pairs_ch
     main:
-        if( !params.host_index_files ) {    
-            host_index(hostfasta)
-            host_index_files = host_index.out.bwaindex
-        }
-        bwa_rm_contaminant_fq(hostfasta,host_index_files, read_pairs_ch )
+        // Define reference_index variable
+        if (params.reference_index == null) {
+            index(reference_index)
+            reference_index_files = index.out
+        } else {
+            reference_index_files = Channel
+                .fromPath(Paths.get(params.reference_index))
+                .map { file(it.toString()) }
+                .filter { file(it).exists() }
+                .toList()
+                .sort()
+         }    
+        bwa_rm_contaminant_fq(reference_index_files, read_pairs_ch )
         HostRemovalStats(bwa_rm_contaminant_fq.out.host_rm_stats.collect())
     emit:
         nonhost_reads = bwa_rm_contaminant_fq.out.nonhost_reads  
 }
-
