@@ -51,7 +51,6 @@ process build_dependencies {
     cp $baseDir/bin/resistome .
 
     git clone https://github.com/Isabella136/AmrPlusPlus_SNP.git
-    cd AmrPlusPlus_SNP/
     chmod -R 777 AmrPlusPlus_SNP/
     """
 
