@@ -58,11 +58,6 @@ RUN set -x && \
     find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
     /opt/conda/bin/conda clean -afy && \
     /opt/conda/bin/conda install -c conda-forge mamba && \
-    /opt/conda/bin/mamba install -c conda-forge -c bioconda git python=3 trimmomatic multiqc bwa samtools bedtools kraken2 multiqc fastqc krona bracken cxx-compiler numpy make pysam pandas && \
-    conda clean --all && \
-    git clone https://github.com/Isabella136/AmrPlusPlus_SNP.git && \
-    git clone https://github.com/cdeanj/rarefactionanalyzer.git rarefaction_dl && cd rarefaction_dl && make && \
-    chmod 777 rarefaction && mv rarefaction ../. && cd ../ && rm -rf rarefaction_dl && \
-    git clone https://github.com/cdeanj/resistomeanalyzer.git resistome_dl && cd resistome_dl && make && \
-    chmod 777 resistome && mv resistome ../. && cd ../ && rm -rf resistome_dl
+    /opt/conda/bin/mamba install -c conda-forge -c bioconda git python=3 trimmomatic multiqc bwa samtools bedtools kraken2 multiqc fastqc krona bracken cxx-compiler numpy make pysam pandas biopython matplotlib nextflow && \
+    conda clean --all 
     

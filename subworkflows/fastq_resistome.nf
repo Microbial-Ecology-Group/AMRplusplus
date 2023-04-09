@@ -7,6 +7,8 @@ include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefac
 // Deduped resistome
 include { BAM_DEDUP_RESISTOME_WF } from '../subworkflows/bam_deduped_resistome.nf'
 
+import java.nio.file.Paths
+
 workflow FASTQ_RESISTOME_WF {
     take: 
         read_pairs_ch
@@ -26,10 +28,20 @@ workflow FASTQ_RESISTOME_WF {
             resistomeanalyzer = file("${baseDir}/bin/resistome")
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
         }
-        // Index
-        index(amr)
+        // Define amr_index_files variable
+        if (params.amr_index == null) {
+            index(amr)
+            amr_index_files = index.out
+        } else {
+            amr_index_files = Channel
+                .fromPath(Paths.get(params.amr_index))
+                .map { file(it.toString()) }
+                .filter { file(it).exists() }
+                .toList()
+                .sort()
+         }        
         // AMR alignment
-        bwa_align(amr, index.out, read_pairs_ch )
+        bwa_align(amr_index_files, read_pairs_ch )
         // Split sections below for standard and dedup_ed results
         runresistome(bwa_align.out.bwa_bam,amr, annotation, resistomeanalyzer )
         resistomeresults(runresistome.out.resistome_counts.collect())

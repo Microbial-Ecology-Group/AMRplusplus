@@ -51,8 +51,8 @@ process build_dependencies {
     cp $baseDir/bin/resistome .
 
     git clone https://github.com/Isabella136/AmrPlusPlus_SNP.git
+    cd AmrPlusPlus_SNP/
     chmod -R 777 AmrPlusPlus_SNP/
-
     """
 
 
@@ -215,23 +215,18 @@ process runsnp {
 
     output:
         path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
-        path("${sample_id}.${prefix}_SNPs/${sample_id}/*")
+        path("${sample_id}.${prefix}_SNPs${sample_id}/*")
 
     """
-    cp -r $baseDir/bin/AmrPlusPlus_SNP/* .
+    ln -s $baseDir/bin/AmrPlusPlus_SNP/* .
 
-    samtools view -h ${bam} > ${sample_id}.sam
+    python3 SNP_Verification.py -c config.ini -a true -i ${bam} -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix}
 
-    python3 SNP_Verification.py -c config.ini -a -i ${sample_id}.sam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix}
+    cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${sample_id}.${prefix}_SNPs${snp_count_matrix}` ${sample_id}.${prefix}_SNPs${snp_count_matrix} > ${sample_id}.${prefix}_SNP_count_col
 
-    cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${snp_count_matrix}` ${snp_count_matrix} > ${sample_id}.${prefix}_SNP_count_col
-
-    cut -d ',' -f 1 ${snp_count_matrix} > gene_accession_labels
+    cut -d ',' -f 1 ${sample_id}.${prefix}_SNPs${snp_count_matrix} > gene_accession_labels
 
     paste gene_accession_labels ${sample_id}.${prefix}_SNP_count_col > ${sample_id}.SNP_confirmed_gene.tsv
-
-
-    rm ${sample_id}.sam
 
     """
 }

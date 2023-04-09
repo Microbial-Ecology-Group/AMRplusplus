@@ -1,9 +1,6 @@
 include { reference_error ; amr_error ; annotation_error } from "$baseDir/modules/nf-functions.nf"
 
-if( params.reference ) {
-    reference = file(params.reference)
-    if( !reference.exists() ) return reference_error(reference)
-}
+
 if( params.amr ) {
     amr = file(params.amr)
     if( !amr.exists() ) return amr_error(amr)
@@ -12,6 +9,8 @@ if( params.annotation ) {
     annotation = file(params.annotation)
     if( !annotation.exists() ) return annotation_error(annotation)
 }
+
+
 threads = params.threads
 
 deduped = params.deduped
@@ -28,7 +27,7 @@ process index {
     path fasta
 
     output: 
-    path("${fasta}*"), emit: bwaindex
+    path("${fasta}*"), emit: bwaindex, includeInputs: true
 
     script:
     """
@@ -53,7 +52,6 @@ process bwa_align {
         }
 
     input:
-        path dbfasta
         path indexfiles 
         tuple val(pair_id), path(reads) 
 
@@ -64,7 +62,7 @@ process bwa_align {
     script:
     if( deduped == "N")
         """
-        ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
+        ${BWA} mem ${indexfiles[0]} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
         ${SAMTOOLS} view -@ ${threads} -S -b ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
         rm ${pair_id}_alignment.sam
         ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
@@ -72,7 +70,7 @@ process bwa_align {
         """
     else if( deduped == "Y")
         """
-        ${BWA} mem ${dbfasta} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
+        ${BWA} mem ${indexfiles[0]} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
         ${SAMTOOLS} view -@ ${threads} -S -b ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
         rm ${pair_id}_alignment.sam
         ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
@@ -103,8 +101,7 @@ process bwa_rm_contaminant_fq {
         }
 
     input:
-    path hostfasta
-    path indexes
+    path indexfiles
     tuple val(pair_id), path(reads) 
 
     output:
@@ -112,18 +109,17 @@ process bwa_rm_contaminant_fq {
     path("${pair_id}.samtools.idxstats"), emit: host_rm_stats
     
     """
-    ${BWA} mem ${hostfasta} ${reads[0]} ${reads[1]} -t ${threads} > ${pair_id}.host.sam
+    ${BWA} mem ${indexfiles[0]} ${reads[0]} ${reads[1]} -t ${threads} > ${pair_id}.host.sam
     ${SAMTOOLS} view -bS ${pair_id}.host.sam | ${SAMTOOLS} sort -@ ${threads} -o ${pair_id}.host.sorted.bam
     rm ${pair_id}.host.sam
     ${SAMTOOLS} index ${pair_id}.host.sorted.bam && ${SAMTOOLS} idxstats ${pair_id}.host.sorted.bam > ${pair_id}.samtools.idxstats
-    ${SAMTOOLS} view -h -f 4 -b ${pair_id}.host.sorted.bam -o ${pair_id}.host.sorted.removed.bam
+    ${SAMTOOLS} view -h -f 1 -F 12 -b ${pair_id}.host.sorted.bam -o ${pair_id}.host.sorted.removed.bam
     ${BEDTOOLS}  \
        bamtofastq \
       -i ${pair_id}.host.sorted.removed.bam \
       -fq ${pair_id}.non.host.R1.fastq.gz \
-      -fq2 ${pair_id}.non.host.R2.fastq.gz
-
-    rm *.host.sam
+      -fq2 ${pair_id}.non.host.R2.fastq.gz \
+      -paired
     rm *.bam
     """
 

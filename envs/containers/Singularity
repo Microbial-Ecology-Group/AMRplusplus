@@ -15,7 +15,7 @@ From: debian:jessie-slim
     python3-pip python3-docopt python3-pytest python-dev python3-dev\
     libcurl4-openssl-dev libssl-dev zlib1g-dev fonts-texgyre \
     gcc g++ gfortran libblas-dev liblapack-dev dos2unix libstdc++6\
-    r-base-core r-recommended hmmer\
+    r-base-core r-recommended \
     && rm -rf /var/lib/apt/lists/*
 
 
@@ -28,7 +28,7 @@ From: debian:jessie-slim
     conda config --add channels bioconda
 
     # install bulk of bioinformatic tools using conda
-    conda create -n AmrPlusPlus_env python=3 trimmomatic bwa samtools bedtools freebayes bbmap vcftools htslib kraken2
+    conda create -n AmrPlusPlus_env python=3 trimmomatic bwa samtools bedtools kraken2 biopython matplotlib numpy pysam pandas fastqc multiqc
 
     . /usr/local/bin/activate AmrPlusPlus_env
     
