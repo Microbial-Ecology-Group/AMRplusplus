@@ -218,12 +218,9 @@ process runsnp {
         path("${sample_id}.${prefix}_SNPs${sample_id}/*")
 
     """
-    cp -r $baseDir/bin/AmrPlusPlus_SNP/* .
+    ln -s $baseDir/bin/AmrPlusPlus_SNP/* .
 
-    mv ${bam} temp/sorted.bam
-    samtools index temp/sorted.bam
-
-    python3 SNP_Verification.py -c config.ini -a -i ${bam} -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix}
+    python3 SNP_Verification.py -c config.ini -a true -i ${bam} -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix}
 
     cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${sample_id}.${prefix}_SNPs${snp_count_matrix}` ${sample_id}.${prefix}_SNPs${snp_count_matrix} > ${sample_id}.${prefix}_SNP_count_col
 

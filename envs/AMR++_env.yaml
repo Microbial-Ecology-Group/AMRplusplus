@@ -16,3 +16,4 @@ dependencies:
   - pandas = 1.4.3
   - trimmomatic = 0.39
   - biopython = 1.81
+  - nextflow

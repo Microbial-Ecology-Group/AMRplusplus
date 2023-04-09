@@ -1,9 +1,6 @@
 include { reference_error ; amr_error ; annotation_error } from "$baseDir/modules/nf-functions.nf"
 
-if( params.reference ) {
-    reference = file(params.reference)
-    if( !reference.exists() ) return reference_error(reference)
-}
+
 if( params.amr ) {
     amr = file(params.amr)
     if( !amr.exists() ) return amr_error(amr)
@@ -13,13 +10,6 @@ if( params.annotation ) {
     if( !annotation.exists() ) return annotation_error(annotation)
 }
 
-if ( params.amr_index ) {
-    amr_index = Channel.fromPath(params.amr_index).toSortedList()
-}
-
-if ( params.reference_index ) {
-    reference_index = Channel.fromPath(params.reference_index).toSortedList()
-}
 
 threads = params.threads
 
@@ -37,7 +27,7 @@ process index {
     path fasta
 
     output: 
-    path("${fasta}.*"), emit: bwaindex
+    path("${fasta}*"), emit: bwaindex, includeInputs: true
 
     script:
     """
@@ -123,14 +113,13 @@ process bwa_rm_contaminant_fq {
     ${SAMTOOLS} view -bS ${pair_id}.host.sam | ${SAMTOOLS} sort -@ ${threads} -o ${pair_id}.host.sorted.bam
     rm ${pair_id}.host.sam
     ${SAMTOOLS} index ${pair_id}.host.sorted.bam && ${SAMTOOLS} idxstats ${pair_id}.host.sorted.bam > ${pair_id}.samtools.idxstats
-    ${SAMTOOLS} view -h -f 4 -b ${pair_id}.host.sorted.bam -o ${pair_id}.host.sorted.removed.bam
+    ${SAMTOOLS} view -h -f 1 -F 12 -b ${pair_id}.host.sorted.bam -o ${pair_id}.host.sorted.removed.bam
     ${BEDTOOLS}  \
        bamtofastq \
       -i ${pair_id}.host.sorted.removed.bam \
       -fq ${pair_id}.non.host.R1.fastq.gz \
-      -fq2 ${pair_id}.non.host.R2.fastq.gz
-
-    rm *.host.sam
+      -fq2 ${pair_id}.non.host.R2.fastq.gz \
+      -paired
     rm *.bam
     """
 

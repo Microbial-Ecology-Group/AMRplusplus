@@ -1,5 +1,5 @@
 // Load modules
-include { index as amr_index ; index as host_index } from '../modules/Alignment/bwa'
+include { index } from '../modules/Alignment/bwa'
 include { bwa_align ; bwa_rm_contaminant_fq ; HostRemovalStats} from '../modules/Alignment/bwa'
 
 import java.nio.file.Paths
@@ -11,12 +11,12 @@ workflow FASTQ_RM_HOST_WF {
         read_pairs_ch
     main:
         // Define reference_index variable
-        if (params.reference_index == null) {
-            index(reference_index)
+        if (params.host_index == null) {
+            index(hostfasta)
             reference_index_files = index.out
         } else {
             reference_index_files = Channel
-                .fromPath(Paths.get(params.reference_index))
+                .fromPath(Paths.get(params.host_index))
                 .map { file(it.toString()) }
                 .filter { file(it).exists() }
                 .toList()

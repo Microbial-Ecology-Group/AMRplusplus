@@ -1,6 +1,28 @@
 params.taxlevel = "S" //level to estimate abundance at [options: D,P,C,O,F,G,S] (default: S)
 params.readlen = 150
 
+threads = params.threads
+
+process dlkraken {
+    tag { }
+    label "python"
+
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
+    publishDir "$baseDir/data/kraken_db/", mode: 'copy'
+
+    output:
+        path("minikraken_8GB_20200312/")
+
+    """
+        wget ftp://ftp.ccb.jhu.edu/pub/data/kraken2_dbs/minikraken_8GB_202003.tgz
+        tar -xvzf minikraken_8GB_202003.tgz
+
+    """
+}
+
+
 process runkraken {
     tag { sample_id }
     label "microbiome"

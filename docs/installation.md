@@ -50,8 +50,15 @@ git clone https://github.com/Microbial-Ecology-Group/AMRplusplus.git
 # Navigate into direcotry
 cd AMRplusplus
 
-# Test AMR++ by specifying the "conda" profile. If your computing cluster uses the slurm scheduler, use the "conda_slurm" profile.
+# Install mamba for faster installation
+conda install mamba -n base -c conda-forge
+
+# Test AMR++ by specifying the "conda" profile. 
 nextflow run main_AMR++.nf -profile conda
+
+# If your computing cluster uses the slurm scheduler, modify the script "run_AMR++_slurm.sh" to
+# accurately request computing resources. Then, run it using:
+sbatch run_AMR++_slurm.sh
 ```
 
 
