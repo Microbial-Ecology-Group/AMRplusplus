@@ -113,13 +113,13 @@ process bwa_rm_contaminant_fq {
     ${SAMTOOLS} view -bS ${pair_id}.host.sam | ${SAMTOOLS} sort -@ ${threads} -o ${pair_id}.host.sorted.bam
     rm ${pair_id}.host.sam
     ${SAMTOOLS} index ${pair_id}.host.sorted.bam && ${SAMTOOLS} idxstats ${pair_id}.host.sorted.bam > ${pair_id}.samtools.idxstats
-    ${SAMTOOLS} view -h -f 1 -F 12 -b ${pair_id}.host.sorted.bam -o ${pair_id}.host.sorted.removed.bam
+    ${SAMTOOLS} view -h -f 4 -b ${pair_id}.host.sorted.bam -o ${pair_id}.host.sorted.removed.bam
     ${BEDTOOLS}  \
        bamtofastq \
       -i ${pair_id}.host.sorted.removed.bam \
       -fq ${pair_id}.non.host.R1.fastq.gz \
       -fq2 ${pair_id}.non.host.R2.fastq.gz 
-      
+
     rm *.bam
     """
 
