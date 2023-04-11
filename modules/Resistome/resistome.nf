@@ -219,7 +219,10 @@ process runsnp {
     """
     ln -s $baseDir/bin/AmrPlusPlus_SNP/* .
 
-    python3 SNP_Verification.py -c config.ini -a true -i ${bam} -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix}
+    # change name to stay consistent with count matrix name
+    mv ${bam} ${sample_id}.bam
+
+    python3 SNP_Verification.py -c config.ini -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix}
 
     cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${sample_id}.${prefix}_SNPs${snp_count_matrix}` ${sample_id}.${prefix}_SNPs${snp_count_matrix} > ${sample_id}.${prefix}_SNP_count_col
 

@@ -59,7 +59,7 @@ workflow {
         
     } else if(params.pipeline == "standard_AMR") {
 
-        STANDARD_AMRplusplus(fastq_files,params.reference, params.amr, params.annotation)
+        STANDARD_AMRplusplus(fastq_files,params.host, params.amr, params.annotation)
         
     } else if(params.pipeline == "fast_AMR") {
 
@@ -67,7 +67,7 @@ workflow {
     } 
     else if(params.pipeline == "standard_AMR_wKraken") {
 
-        STANDARD_AMRplusplus_wKraken(fastq_files,params.reference, params.amr, params.annotation, params.kraken_db)
+        STANDARD_AMRplusplus_wKraken(fastq_files,params.host, params.amr, params.annotation, params.kraken_db)
     } 
     else if(params.pipeline == "eval_qc") {
 

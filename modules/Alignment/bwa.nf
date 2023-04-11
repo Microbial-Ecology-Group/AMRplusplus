@@ -118,8 +118,8 @@ process bwa_rm_contaminant_fq {
        bamtofastq \
       -i ${pair_id}.host.sorted.removed.bam \
       -fq ${pair_id}.non.host.R1.fastq.gz \
-      -fq2 ${pair_id}.non.host.R2.fastq.gz \
-      -paired
+      -fq2 ${pair_id}.non.host.R2.fastq.gz 
+      
     rm *.bam
     """
 
