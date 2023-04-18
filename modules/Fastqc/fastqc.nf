@@ -25,7 +25,6 @@ process fastqc {
 
 
 process multiqc {
-    errorStrategy 'ignore'
     label "fastqc"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
@@ -34,8 +33,8 @@ process multiqc {
     publishDir "${params.output}/QC_analysis/", mode: 'copy',
         saveAs: { filename ->
             if(filename.indexOf("multiqc_data/*") > 0) "MultiQC_stats/multiqc_data/$filename"
-            if(filename.indexOf("general_stats.txt") > 0) "MultiQC_stats/$filename"
-            if(filename.indexOf("_report.html") > 0) "MultiQC_stats/$filename"
+            else if(filename.indexOf("general_stats.txt") > 0) "MultiQC_stats/$filename"
+            else if(filename.indexOf("_report.html") > 0) "MultiQC_stats/$filename"
             else {}
         }
     
@@ -51,7 +50,7 @@ process multiqc {
     script:
     """
     cp $config/* .
-    multiqc -v .
+    multiqc -v . --interactive
     mv multiqc_data/multiqc_general_stats.txt .
     """
 }

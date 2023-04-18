@@ -217,7 +217,7 @@ process runsnp {
         path("${sample_id}.${prefix}_SNPs${sample_id}/*")
 
     """
-    ln -s $baseDir/bin/AmrPlusPlus_SNP/* .
+    cp -r $baseDir/bin/AmrPlusPlus_SNP/* .
 
     # change name to stay consistent with count matrix name
     mv ${bam} ${sample_id}.bam

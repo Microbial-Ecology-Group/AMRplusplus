@@ -69,10 +69,10 @@ We will go over a typical pipeline setup scenario in which you connect to a remo
 
 ```bash
 # Download miniconda
-wget https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-x86_64.sh
+wget https://repo.anaconda.com/miniconda/Miniconda3-py310_23.1.0-1-Linux-x86_64.sh
 # Run installation, follow default options. However, depending on your computing cluster when you are prompted, you should consider changing the 
 # location of the installation to somewhere that is not your home directory which can have storage limits.
-bash Miniconda3-py39_4.12.0-Linux-x86_64.sh
+bash Miniconda3-py310_23.1.0-1-Linux-x86_64.sh
 
 # Download AMR++ repository
 git clone https://github.com/Microbial-Ecology-Group/AMRplusplus.git

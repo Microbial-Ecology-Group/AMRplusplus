@@ -58,6 +58,5 @@ RUN set -x && \
     find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
     /opt/conda/bin/conda clean -afy && \
     /opt/conda/bin/conda install -c conda-forge mamba && \
-    /opt/conda/bin/mamba install -c conda-forge -c bioconda git python=3 trimmomatic multiqc bwa samtools bedtools kraken2 multiqc fastqc krona bracken cxx-compiler numpy make pysam pandas biopython matplotlib nextflow && \
-    conda clean --all 
-    
+    /opt/conda/bin/mamba install -c conda-forge -c bioconda git python=3 trimmomatic multiqc bwa samtools bedtools kraken2 multiqc fastqc krona bracken numpy pysam pandas biopython matplotlib nextflow && \
+    conda clean --all
