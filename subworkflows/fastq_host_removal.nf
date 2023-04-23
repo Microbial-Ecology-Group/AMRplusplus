@@ -20,7 +20,13 @@ workflow FASTQ_RM_HOST_WF {
                 .map { file(it.toString()) }
                 .filter { file(it).exists() }
                 .toList()
-                .sort()
+                .map { files ->
+                    if (files.size() < 6) {
+                        error "Expected 6 host index files, found ${files.size()}. Please provide all 6 files, including the host fasta file. Remember to use * in your path."
+                    } else {
+                        files.sort()
+                    }
+                }
          }    
         bwa_rm_contaminant_fq(reference_index_files, read_pairs_ch )
         HostRemovalStats(bwa_rm_contaminant_fq.out.host_rm_stats.collect())

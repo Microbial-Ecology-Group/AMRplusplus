@@ -219,8 +219,10 @@ process runsnp {
     """
     cp -r $baseDir/bin/AmrPlusPlus_SNP/* .
 
-    # change name to stay consistent with count matrix name
-    mv ${bam} ${sample_id}.bam
+    # change name to stay consistent with count matrix name, but only if the names don't match
+    if [ "${bam}" != "${sample_id}.bam" ]; then
+        mv ${bam} ${sample_id}.bam
+    fi
 
     python3 SNP_Verification.py -c config.ini -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix}
 

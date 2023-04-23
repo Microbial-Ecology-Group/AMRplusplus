@@ -38,7 +38,13 @@ workflow FASTQ_RESISTOME_WF {
                 .map { file(it.toString()) }
                 .filter { file(it).exists() }
                 .toList()
-                .sort()
+                .map { files ->
+                    if (files.size() < 6) {
+                        error "Expected 6 AMR index files, found ${files.size()}. Please provide all 6 files, including the AMR database fasta file. Remember to use * in your path."
+                    } else {
+                        files.sort()
+                    }
+                }
          }        
         // AMR alignment
         bwa_align(amr_index_files, read_pairs_ch )

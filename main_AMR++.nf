@@ -16,6 +16,51 @@ log.info """\
  output       : ${params.output}
  """
 
+
+def helpMessage = """\
+    AMR++ Nextflow Pipeline Help
+    =============================
+
+    Available pipelines:
+        - demo: Run a demonstration of AMR++
+        - standard_AMR: Run the standard AMR++ pipeline
+        - fast_AMR: Run the fast AMR++ pipeline without host removal.
+        - standard_AMR_wKraken: Run the standard AMR++ pipeline with Kraken
+    Available subworkflows:
+        - eval_qc: Run FastQC analysis
+        - trim_qc: Run trimming and quality control
+        - rm_host: Remove host reads
+        - resistome: Perform resistome analysis
+        - align: Perform alignment to MEGARes database
+        - kraken: Perform Kraken analysis
+        - qiime2: Perform QIIME 2 analysis
+        - bam_resistome: Perform resistome analysis on BAM files
+
+    To run a specific pipeline, use the "--pipeline" option followed by the pipeline name:
+        nextflow run main_AMR++.nf --pipeline <pipeline_name> [other_options]
+
+    To analyze your samples or otherwise change how AMR++ runs, modify the "params.config" file 
+    or add more parameters to the command line.
+
+    Finally, consider your computing environment and modify the "-profile" option. By default,
+    AMR++ assumes all software dependencies are in your \$PATH, as in the "local" profile. Here are 
+    the other options:
+        - local: Assumes all sofware is already in your \$PATH
+        - local_slurm: Local installation and adds control over slurm job submission.
+        - conda: Uses "mamba" to install a conda environment. 
+        - conda_slurm: Uses "mamba" and adds control over slurm job submission.
+        - singularity: Uses a "singularity" image container.
+        - singularity_slurm: Singularity image and adds control over slurm job submission.
+        - docker: Uses a docker image container.
+
+    To include SNP analysis, add `--snp Y` to your command.
+    
+    To include deduplicated count analysis, add `--deduped Y` to your command. 
+    Please be aware that adding deduplicated counts will significantly increase run time and temp file storage requirements.
+
+    """
+
+
 Channel
 .fromFilePairs( params.reads , size: ("${params.reads}" =~ /\{/) ? 2 : 1)
 .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
@@ -33,6 +78,7 @@ include { STANDARD_AMRplusplus_wKraken } from './subworkflows/AMR++_standard_wKr
 // Load subworkflows
 include { FASTQ_QC_WF } from './subworkflows/fastq_information.nf'
 include { FASTQ_TRIM_WF } from './subworkflows/fastq_QC_trimming.nf'
+include { FASTQ_ALIGN_WF } from './subworkflows/fastq_align.nf'
 include { FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf' 
 include { FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
 include { FASTQ_KRAKEN_WF } from './subworkflows/fastq_microbiome.nf'
@@ -44,24 +90,35 @@ include { BAM_RESISTOME_WF } from './subworkflows/bam_resistome.nf'
 
 
 workflow {
-    if (params.pipeline == null || params.pipeline == "demo") {
+    if (params.pipeline == null || params.pipeline == "help") {
+
+        println helpMessage
+
+
         log.info """\
-        Running a demonstration of AMR++
         ===================================
-        To include SNP analysis, add `--snp Y` to your command.
-        ===================================        
-        To include deduplicated count analysis, add `--deduped Y` to your command. 
-        Please be aware that adding deduplicated counts will significantly increase run time and temp file storage requirements.
+        Running a demonstration of AMR++
         ===================================
         """
         //run with demo params, use params.config
         FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
         
-    } else if(params.pipeline == "standard_AMR") {
+    }
+    else if(params.pipeline == "demo") {
+        log.info """\
+        ===================================
+        Running a demonstration of AMR++
+        ===================================
+        """
+        //run with demo params, use params.config
+        FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
+    } 
+    else if(params.pipeline == "standard_AMR") {
 
         STANDARD_AMRplusplus(fastq_files,params.host, params.amr, params.annotation)
         
-    } else if(params.pipeline == "fast_AMR") {
+    } 
+    else if(params.pipeline == "fast_AMR") {
 
         FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
     } 
@@ -84,6 +141,10 @@ workflow {
     else if(params.pipeline == "resistome") {
 
         FASTQ_RESISTOME_WF( fastq_files, params.amr, params.annotation )
+    }  
+    else if(params.pipeline == "align") {
+
+        FASTQ_ALIGN_WF( fastq_files, params.amr)
     }  
     else if(params.pipeline == "kraken") {
 
