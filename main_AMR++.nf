@@ -62,11 +62,11 @@ def helpMessage = """\
 
 
 Channel
-    .fromFilePairs( params.reads , size: ("${params.reads}" =~ /\{/) ? 2 : 1)
+    .fromFilePairs( params.reads , size: (params.reads =~ /\{/) ? 2 : 1)
     .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-    .map { file -> 
-        def modified_baseName = file.baseName.split('\\.')[0]
-        [ id: modified_baseName, file: file]
+    .map { id, files -> 
+        def modified_baseName = files[0].baseName.split('\\.')[0]
+        tuple(id, modified_baseName, files)
     }
     .set {fastq_files}
 
@@ -180,16 +180,13 @@ workflow {
         Channel
             .fromPath(params.bam_files)
             .ifEmpty { exit 1, "bam files could not be found: ${params.bam_files}" }
-            .map { file -> 
-                def modified_baseName = file.baseName.split('\\.')[0]
-                [ id: modified_baseName, file: file]
-            }
+            .map { file ->
+            def modified_baseName = file.baseName.split('\\.')[0]
+              tuple(modified_baseName, file)
+                }
             .set {bam_files_ch}
-        
         BAM_RESISTOME_WF( bam_files_ch , params.amr, params.annotation )
-
     }
-
     else {
             println "ERROR ################################################################"
             println "Please choose a pipeline!!!" 
