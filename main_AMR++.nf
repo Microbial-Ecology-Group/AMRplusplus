@@ -60,13 +60,12 @@ def helpMessage = """\
 
     """
 
-
 Channel
     .fromFilePairs( params.reads , size: ("${params.reads}" =~ /\{/) ? 2 : 1)
     .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-    .map { file -> 
-        def modified_baseName = file.baseName.split('\\.')[0]
-        [ id: modified_baseName, file: file]
+    .map { id, files -> 
+        def modified_id = id.split('\\.')[0] // Modify this line as necessary to suit your needs, this selects everything to the left of the first period as the sampleID.
+        [modified_id, files]
     }
     .set {fastq_files}
 
@@ -178,13 +177,13 @@ workflow {
         =======================================
         """
         Channel
-            .fromPath(params.bam_files)
-            .ifEmpty { exit 1, "bam files could not be found: ${params.bam_files}" }
-            .map { file -> 
+        .fromPath(params.bam_files)
+        .ifEmpty { exit 1, "bam files could not be found: ${params.bam_files}" }
+        .map { file ->
                 def modified_baseName = file.baseName.split('\\.')[0]
-                [ id: modified_baseName, file: file]
-            }
-            .set {bam_files_ch}
+                tuple(modified_baseName, file)
+        }
+        .set {bam_files_ch} 
         
         BAM_RESISTOME_WF( bam_files_ch , params.amr, params.annotation )
 

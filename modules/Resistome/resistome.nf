@@ -101,7 +101,7 @@ process runresistome {
 }
 
 process resistomeresults {
-    tag { }
+    tag "Make AMR count matrix"
     label "python"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
@@ -166,7 +166,7 @@ process runrarefaction {
 }
 
 process plotrarefaction {
-    tag { sample_id }
+    tag "Plot rarefaction results"
     label "python"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
@@ -237,7 +237,7 @@ process runsnp {
 
 
 process snpresults {
-    tag {sample_id}
+    tag "Make SNP-confirmed matrix"
     label "python"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
