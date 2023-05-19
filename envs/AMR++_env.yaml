@@ -2,8 +2,8 @@ name: AMR++_env
 channels:
   - bioconda
   - conda-forge
+  - anaconda
 dependencies:
-  - bedtools = 2.30.0
   - bwa = 0.7.17
   - samtools = 1.15.1
   - multiqc
@@ -17,3 +17,4 @@ dependencies:
   - trimmomatic = 0.39
   - biopython = 1.81
   - nextflow
+  - git

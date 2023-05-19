@@ -60,12 +60,14 @@ def helpMessage = """\
 
     """
 
-
 Channel
-.fromFilePairs( params.reads , size: ("${params.reads}" =~ /\{/) ? 2 : 1)
-.ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-.set { fastq_files }
-
+    .fromFilePairs( params.reads , size: (params.reads =~ /\{/) ? 2 : 1)
+    .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
+    .map { id, files -> 
+        def modified_baseName = files[0].baseName.split('\\.')[0]
+        tuple(id, modified_baseName, files)
+    }
+    .set {fastq_files}
 
 // Load null pipeline
 params.pipeline = null
@@ -164,15 +166,26 @@ workflow {
         FASTQ_QIIME2_WF( ch_manifest , params.dada2_db)
     }
     else if(params.pipeline == "bam_resistome"){
+        log.info """\
+        =======================================
+        Running resistome analysis on bam files
+        with bwa alignments to the MEGARes db.
+
+        Use the --bam_files argument and change
+        the --output flag to keep track of your
+        standard vs deduped data.
+        =======================================
+        """
         Channel
-        .fromPath(params.bam_files)
-        .map { file -> [ id:file.baseName,file:file] }
-        .set {bam_files_ch}
-        
+            .fromPath(params.bam_files)
+            .ifEmpty { exit 1, "bam files could not be found: ${params.bam_files}" }
+            .map { file ->
+            def modified_baseName = file.baseName.split('\\.')[0]
+              tuple(modified_baseName, file)
+                }
+            .set {bam_files_ch}
         BAM_RESISTOME_WF( bam_files_ch , params.amr, params.annotation )
-
     }
-
     else {
             println "ERROR ################################################################"
             println "Please choose a pipeline!!!" 

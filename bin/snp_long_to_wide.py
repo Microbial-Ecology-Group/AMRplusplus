@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+# example command:
+# python snp_long_to_wide.py -i *.tsv -o SNPconfirmed_AMR_analytic_matrix.csv
 
-__author__ = "Enrique Doster"
+__author__ = "Enrique Doster & Steven Lakin"
 
 import argparse
 import sys

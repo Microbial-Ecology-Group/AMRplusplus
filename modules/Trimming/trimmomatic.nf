@@ -54,7 +54,7 @@ process runqc {
 }
 
 process QCstats {
-    tag { sample_id }
+    tag "Make QC summary file"
     label "python"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }

@@ -116,10 +116,11 @@ process bwa_rm_contaminant_fq {
     ${SAMTOOLS} view -h -f 4 -b ${pair_id}.host.sorted.bam -o ${pair_id}.host.sorted.removed.bam
     ${SAMTOOLS} sort -n -@ ${threads} ${pair_id}.host.sorted.removed.bam -o ${pair_id}.host.resorted.removed.bam
     ${SAMTOOLS}  \
-       fastq -@ ${threads} \
+       fastq -@ ${threads} -c 6  \
       ${pair_id}.host.resorted.removed.bam \
       -1 ${pair_id}.non.host.R1.fastq.gz \
-      -2 ${pair_id}.non.host.R2.fastq.gz 
+      -2 ${pair_id}.non.host.R2.fastq.gz \
+      -0 /dev/null -s /dev/null -n
 
     rm *.bam
     """
