@@ -113,7 +113,7 @@ process bwa_rm_contaminant_fq {
     ${SAMTOOLS} view -bS ${pair_id}.host.sam | ${SAMTOOLS} sort -@ ${threads} -o ${pair_id}.host.sorted.bam
     rm ${pair_id}.host.sam
     ${SAMTOOLS} index ${pair_id}.host.sorted.bam && ${SAMTOOLS} idxstats ${pair_id}.host.sorted.bam > ${pair_id}.samtools.idxstats
-    ${SAMTOOLS} view -h -f 4 -b ${pair_id}.host.sorted.bam -o ${pair_id}.host.sorted.removed.bam
+    ${SAMTOOLS} view -h -f 12 -b ${pair_id}.host.sorted.bam -o ${pair_id}.host.sorted.removed.bam
     ${SAMTOOLS} sort -n -@ ${threads} ${pair_id}.host.sorted.removed.bam -o ${pair_id}.host.resorted.removed.bam
     ${SAMTOOLS}  \
        fastq -@ ${threads} -c 6  \
