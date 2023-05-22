@@ -64,8 +64,8 @@ Channel
     .fromFilePairs( params.reads , size: (params.reads =~ /\{/) ? 2 : 1)
     .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
     .map { id, files -> 
-        def modified_baseName = files[0].baseName.split('\\.')[0]
-        tuple(id, modified_baseName, files)
+        def modified_baseName = id.split('\\.')[0]
+        tuple(modified_baseName, files)
     }
     .set {fastq_files}
 
