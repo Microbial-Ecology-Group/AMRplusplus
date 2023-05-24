@@ -16,6 +16,7 @@ threads = params.threads
 deduped = params.deduped
 
 process index {
+    tag "Creating bwa index"
     label "alignment"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }

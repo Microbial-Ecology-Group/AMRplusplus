@@ -25,7 +25,8 @@ process fastqc {
 
 
 process multiqc {
-    label "Run multiqc"
+    tag "Running multiQC"
+    label "fastqc"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
