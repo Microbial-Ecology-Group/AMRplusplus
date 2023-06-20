@@ -6,6 +6,8 @@ if( params.annotation ) {
 }
 
 threshold = params.threshold
+threads = params.threads
+
 
 min = params.min
 max = params.max
@@ -224,7 +226,7 @@ process runsnp {
         mv ${bam} ${sample_id}.bam
     fi
 
-    python3 SNP_Verification.py -c config.ini -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix}
+    python3 SNP_Verification.py -c config.ini -t ${threads} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix}
 
     cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${sample_id}.${prefix}_SNPs${snp_count_matrix}` ${sample_id}.${prefix}_SNPs${snp_count_matrix} > ${sample_id}.${prefix}_SNP_count_col
 
