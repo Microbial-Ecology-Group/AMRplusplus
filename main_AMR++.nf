@@ -12,8 +12,8 @@ nextflow.enable.dsl=2
 log.info """\
  A M R + +    N F   P I P E L I N E
  ===================================
- reads        : ${params.reads}
- output       : ${params.output}
+ reads being analyzed : ${params.reads}
+ output folder        : ${params.output}
  """
 
 
@@ -26,7 +26,7 @@ def helpMessage = """\
         - standard_AMR: Run the standard AMR++ pipeline
         - fast_AMR: Run the fast AMR++ pipeline without host removal.
         - standard_AMR_wKraken: Run the standard AMR++ pipeline with Kraken
-    Available subworkflows:
+    Available pipeline subworkflows:
         - eval_qc: Run FastQC analysis
         - trim_qc: Run trimming and quality control
         - rm_host: Remove host reads
@@ -36,7 +36,7 @@ def helpMessage = """\
         - qiime2: Perform QIIME 2 analysis
         - bam_resistome: Perform resistome analysis on BAM files
 
-    To run a specific pipeline, use the "--pipeline" option followed by the pipeline name:
+    To run a specific pipeline/subworkflow, use the "--pipeline" option followed by the pipeline name:
         nextflow run main_AMR++.nf --pipeline <pipeline_name> [other_options]
 
     To analyze your samples or otherwise change how AMR++ runs, modify the "params.config" file 
@@ -93,66 +93,103 @@ include { BAM_RESISTOME_WF } from './subworkflows/bam_resistome.nf'
 
 workflow {
     if (params.pipeline == null || params.pipeline == "help") {
-
         println helpMessage
-
-
         log.info """\
-        ===================================
-        Running a demonstration of AMR++
-        ===================================
+===================================
+Running a demonstration of AMR++
+===================================
         """
         //run with demo params, use params.config
         FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
-        
     }
     else if(params.pipeline == "demo") {
         log.info """\
-        ===================================
-        Running a demonstration of AMR++
-        ===================================
+===================================
+Running a demonstration of AMR++
+===================================
         """
         //run with demo params, use params.config
         FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
     } 
     else if(params.pipeline == "standard_AMR") {
 
+        log.info """\
+===================================
+Running the ${params.pipeline} pipeline
+===================================
+        """
         STANDARD_AMRplusplus(fastq_files,params.host, params.amr, params.annotation)
-        
     } 
     else if(params.pipeline == "fast_AMR") {
-
+        log.info """\
+===================================
+Running the ${params.pipeline} pipeline
+===================================
+        """
         FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
     } 
     else if(params.pipeline == "standard_AMR_wKraken") {
-
+        log.info """\
+===================================
+Running the ${params.pipeline} pipeline
+===================================
+        """
         STANDARD_AMRplusplus_wKraken(fastq_files,params.host, params.amr, params.annotation, params.kraken_db)
     } 
     else if(params.pipeline == "eval_qc") {
-
+        log.info """\
+===================================
+Running the ${params.pipeline} subworkflow
+===================================
+        """
         FASTQ_QC_WF( fastq_files )
     } 
     else if(params.pipeline == "trim_qc") {
-
+        log.info """\
+===================================
+Running the ${params.pipeline} subworkflow
+===================================
+        """
         FASTQ_TRIM_WF( fastq_files )
     }
     else if(params.pipeline == "rm_host") {
-
+        log.info """\
+===================================
+Running the ${params.pipeline} subworkflow
+===================================
+        """
         FASTQ_RM_HOST_WF(params.host, fastq_files )
     } 
     else if(params.pipeline == "resistome") {
-
+        log.info """\
+===================================
+Running the ${params.pipeline} subworkflow
+===================================
+        """
         FASTQ_RESISTOME_WF( fastq_files, params.amr, params.annotation )
     }  
     else if(params.pipeline == "align") {
-
+        log.info """\
+===================================
+Running the ${params.pipeline} subworkflow
+===================================
+        """
         FASTQ_ALIGN_WF( fastq_files, params.amr)
     }  
     else if(params.pipeline == "kraken") {
-
+        log.info """\
+===================================
+Running the ${params.pipeline} subworkflow
+===================================
+        """
         FASTQ_KRAKEN_WF( fastq_files , params.kraken_db)
     }
     else if(params.pipeline == "qiime2") {
+         log.info """\
+===================================
+Running the ${params.pipeline} subworkflow
+===================================
+        """
         Channel
             .fromFilePairs( params.reads, flat: true )
             .ifEmpty { exit 1, "Read pair files could not be found: ${params.reads}" }
@@ -167,15 +204,15 @@ workflow {
     }
     else if(params.pipeline == "bam_resistome"){
         log.info """\
-        =======================================
-        Running resistome analysis on bam files
-        with bwa alignments to the MEGARes db.
+=======================================
+Running resistome analysis on bam files
+with bwa alignments to the MEGARes db.
 
-        Use the --bam_files argument and change
-        the --output flag to keep track of your
-        standard vs deduped data.
-        =======================================
-        """
+Use the --bam_files argument and change
+the --output flag to keep track of your
+standard vs deduped data.
+=======================================
+"""
         Channel
             .fromPath(params.bam_files)
             .ifEmpty { exit 1, "bam files could not be found: ${params.bam_files}" }
@@ -193,6 +230,7 @@ workflow {
             println "To test the pipeline, use the \"demo\" pipeline or omit the pipeline flag:"
             println ""
             println "ERROR ################################################################"
+            println helpMessage
             println "Exiting ..."
             System.exit(0)  
     }

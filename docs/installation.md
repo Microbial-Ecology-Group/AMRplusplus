@@ -151,11 +151,11 @@ nextflow run main_AMR++.nf -profile docker
 ## Local installation of tools
 
 Requirements:
-* All [software requirements](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/requirements.md)
+* All [software dependencies](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/dependencies.md)
 * Nextflow
 
 
-If Singularity cannot be installed, or perhaps your computing cluster has all of the required tools, configure the "config/local.config" file to specify the absolute PATH to each required bioinformatic tool. Or if you can add all of the relevant paths to your $PATH environment variable, which in some cases means loading the correct modules, then you can just leave the name of each tool without the path. Finally, change the flag after "-profile" to "local" when running the pipeline.
+If you run into issues with using Miniconda and Singularity, or perhaps your computing cluster has all of the required tools, configure the "config/local.config" file to specify the absolute PATH to each required bioinformatic tool. Or if you can add all of the relevant paths to your $PATH environment variable, which in some cases means loading the correct modules, then you can just leave the name of each tool without the path. Finally, change the flag after "-profile" to "local" when running the pipeline.
 
 ```bash
 nextflow run main_AMR++.nf -profile local

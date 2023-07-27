@@ -7,19 +7,15 @@ workflow FASTQ_KRAKEN_WF {
         krakendb
 
     main:
-        if (params.kraken_db == null) {
-            if (file("$baseDir/data/kraken_db/minikraken_8GB_20200312/").isDirectory()) {
-                kraken_db_ch = Channel.fromPath("$baseDir/data/kraken_db/minikraken_8GB_20200312/")
-            } else {
-                dlkraken()
-                kraken_db_ch = dlkraken.out
-            }
+        def default_db_path = "$baseDir/data/kraken_db/minikraken_8GB_20200312/"
+        def db_path = file(default_db_path).exists() ? default_db_path : params.kraken_db
+        
+        if (db_path == null) {
+            dlkraken()
+            runkraken(read_pairs_ch, dlkraken.out)
         } else {
-            kraken_db_ch = Channel.fromPath(params.kraken_db)
+            kraken_db_ch = Channel.value(db_path)
+            runkraken(read_pairs_ch, kraken_db_ch)
         }
-        
-        runkraken(read_pairs_ch, kraken_db_ch)
         krakenresults(runkraken.out.kraken_report.collect())
-        
 }
-
