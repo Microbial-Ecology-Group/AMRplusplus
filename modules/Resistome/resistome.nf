@@ -187,7 +187,7 @@ process plotrarefaction {
         path("*.png"), emit: plots
 
     """
-    mkdir data/
+    mkdir -p data/
     mv *.tsv data/
     python $baseDir/bin/rfplot.py --dir ./data --nd --s --sd .
     """

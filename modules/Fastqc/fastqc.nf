@@ -18,7 +18,7 @@ process fastqc {
 
     script:
     """
-    mkdir ${sample_id}_fastqc_logs
+    mkdir -p ${sample_id}_fastqc_logs
     fastqc -o ${sample_id}_fastqc_logs -f fastq -q ${reads}
     """
 }
@@ -44,14 +44,14 @@ process multiqc {
         path config
 
     output:
-        path 'multiqc_report.html'
+        path 'AMR-Bioinformatic-pipeline_multiqc_report.html'
         path 'multiqc_general_stats.txt'
-        path 'multiqc_data/'
+        path 'AMR-Bioinformatic-pipeline_multiqc_report_data/'
 
     script:
     """
     cp $config/* .
     multiqc -v data* --interactive -f --cl-config "max_table_rows: 3000"
-    mv multiqc_data/multiqc_general_stats.txt .
+    mv AMR-Bioinformatic-pipeline_multiqc_report_data/multiqc_general_stats.txt .
     """
 }

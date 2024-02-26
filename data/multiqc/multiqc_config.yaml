@@ -6,6 +6,6 @@ report_header_info:
     - Application Type: 'AMR++'
     - Project Type: 'FastQC analysis'
 
-custom_logo_url: 'https://www.nextflow.io'
-custom_logo_title: 'Center for Genomic Regulation'
+custom_logo_url: 'https://www.meglab.org/'
+custom_logo_title: 'Microbial Ecology Group'
 

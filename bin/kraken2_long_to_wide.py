@@ -53,12 +53,12 @@ def dict_to_matrix(D):
             if taxon not in unique_nodes:
                 unique_nodes.append(taxon)
     nrow = len(unique_nodes)
-    return_values = np.zeros((nrow, ncol), dtype=np.float)
+    return_values = np.zeros((nrow, ncol), dtype=float)
     for j, (sample, tdict) in enumerate(D.items()):
         samples.append(sample)
         for i, taxon in enumerate(unique_nodes):
             if taxon in tdict:
-                return_values[i, j] = np.float(tdict[taxon])
+                return_values[i, j] = float(tdict[taxon])
     return return_values, unique_nodes, samples
 
 

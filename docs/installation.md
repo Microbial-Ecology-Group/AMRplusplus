@@ -9,11 +9,13 @@ Usually, you'll have to install nextflow, unless it's available to be loaded as 
 * [Install Nextflow](#installing-nextflow)
 
 To make all of the bioinformatic tool dependencies available for use with AMR++, we have a few options:
-* [Run AMR++ with Anaconda](#run-amr-with-anaconda)
-    * [Install miniconda without "sudo" permissions](#installing-miniconda-without-sudo-permissions)
-* [Run AMR++ with Singularity](#run-amr-using-singularity)
-* [Run AMR++ with Docker](#run-amr-using-docker)
-* [Run AMR++ with locally installed tools](#local-installation-of-tools)
+- [Installation overview](#installation-overview)
+  - [Installing nextflow](#installing-nextflow)
+  - [Run AMR++ with anaconda](#run-amr-with-anaconda)
+    - [Installing miniconda without "sudo" permissions.](#installing-miniconda-without-sudo-permissions)
+  - [Run AMR++ using Singularity](#run-amr-using-singularity)
+  - [Run AMR++ using Docker](#run-amr-using-docker)
+  - [Local installation of tools](#local-installation-of-tools)
 
 ## Installing nextflow
 
@@ -69,10 +71,10 @@ We will go over a typical pipeline setup scenario in which you connect to a remo
 
 ```bash
 # Download miniconda
-wget https://repo.anaconda.com/miniconda/Miniconda3-py310_23.1.0-1-Linux-x86_64.sh
+wget https://repo.anaconda.com/miniconda/Miniconda3-py310_23.11.0-2-Linux-x86_64.sh
 # Run installation, follow default options. However, depending on your computing cluster when you are prompted, you should consider changing the 
 # location of the installation to somewhere that is not your home directory which can have storage limits.
-bash Miniconda3-py310_23.1.0-1-Linux-x86_64.sh
+bash Miniconda3-py310_23.11.0-2-Linux-x86_64.sh
 
 # Download AMR++ repository
 git clone https://github.com/Microbial-Ecology-Group/AMRplusplus.git

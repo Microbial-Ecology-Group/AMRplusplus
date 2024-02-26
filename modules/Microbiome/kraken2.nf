@@ -138,7 +138,7 @@ process kronafromkraken {
     
     script:
     """
-    mkdir krona
+    mkdir -p krona
     ktImportTaxonomy -o kraken2_taxonomy_krona.html -tax krona_db $x
     """
 }
