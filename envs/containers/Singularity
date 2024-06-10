@@ -28,14 +28,14 @@ From: debian:jessie-slim
     conda config --add channels bioconda
 
     # install bulk of bioinformatic tools using conda
-    conda create -n AmrPlusPlus_env python=3 trimmomatic bwa samtools bedtools kraken2 biopython matplotlib numpy pysam pandas fastqc multiqc
+    conda create -n AMR++_env python=3.9 trimmomatic bwa samtools bedtools kraken2 biopython matplotlib numpy pysam pandas fastqc multiqc
 
-    . /usr/local/bin/activate AmrPlusPlus_env
+    . /usr/local/bin/activate AMR++_env
     
-    #ln -s /usr/local/envs/AmrPlusPlus_env/bin/* /usr/local/bin/
+    #ln -s /usr/local/envs/AMR++_env/bin/* /usr/local/bin/
     
     #Still experimenting with how to change $PATH location. 
-    echo 'export PATH=$PATH:/usr/local/envs/AmrPlusPlus_env/bin/' >> $SINGULARITY_ENVIRONMENT
+    echo 'export PATH=$PATH:/usr/local/envs/AMR++_env/bin/' >> $SINGULARITY_ENVIRONMENT
 
     # SNPfinder
     cd /usr/local

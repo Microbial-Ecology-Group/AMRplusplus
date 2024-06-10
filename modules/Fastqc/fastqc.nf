@@ -33,8 +33,7 @@ process multiqc {
     
     publishDir "${params.output}/QC_analysis/", mode: 'copy',
         saveAs: { filename ->
-            if(filename.indexOf("multiqc_data/*") > 0) "MultiQC_stats/multiqc_data/$filename"
-            else if(filename.indexOf("general_stats.txt") > 0) "MultiQC_stats/$filename"
+            if(filename.indexOf("general_stats.txt") > 0) "MultiQC_stats/$filename"
             else if(filename.indexOf("_report.html") > 0) "MultiQC_stats/$filename"
             else {}
         }
@@ -44,14 +43,15 @@ process multiqc {
         path config
 
     output:
-        path 'AMR-Bioinformatic-pipeline_multiqc_report.html'
+        path 'multiqc_report.html'
         path 'multiqc_general_stats.txt'
-        path 'AMR-Bioinformatic-pipeline_multiqc_report_data/'
 
     script:
     """
     cp $config/* .
-    multiqc -v data* --interactive -f --cl-config "max_table_rows: 3000"
-    mv AMR-Bioinformatic-pipeline_multiqc_report_data/multiqc_general_stats.txt .
+    multiqc -v data* --interactive -f --cl-config "max_table_rows: 5000" --outdir multiqc_data --filename multiqc_report.html
+    mv multiqc_data/multiqc_report_data/multiqc_general_stats.txt .
+    mv multiqc_data/multiqc_report.html .
+
     """
 }
