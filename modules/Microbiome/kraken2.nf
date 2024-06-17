@@ -43,15 +43,15 @@ process runkraken {
 
 
    output:
-      tuple val(sample_id), path("${sample_id}.kraken.conf_${kraken_confidence}.raw"), emit: kraken_raw
-      path("${sample_id}.kraken.conf_${kraken_confidence}.report"), emit: kraken_report
-      tuple val(sample_id), path("${sample_id}_kraken.conf_${kraken_confidence}.krona"), emit: krakenkrona_filtered
+      tuple val(sample_id), path("${sample_id}.conf_${kraken_confidence}.kraken.raw"), emit: kraken_raw
+      path("${sample_id}.conf_${kraken_confidence}.kraken.report"), emit: kraken_report
+      tuple val(sample_id), path("${sample_id}.conf_${kraken_confidence}.kraken.krona"), emit: krakenkrona_filtered
 
 
      """
-     ${KRAKEN2} --db ${krakendb} --confidence ${kraken_confidence} --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.kraken.conf_${kraken_confidence}.report > ${sample_id}.kraken.conf_${kraken_confidence}.raw
+     ${KRAKEN2} --db ${krakendb} --confidence ${kraken_confidence} --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.conf_${kraken_confidence}.kraken.report > ${sample_id}.conf_${kraken_confidence}.kraken.raw
 
-     cut -f 2,3  ${sample_id}.kraken.conf_${kraken_confidence}.raw > ${sample_id}_kraken.conf_${kraken_confidence}.krona
+     cut -f 2,3  ${sample_id}.conf_${kraken_confidence}.kraken.raw > ${sample_id}.conf_${kraken_confidence}.kraken.krona
     """
 }
 
@@ -69,12 +69,14 @@ process krakenresults {
         path(kraken_reports)
 
     output:
-        path("kraken_analytic_matrix.csv")
+        path("kraken_analytic_matrix.conf_${kraken_confidence}.csv")
+	path("unclassifieds_kraken_analytic_matrix.conf_${kraken_confidence}.csv")
 
     """
-    ${PYTHON3} $baseDir/bin/kraken2_long_to_wide.py -i ${kraken_reports} -o kraken_analytic_matrix.csv
+    ${PYTHON3} $baseDir/bin/kraken2_long_to_wide.py -i ${kraken_reports} -o kraken_analytic_matrix.conf_${kraken_confidence}.csv
     """
 }
+
 
 process runbracken {
     label "microbiome"
