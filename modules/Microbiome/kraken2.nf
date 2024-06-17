@@ -2,6 +2,7 @@ params.taxlevel = "S" //level to estimate abundance at [options: D,P,C,O,F,G,S] 
 params.readlen = 150
 
 threads = params.threads
+kraken_confidence = params.kraken_confidence
 
 process dlkraken {
     tag { }
@@ -22,7 +23,6 @@ process dlkraken {
     """
 }
 
-
 process runkraken {
     tag { sample_id }
     label "microbiome"
@@ -32,10 +32,8 @@ process runkraken {
 
     publishDir "${params.output}/MicrobiomeAnalysis", mode: 'copy',
         saveAs: { filename ->
-            if(filename.indexOf(".kraken.raw") > 0) "Kraken/standard/$filename"
-            else if(filename.indexOf(".kraken.report") > 0) "Kraken/standard_report/$filename"
-            else if(filename.indexOf(".kraken.filtered.report") > 0) "Kraken/filtered_report/$filename"
-            else if(filename.indexOf(".kraken.filtered.raw") > 0) "Kraken/filtered/$filename"
+            if(filename.indexOf(".kraken.conf_${kraken_confidence}.raw") > 0) "Kraken/Raw_output_conf_${kraken_confidence}/$filename"
+            else if(filename.indexOf(".kraken.conf_${kraken_confidence}.report") > 0) "Kraken/Report_conf_${kraken_confidence}/$filename"
             else {}
         }
 
@@ -45,23 +43,18 @@ process runkraken {
 
 
    output:
-      tuple val(sample_id), path("${sample_id}.kraken.raw"), emit: kraken_raw
-      path("${sample_id}.kraken.report"), emit: kraken_report
-      tuple val(sample_id), path("${sample_id}.kraken.filtered.raw"), emit: kraken_filter_raw
-      path("${sample_id}.kraken.filtered.report"), emit: kraken_filter_report
-      tuple val(sample_id), path("${sample_id}_kraken2.krona"), emit: krakenkrona
-      tuple val(sample_id), path("${sample_id}_kraken2_filtered.krona"), emit: krakenkrona_filtered
-
+      tuple val(sample_id), path("${sample_id}.kraken.conf_${kraken_confidence}.raw"), emit: kraken_raw
+      path("${sample_id}.kraken.conf_${kraken_confidence}.report"), emit: kraken_report
+      tuple val(sample_id), path("${sample_id}_kraken.conf_${kraken_confidence}.krona"), emit: krakenkrona_filtered
 
 
      """
-     ${KRAKEN2} --db ${krakendb} --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.kraken.report > ${sample_id}.kraken.raw
-     ${KRAKEN2} --db ${krakendb} --confidence 1 --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.kraken.filtered.report > ${sample_id}.kraken.filtered.raw
+     ${KRAKEN2} --db ${krakendb} --confidence ${kraken_confidence} --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.kraken.conf_${kraken_confidence}.report > ${sample_id}.kraken.conf_${kraken_confidence}.raw
 
-    cut -f 2,3  ${sample_id}.kraken.raw > ${sample_id}_kraken2.krona
-    cut -f 2,3  ${sample_id}.kraken.filtered.raw > ${sample_id}_kraken2_filtered.krona
+     cut -f 2,3  ${sample_id}.kraken.conf_${kraken_confidence}.raw > ${sample_id}_kraken.conf_${kraken_confidence}.krona
     """
 }
+
 
 process krakenresults {
     tag { }
