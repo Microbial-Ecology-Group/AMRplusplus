@@ -12,8 +12,9 @@ nextflow.enable.dsl=2
 log.info """\
  A M R + +    N F   P I P E L I N E
  ===================================
- reads being analyzed : ${params.reads}
- output folder        : ${params.output}
+ Reads being analyzed : ${params.reads}
+ With the pipeline    : ${params.pipeline}
+ Output folder        : ${params.output}
  """
 
 
