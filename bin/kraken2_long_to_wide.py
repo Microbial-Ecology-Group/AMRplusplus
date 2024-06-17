@@ -114,7 +114,7 @@ def kraken2_load_analytic_data(file_name_list):
 
 def output_kraken2_analytic_data(outfile, M, m_names, n_names, unclassifieds):
     with open(outfile, 'w') as out, \
-            open('kraken_unclassifieds.csv', 'w') as u_out:
+            open(f"unclassifieds_{outfile}", 'w') as u_out:
         out.write(','.join(n_names) + '\n')
         for i, row in enumerate(M):
             out.write('\"{}\",'.format(
