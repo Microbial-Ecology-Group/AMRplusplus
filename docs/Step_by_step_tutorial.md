@@ -229,6 +229,30 @@ ls
 
 Finally, let's explore how changing some of these parameters could affect our results. The two main examples are the `--threshold` flag which controls the gene fraction threshold in the resistome analysis, and the `--kraken_confidence` flag which controls how kraken classifies reads. 
 
+
+## Resistome 
+
+We can rename the original reistome output AMR_analytic_matrix.csv to AMR_analytic_matrix_thresh80.csv to store the default results. Then, we can run the analysis again using a lower threshold. 
+
+```
+mv AMR++_results/Results/AMR_analytic_matrix.csv AMR++_results/Results/AMR_analytic_matrix_thresh80.csv
+
+nextflow run main_AMR++.nf --pipeline resistome --output AMR++_results --reads "AMR++_results/HostRemoval/NonHostFastq/*R{1,2}.fastq.gz" --threshold 30
+
+wc -l AMR++_results/Results/AM*
+```
+
+Notice the increase in taxa identified with the lower threshold.
+
+
+## Kraken
+
+Here, we can change the kraken_confidence score and run the kraken classification again. 
+
 ```
 nextflow run main_AMR++.nf --pipeline kraken --output AMR++_results --reads "AMR++_results/HostRemoval/NonHostFastq/*R{1,2}.fastq.gz" --kraken_db "/home/training/kraken2_DB/minikraken_8GB_20200312/" --kraken_confidence 1
+
+head AMR++_results/Results/unclassifieds_kraken_analytic_matrix.conf_*
 ```
+
+Notice the major change in results, with a confidence of 1 leading to 100% unclassified reads.
