@@ -51,6 +51,7 @@ def helpMessage = """\
         - conda: Uses "mamba" to install a conda environment. 
         - conda_slurm: Uses "mamba" and adds control over slurm job submission.
         - singularity: Uses a "singularity" image container.
+        - apptainer: Uses a "Singularity" (.sif) image container with the apptainer container system. 
         - singularity_slurm: Singularity image and adds control over slurm job submission.
         - docker: Uses a docker image container.
 
