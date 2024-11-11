@@ -134,7 +134,7 @@ Requirements:
 * Nextflow
 * Apptainer
 
-Apptainer is the opensourc fork of singularity that is a part of the linux project. Sometimes HPCs might have apptainer intstalled rather than singularity, this will allow AMR++ to download and use a singularity/apptainer container with all of the pre-installed software requirements.
+Apptainer is the opensourc fork of singularity that is a part of the linux project. Sometimes HPCs might have apptainer intstalled rather than singularity. This configuration will allow AMR++ to download and use a singularity/apptainer container with all of the pre-installed software requirements.
 
 ```bash
 
