@@ -14,6 +14,7 @@ To make all of the bioinformatic tool dependencies available for use with AMR++,
   - [Run AMR++ with anaconda](#run-amr-with-anaconda)
     - [Installing miniconda without "sudo" permissions.](#installing-miniconda-without-sudo-permissions)
   - [Run AMR++ using Singularity](#run-amr-using-singularity)
+  - [Run AMR++ using Apptainer](#Run-amr-using-apptainer)
   - [Run AMR++ using Docker](#run-amr-using-docker)
   - [Local installation of tools](#local-installation-of-tools)
 
@@ -127,6 +128,33 @@ nextflow run main_AMR++.nf -profile local -with-singularity amrplusplus_latest.s
 
 ```
 
+## Run AMR++ using Apptainer
+
+Requirements:
+* Nextflow
+* Apptainer
+
+Apptainer is the opensourc fork of singularity that is a part of the linux project. Sometimes HPCs might have apptainer intstalled rather than singularity, this will allow AMR++ to download and use a singularity/apptainer container with all of the pre-installed software requirements.
+
+```bash
+
+# Download AMR++ repository
+git clone https://github.com/Microbial-Ecology-Group/AMRplusplus.git
+
+# Navigate into direcotry
+cd AMRplusplus
+
+# Run command with singularity profile
+nextflow run main_AMR++.nf -profile apptainer
+
+# Alternatively, you can pull the singularity container first like this:
+singularity pull docker://enriquedoster/amrplusplus:latest
+
+# Then, specify the path to the singularity image.
+nextflow run main_AMR++.nf -profile local -with-apptainer amrplusplus_latest.sif
+
+```
+
 ## Run AMR++ using Docker
 
 Requirements:
@@ -161,4 +189,4 @@ If you run into issues with using Miniconda and Singularity, or perhaps your com
 
 ```bash
 nextflow run main_AMR++.nf -profile local
- ```
+```
