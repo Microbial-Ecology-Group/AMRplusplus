@@ -85,20 +85,33 @@ Below is a list of all of the parameters that AMR++ uses by default. They can be
 These are all of the parameters used by AMR++:
 ```bash
 params {
+     /* Display help message */
+    help = false
+
     /* Location of forward and reverse read pairs */
     reads = "${baseDir}/data/raw/*_R{1,2}.fastq.gz"
 
+    /* Optional input for bam files for use with "--pipeline bam_resistome" */
+    bam_files = null
+
     /* Location of reference/host genome */
-    reference = "${baseDir}/data/host/chr21.fasta.gz"
+    host = "${baseDir}/data/host/chr21.fasta.gz"
+
+    /* Optionally, you can specify the location of the host index files created with bwa with the path and wildcard (*): */
+    /* If you don't have the index files, replace this with "null" without quotes */
+    host_index =  "${baseDir}/data/host/chr21.fasta.gz*"
 
     /* Output directory */
     output = "test_results"
     
     /* Kraken database location, default is "null" */   
     kraken_db = null
+    
+    /* Kraken confidence score, 0.0 by default */
+    kraken_confidence = 0.0
 
-    /* Location of amr index files */
-    amr_index = ""
+    /* Location of amr index files with wildcard */
+    amr_index = "${baseDir}/data/amr/megares_database_v3.00.fasta*"
 
     /* Location of antimicrobial resistance (MEGARes) database */
     amr = "${baseDir}/data/amr/megares_database_v3.00.fasta"
@@ -106,8 +119,12 @@ params {
     /* Location of amr annotation file */
     annotation = "${baseDir}/data/amr/megares_annotations_v3.00.csv"
 
-    /* Location of SNP confirmation script */
-    snp_confirmation = "${baseDir}/bin/snp_confirmation.py"
+    /* Add SNP analysis */
+    snp = "N"
+
+    /* Add deduplicaation analysis */
+    deduped = "N"
+    prefix = "AMR"
 
     /* Number of threads */
     threads = 4
@@ -121,7 +138,7 @@ params {
     minlen = 36
 
     /* Resistome threshold */
-    threshold = 10
+    threshold = 80
 
     /* Starting rarefaction level */
     min = 5
@@ -138,8 +155,21 @@ params {
     /* multiQC */
     multiqc = "$baseDir/data/multiqc"
 
-    /* Display help message */
-    help = false
+    /* Qiime2 */
+
+    /* Dada parameters */
+    p_trim_left_f = 25
+
+    p_trim_left_r = 26
+
+    p_trunc_len_f = 225
+
+    p_trunc_len_r = 220
+
+    /* qiime2 bayes classifier */
+    dada2_db = "$baseDir/data/qiime/gg-13-8-99-515-806-nb-classifier.qza"
+
+
 }
 ```
 ### Modifying parameters using the command-line
