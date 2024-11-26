@@ -26,7 +26,7 @@ The **params.config** contains parameters that control which files are being ana
 
 The **nextflow.config** contains a section that allows the use of environment "profiles" when running AmrPlusPlus. Further information for each profile can be found within the /config directory. In brief, profiles allow control over how the pipeline is run on different computing clusters. We recommend the "singularity" profile which employs singularity containers which contain all the required bioinformatic tools.
 
-We make the following profiles available to suit your computing needs; "local", "local_slurm", "conda","conda_slurm", "singularity", "singularity_slurm", and "docker". You specify which profile to use with the ```-profile`` flag.
+We make the following profiles available to suit your computing needs; "local", "local_slurm", "conda","conda_slurm", "singularity", "apptainer", "singularity_slurm", and "docker". You specify which profile to use with the ```-profile`` flag.
 
 
 ```bash
@@ -55,6 +55,12 @@ profiles {
     singularity.enabled = true
     singularity.autoMounts = true
     singularity.cacheDir = "$baseDir/envs/"
+  }
+   apptainer {
+    includeConfig "config/apptainer.config"
+    apptainer.enabled = true
+    apptainer.autoMounts = true
+    apptainer.cacheDir = "$baseDir/envs/"
   }
   conda_slurm {
     includeConfig "config/conda_slurm.config"
@@ -166,7 +172,7 @@ By default, the pipeline uses the default minikraken database (~4GB) to classify
 
 ```bash
  sh download_minikraken.sh
- ```
+```
 
 If you would like to use a custom database or the standard Kraken database (~160GB), you will need to build it yourself and modify the **kraken_db** environment variable in the ```params.config ``` file to point to its location on your machine. 
 
@@ -195,37 +201,37 @@ Main pipeline options
   * Standard AMR pipeline ( QC trimming > Host DNA removal > Resistome alignment > Resistome results)
     ```bash
     --pipeline standard_AMR
-    ```  
+    ```
   * Fast AMR pipeline (QC trimming > Resistome alignment > Resistome results)
     ```bash
     --pipeline fast_AMR
-    ``` 
+    ```
   * AMR pipeline with kraken ( QC trimming > Host DNA removal > Resistome alignment > Resistome results) & (Non-host reads > Microbiome analysis)
     ```bash
     --pipeline standard_AMR_wKraken
-    ``` 
+    ```
   * 16S Microbiome analysis with qiime2 (DADA2 QC > Classification with SILVA)
     ```bash
     --pipeline qiime2
-    ``` 
-Pipeline components
+    ```
+    Pipeline components
   * Evaluate QC with multiQC
     ```bash
     --pipeline eval_qc
-    ``` 
+    ```
   * QC trimming with trimmomatic
     ```bash
     --pipeline trim_qc
-    ``` 
+    ```
   * Align reads to host DNA and remove contaminants
     ```bash
     --pipeline rm_host
-    ``` 
+    ```
   * Only perform AMR++ resistome analysis
     ```bash
     --pipeline resistome
-    ``` 
+    ```
   * Only perform microbiome analysis with Kraken
     ```bash
     --pipeline kraken
-    ``` 
+    ```
