@@ -122,12 +122,21 @@ Note, we don't have to specify what `--profile` to use because it defaults to us
 
 ## How did AMR++ know what parameters to run:
 
-AMR++ has default parameters that are listed in the `params.config` file. We can then either change the values in the file directly, or add those flags to the command you're using directly. We'll practice that below. 
+AMR++ has default parameters that are listed in the `params.config` file. We can then either change the values in the file directly, or add those flags to the command you're using directly. Also, note that there are variables with a single dash "-" and others with two dashes "--". The single dashes are internal to nextflow and include parameters/flags/variables like "-profile" and "-resume". The profile flag will not change if you're using conda as instructed above, and the "-resume" flag can be added to commands when the initial run failed for some reason and you want to try picking up where it left off. Otherwise, the majority of important variables will be denoted by two dashes "--". We'll go over all the parameters used by AMR++ which we'll either change in the command or by modifying the `params.config` file.  
 
-For now, let's look at the defaults:
+Nextflow prioritizes:
+1. whatever flags you include in the command
+2. The default paramaters in `params.config`
+3. Other variable calls within AMR++
+
+We'll practice changing various variables below. 
+
+First, let's look at the defaults:
 ```bash
 less params.config 
 ```
+
+For example, you can see which `--reads` are being analyzed by default and their location. We'll talk about each set of relevant variables as we go along.  
 
 # AMR++ components
 
