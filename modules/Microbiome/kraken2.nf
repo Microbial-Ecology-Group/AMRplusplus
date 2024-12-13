@@ -32,8 +32,8 @@ process runkraken {
 
     publishDir "${params.output}/MicrobiomeAnalysis", mode: 'copy',
         saveAs: { filename ->
-            if(filename.indexOf(".kraken.conf_${kraken_confidence}.raw") > 0) "Kraken/Raw_output_conf_${kraken_confidence}/$filename"
-            else if(filename.indexOf(".kraken.conf_${kraken_confidence}.report") > 0) "Kraken/Report_conf_${kraken_confidence}/$filename"
+            if(filename.indexOf(".conf_${kraken_confidence}.kraken.raw") > 0) "Kraken/Raw_output_conf_${kraken_confidence}/$filename"
+            else if(filename.indexOf(".conf_${kraken_confidence}.kraken.report") > 0) "Kraken/Report_conf_${kraken_confidence}/$filename"
             else {}
         }
 
