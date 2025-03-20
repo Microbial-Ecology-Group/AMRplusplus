@@ -54,7 +54,7 @@ def helpMessage = """\
         - singularity_slurm: Singularity image and adds control over slurm job submission.
         - docker: Uses a docker image container.
 
-    To include SNP analysis, add `--snp Y` to your command.
+    Analysis for genes requiring SNP confirmation occurs by default, add `--snp N` to your command or modify the "params.txt" if you wish to skip this analysis. 
     
     To include deduplicated count analysis, add `--deduped Y` to your command. 
     Please be aware that adding deduplicated counts will significantly increase run time and temp file storage requirements.

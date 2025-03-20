@@ -201,9 +201,10 @@ process runsnp {
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
 
-    publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
+    publishDir "${params.output}/ResistomeAnalysis/SNP_verification", mode: "copy",
         saveAs: { filename ->
-            if(filename.indexOf(".csv") > 0) "SNP_verification/$filename"
+            if(filename.indexOf(".csv") > 0) "SNP_raw_output/$filename"
+            else if(filename.indexOf(".txt") > 0 ) "SNP_resistant_reads/$filename"
             else if(filename.indexOf(".tsv") > 0 ) "SNP_verification_counts/$filename"
             else {}
         }
@@ -217,6 +218,7 @@ process runsnp {
     output:
         path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
         path("${sample_id}.${prefix}_SNPs${sample_id}/*")
+        path("${sample_id}_${prefix}_SNPresistant_reads.txt")
 
     """
     cp -r $baseDir/bin/AmrPlusPlus_SNP/* .
@@ -226,13 +228,15 @@ process runsnp {
         mv ${bam} ${sample_id}.bam
     fi
 
-    python3 SNP_Verification.py -c config.ini -t ${threads} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix}
+    python3 SNP_Verification.py -c config.ini -t ${threads} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output = True
 
     cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${sample_id}.${prefix}_SNPs${snp_count_matrix}` ${sample_id}.${prefix}_SNPs${snp_count_matrix} > ${sample_id}.${prefix}_SNP_count_col
 
     cut -d ',' -f 1 ${sample_id}.${prefix}_SNPs${snp_count_matrix} > gene_accession_labels
 
     paste gene_accession_labels ${sample_id}.${prefix}_SNP_count_col > ${sample_id}.SNP_confirmed_gene.tsv
+
+    mv ${sample_id}.${prefix}_SNPs${sample_id}/resistant_reads.csv ${sample_id}_${prefix}_SNPresistant_reads.txt
 
     """
 }
