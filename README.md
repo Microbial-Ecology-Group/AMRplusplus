@@ -34,11 +34,11 @@ More Information
 
 ## AMR++ demonstration
 
-If anaconda is already installed and nextflow is working, we'll just need to download the AMR++ github repository. Please review the [installation document](docs/installation.md) for alternative methods to install AMR++ in your computing environment.
+If anaconda is already installed, we'll just need to download the AMR++ github repository and create the AMR++ conda environment. Please review the [installation document](docs/installation.md) for alternative methods to install AMR++ in your computing environment.
 
 ```bash
-# Install mamba for faster installation
-conda install mamba -n base -c conda-forge
+# Confirm conda works
+conda -h
 ```
 
 Clone the AMR++ repository.
@@ -51,10 +51,20 @@ Navigate into the AMR++ repository and run the test command.
 ```bash
 cd AMRplusplus
 
-# Run command to perform the demonstration pipeline using the conda profile.
-nextflow run main_AMR++.nf -profile conda
+# Now we can use the included recipe to make the AMR++ environment
+conda env create -f envs/AMR++_env.yaml
+# This can take 5-10 mins (or more) depending on your internet speed, computing resources, etc. 
 
-# The first time this can take 5-10 mins (or more) depending on your internet speed because it is installing a conda environment. Subsequent runs will skip this step automatically.
+# Once it's completed, activate the environment
+conda activate AMR++_env.yaml
+
+# You now have access to all the AMR++ software dependencies (locally)
+samtools --help
+
+# Run command to perform the demonstration pipeline using the conda profile.
+nextflow run main_AMR++.nf
+
+
 ```
 Now, you can check out the results in the newly created "test_results" directory.
 
@@ -64,14 +74,18 @@ AMR++ is customizable to suit your computing needs and analyze your data. Primar
 All parameters used to control how AMR++ analyzes your data can also be changed as needed in a variety of ways. For full information, review this [configuration document.](docs/configuration.md)
 
 
-Below is a brief example, the default parameters were run using this command:
+Below is a brief example, the default parameters were run using this command (with the conda environment, AMR++_env, already activated):
 
-```nextflow run main_AMR++.nf -profile conda```
+```nextflow run main_AMR++.nf```
 
 To change the reads that were analyzed, you should specify the ```--reads`` parameters. Here, we can use regular expressions to point to your samples in a different directory.
 ```bash
-nextflow run main_AMR++.nf -profile conda --reads "path/to/your/reads/*_R{1,2}.fastq.gz" 
+nextflow run main_AMR++.nf --reads "path/to/your/reads/*_R{1,2}.fastq.gz" 
 ```
+
+#### [Here's an extended tutorial to run each AMR++ component individually](docs/Step_by_step_tutorial.md)
+
+
 
 # Optional flags
 
