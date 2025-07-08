@@ -77,9 +77,6 @@ workflow MERGED_FASTQ_RESISTOME_WF {
         amr
         annotation
 
-    /* ---- (1) Build or fetch auxiliary scripts -------------------- */
-    Channel.create { amrsnp; resistomeanalyzer; rarefactionanalyzer }
-
     if( file("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").isEmpty() ) {
         build_dependencies()
         amrsnp              = build_dependencies.out.amrsnp
