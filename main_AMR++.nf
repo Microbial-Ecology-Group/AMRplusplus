@@ -79,6 +79,11 @@ include { STANDARD_AMRplusplus } from './subworkflows/AMR++_standard.nf'
 include { FAST_AMRplusplus } from './subworkflows/AMR++_fast.nf'
 include { STANDARD_AMRplusplus_wKraken } from './subworkflows/AMR++_standard_wKraken.nf'
 
+// Load merged read workflows
+
+include { STANDARD_merged_AMRplusplus } from './subworkflows/AMR++_merged_standard.nf'
+
+
 // Load subworkflows
 include { FASTQ_QC_WF } from './subworkflows/fastq_information.nf'
 include { FASTQ_TRIM_WF } from './subworkflows/fastq_QC_trimming.nf'
@@ -187,6 +192,15 @@ Running the ${params.pipeline} subworkflow
         """
         FASTQ_KRAKEN_WF( fastq_files , params.kraken_db)
     }
+    else if(params.pipeline == "merged_AMR") {
+
+        log.info """\
+===================================
+Running the ${params.pipeline} pipeline
+===================================
+        """
+        STANDARD_merged_AMRplusplus(fastq_files,params.host, params.amr, params.annotation)
+    }  
     else if(params.pipeline == "qiime2") {
         log.info"""\
         ===================================

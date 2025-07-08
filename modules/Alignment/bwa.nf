@@ -128,6 +128,68 @@ process bwa_rm_contaminant_fq {
 
 }
 
+process bwa_rm_contaminant_merged_fq {
+
+    tag   { sample_id }
+    label "medium"
+
+    maxRetries 3
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+
+    publishDir "${params.output}/HostRemoval", mode: 'copy',
+        saveAs: { fn ->
+            if (fn.endsWith('.fastq.gz'))
+                "NonHostFastq/$fn"          // keep only the de-contaminated FASTQs
+            else
+                null
+        }
+
+    /* ───────── inputs ────────────────────────────────────────────────
+     *  indexfiles[0]  – bwa index prefix (6 files in the same dir)
+     *  merged_fq      – FLASH-merged reads      (sample.extendedFrags.fastq.gz)
+     *  unmerged_fq    – FLASH-unmerged reads    (sample.notCombined.fastq.gz)
+     */
+    input:
+        path  indexfiles
+        tuple val(sample_id), path(merged_fq), path(unmerged_fq)
+
+    /* ───────── outputs ─────────────────────────────────────────────── */
+    output:
+        tuple val(sample_id), path("${sample_id}.merged.non.host.fastq.gz"),   emit: nonhost_merged
+        path("${sample_id}.merged.samtools.idxstats"),                         emit: host_rm_stats_merged
+
+        tuple val(sample_id), path("${sample_id}.unmerged.non.host.fastq.gz"), emit: nonhost_unmerged
+        path("${sample_id}.unmerged.samtools.idxstats"),                       emit: host_rm_stats_unmerged
+
+    script:
+    """
+    set -euo pipefail
+
+    # ───────────────────────── merged reads ────────────────────────────
+    bwa mem ${indexfiles[0]} ${merged_fq} -t ${task.cpus} \
+        | samtools sort -@ ${task.cpus} -o ${sample_id}.merged.host.sorted.bam
+
+    samtools index   ${sample_id}.merged.host.sorted.bam
+    samtools idxstats ${sample_id}.merged.host.sorted.bam \
+        > ${sample_id}.merged.samtools.idxstats
+
+    samtools view -b -f 4 ${sample_id}.merged.host.sorted.bam \
+      | samtools fastq -@ ${task.cpus} -c 6 - | pigz -p ${task.cpus} -c > ${sample_id}.merged.non.host.fastq.gz
+
+
+    # ──────────────────────── un-merged reads ──────────────────────────
+    bwa mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpus} \
+        | samtools sort -@ ${task.cpus} -o ${sample_id}.unmerged.host.sorted.bam
+
+    samtools index   ${sample_id}.unmerged.host.sorted.bam
+    samtools idxstats ${sample_id}.unmerged.host.sorted.bam \
+        > ${sample_id}.unmerged.samtools.idxstats
+
+    samtools view -b -f 4 ${sample_id}.unmerged.host.sorted.bam \
+      | samtools fastq -@ ${task.cpus} -c 6 - | pigz -p ${task.cpus} -c > ${sample_id}.unmerged.non.host.fastq.gz
+    """
+}
+
 process HostRemovalStats {
     tag { sample_id }
     label "alignment"

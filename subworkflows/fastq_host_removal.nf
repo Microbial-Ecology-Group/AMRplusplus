@@ -1,10 +1,10 @@
 // Load modules
 include { index } from '../modules/Alignment/bwa'
-include { bwa_align ; bwa_rm_contaminant_fq ; HostRemovalStats} from '../modules/Alignment/bwa'
+include { bwa_align ; bwa_rm_contaminant_fq ; bwa_rm_contaminant_merged_fq; HostRemovalStats} from '../modules/Alignment/bwa'
 
 import java.nio.file.Paths
 
-// WC trimming
+//  Host removal for paired reads
 workflow FASTQ_RM_HOST_WF {
     take: 
         hostfasta
@@ -32,4 +32,41 @@ workflow FASTQ_RM_HOST_WF {
         HostRemovalStats(bwa_rm_contaminant_fq.out.host_rm_stats.collect())
     emit:
         nonhost_reads = bwa_rm_contaminant_fq.out.nonhost_reads  
+}
+
+workflow MERGED_FASTQ_RM_HOST_WF {
+    take: 
+        hostfasta
+        merged_reads_ch
+
+    main:
+        /* 1 ─ build / load BWA index -------------------------------------- */
+        def reference_index_ch =
+            params.host_index
+            ? Channel.fromPath( params.host_index , glob:true )
+                    .ifEmpty { error "No files match --host_index '${params.host_index}'" }
+                    .toList()
+                    .map { it.sort() }               // bundle 6 index files
+            : { index( hostfasta ); index.out }()     // call in a closure
+
+
+        /* 2 ─ host-removal -------------------------------------------------- */
+        bwa_rm_contaminant_merged_fq( reference_index_ch , merged_reads_ch )
+        
+        bwa_rm_contaminant_merged_fq.out.nonhost_merged
+            .join( bwa_rm_contaminant_merged_fq.out.nonhost_unmerged )
+            .set { nonhost_reads_ch } 
+        
+
+        bwa_rm_contaminant_merged_fq(reference_index_files, to_host_rm_ch )
+
+        /* ── extra channel: the non-host reads in tuple form ───────────── */
+        def nonhost_reads_ch = bwa_rm_contaminant_merged_fq.out.nonhost_reads
+
+        HostRemovalStats( bwa_rm_contaminant_merged_fq.out.host_rm_stats )
+
+
+
+    emit:
+        nonhost_reads_ch
 }
