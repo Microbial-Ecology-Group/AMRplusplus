@@ -61,8 +61,8 @@ workflow MERGED_FASTQ_RM_HOST_WF {
             .set { nonhost_reads_ch } 
         
         /* merged + unmerged non-host FASTQs  → one channel  */
-        Mergedbwa_rm_contaminant_fq.out.nonhost_merged
-            .mix( Mergedbwa_rm_contaminant_fq.out.nonhost_unmerged )
+        bwa_rm_contaminant_merged_fq.out.nonhost_merged
+            .mix( bwa_rm_contaminant_merged_fq.out.nonhost_unmerged )
             .set { only_reads_ch }            // ← make it top-level
         
         
