@@ -78,82 +78,78 @@ workflow MERGED_FASTQ_RESISTOME_WF {
         amr
         annotation
 
-    /* ------------ (1)  DEPENDENCIES -------------------------------------- */
-    // declare vars first
-    def resistomeanalyzer
-    def rarefactionanalyzer
-    def amrsnp
+    main:
+        /* ------------ (1)  DEPENDENCIES -------------------------------------- */
 
-    if( !new File("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").exists() ) {
-        build_dependencies()
-        resistomeanalyzer   = build_dependencies.out.resistomeanalyzer
-        rarefactionanalyzer = build_dependencies.out.rarefactionanalyzer
-        amrsnp              = build_dependencies.out.amrsnp
-    } else {
-        resistomeanalyzer   = file("${baseDir}/bin/resistome")
-        rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
-        amrsnp              = file("${baseDir}/bin/AmrPlusPlus_SNP/*")
-    }
-    /* ------------ (2)  AMR INDEX ----------------------------------------- */
-    // declare the channel handle first
-    def amr_index_files
+        if( !new File("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").exists() ) {
+            build_dependencies()
+            resistomeanalyzer   = build_dependencies.out.resistomeanalyzer
+            rarefactionanalyzer = build_dependencies.out.rarefactionanalyzer
+            amrsnp              = build_dependencies.out.amrsnp
+        } else {
+            resistomeanalyzer   = file("${baseDir}/bin/resistome")
+            rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
+            amrsnp              = file("${baseDir}/bin/AmrPlusPlus_SNP/*")
+        }
+        /* ------------ (2)  AMR INDEX ----------------------------------------- */
+        // declare the channel handle first
 
-    if( params.amr_index == null ) {
+        if( params.amr_index == null ) {
 
-        // run the indexing process you already defined
-        index( amr )
-        amr_index_files = index.out          // <-- channel of 6 files
+            // run the indexing process you already defined
+            index( amr )
+            amr_index_files = index.out          // <-- channel of 6 files
 
-    } else {
+        } else {
 
-        // read files matching the user-supplied pattern
-        amr_index_files = Channel
-            .fromPath( params.amr_index )    // emit each path
-            .ifEmpty {
-                error "No files matched '${params.amr_index}'. " +
-                    "Did you forget the * wildcard?"
-            }
-            .collect()                       // gather into a single list
-            .map { files ->
-                if( files.size() != 6 )
-                    throw new RuntimeException(
-                        "Expected 6 AMR index files, found ${files.size()}"
-                    )
-                files.sort()                 // ensure deterministic order
-            }
-    }
+            // read files matching the user-supplied pattern
+            amr_index_files = Channel
+                .fromPath( params.amr_index )    // emit each path
+                .ifEmpty {
+                    error "No files matched '${params.amr_index}'. " +
+                        "Did you forget the * wildcard?"
+                }
+                .collect()                       // gather into a single list
+                .map { files ->
+                    if( files.size() != 6 )
+                        throw new RuntimeException(
+                            "Expected 6 AMR index files, found ${files.size()}"
+                        )
+                    files.sort()                 // ensure deterministic order
+                }
+        }
 
-    /* ------------ (3)  ALIGN READS --------------------------------------- */
-    bwa_merged_align( amr_index_files, merged_reads_ch )
+        /* ------------ (3)  ALIGN READS --------------------------------------- */
+        bwa_merged_align( amr_index_files, merged_reads_ch )
 
-    /* ------------ (4)  MERGE BAMs ---------------------------------------- */
-    def bam_pairs_ch = bwa_merged_align.out.merged_bam \
-                         .mix( bwa_merged_align.out.unmerged_bam ) \
-                         .groupTuple()          // (id, [bam1,bam2])
+        /* ------------ (4)  MERGE BAMs ---------------------------------------- */
+        def bam_pairs_ch = bwa_merged_align.out.merged_bam \
+                            .mix( bwa_merged_align.out.unmerged_bam ) \
+                            .groupTuple()          // (id, [bam1,bam2])
 
-    samtools_merge_bams( bam_pairs_ch )
-    def combo_bam_ch = samtools_merge_bams.out.combo_bam
+        samtools_merge_bams( bam_pairs_ch )
+        def combo_bam_ch = samtools_merge_bams.out.combo_bam
 
-    /* ------------ (5)  RESISTOME / RAREFACTION --------------------------- */
-    runresistome   ( combo_bam_ch, amr, annotation, resistomeanalyzer )
-    resistomeresults( runresistome.out.resistome_counts.collect() )
+        /* ------------ (5)  RESISTOME / RAREFACTION --------------------------- */
+        runresistome   ( combo_bam_ch, amr, annotation, resistomeanalyzer )
+        resistomeresults( runresistome.out.resistome_counts.collect() )
 
-    runrarefaction ( combo_bam_ch, annotation, amr, rarefactionanalyzer )
-    plotrarefaction( runrarefaction.out.rarefaction.collect() )
+        runrarefaction ( combo_bam_ch, annotation, amr, rarefactionanalyzer )
+        plotrarefaction( runrarefaction.out.rarefaction.collect() )
 
-    /* ------------ (6)  SNP (optional) ------------------------------------ */
-    if( params.snp == 'Y' ) {
-        runsnp    ( combo_bam_ch, resistomeresults.out.snp_count_matrix )
-        snpresults( runsnp.out.snp_counts.collect() )
-    }
+        /* ------------ (6)  SNP (optional) ------------------------------------ */
+        if( params.snp == 'Y' ) {
+            runsnp    ( combo_bam_ch, resistomeresults.out.snp_count_matrix )
+            snpresults( runsnp.out.snp_counts.collect() )
+        }
 
-    /* ------------ (7)  DEDUP (optional) ---------------------------------- */
-    if( params.deduped == 'Y' ) {
-        def dedup_pairs_ch = bwa_merged_align.out.merged_dedup_bam \
-                                .mix( bwa_merged_align.out.unmerged_dedup_bam ) \
-                                .groupTuple()
-        samtools_merge_bams( dedup_pairs_ch )
-        BAM_DEDUP_RESISTOME_WF( samtools_merge_bams.out.combo_bam,
-                                amr, annotation )
-    }
+        /* ------------ (7)  DEDUP (optional) ---------------------------------- */
+        if( params.deduped == 'Y' ) {
+            def dedup_pairs_ch = bwa_merged_align.out.merged_dedup_bam \
+                                    .mix( bwa_merged_align.out.unmerged_dedup_bam ) \
+                                    .groupTuple()
+            samtools_merge_bams( dedup_pairs_ch )
+            BAM_DEDUP_RESISTOME_WF( samtools_merge_bams.out.combo_bam,
+                                    amr, annotation )
+        }
 }
