@@ -17,7 +17,7 @@ workflow STANDARD_merged_AMRplusplus {
         // runqc trimming
         FASTQ_TRIM_WF(read_pairs_ch)
         // merge reads
-        FASTQ_MERGE_WF( FASTQ_TRIM_WF.out.paired_fastq )
+        FASTQ_MERGE_WF( FASTQ_TRIM_WF.out.trimmed_reads )
         
         FASTQ_MERGE_WF.out.merged
               .join( GSV_2_WF.out.unmerged )
