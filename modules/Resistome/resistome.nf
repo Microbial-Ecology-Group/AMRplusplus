@@ -267,41 +267,6 @@ process snpresults {
 }
 
 
-‑ complete set of updated modules + workflow
-//  Keep merged and unmerged read streams separate throughout the resistome
-//  pipeline while avoiding filename collisions.
-// ─────────────────────────────────────────────────────────────────────────────
-
-nextflow.enable.dsl = 2
-
-// ───────── PARAMS (trim to what you really need) ─────────────────────────────
-params {
-    output     = "results"
-    snp        = 'N'      // Y|N – run SNP confirmation?
-    deduped    = 'N'      // Y|N – emit & analyse deduped BAMs?
-    threshold  = 90
-    min        = 1_000
-    max        = 100_000
-    skip       = 1_000
-    samples    = 20
-    amr_index  = null     // path to a pre‑built BWA index (optional)
-}
-
-// ───────── MODULE IMPORTS ────────────────────────────────────────────────────
-include { bwa_rm_contaminant_fq        }   from './modules/hostremoval/bwa_rm_contaminant_fq'
-include { bwa_rm_contaminant_merged_fq }   from './modules/hostremoval/bwa_rm_contaminant_merged_fq'
-include { bwa_align                    }   from './modules/alignment/bwa_align'
-include { bwa_merged_align             }   from './modules/alignment/bwa_merged_align'
-
-include {
-    runresistome; resistomeresults;
-    runrarefaction; plotrarefaction;
-    runsnp; snpresults
-} from './modules/resistome/*'
-
-include { build_dependencies; index }        from './modules/utils/*'
-include { BAM_DEDUP_RESISTOME_WF }           from './workflows/bam_dedup_resistome_wf'
-
 // ───────── bwa_merged_align MODULE DEFINITION ───────────────────────────────
 // File: modules/alignment/bwa_merged_align.nf
 process bwa_merged_align {
