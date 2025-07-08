@@ -58,9 +58,6 @@ workflow MERGED_FASTQ_RM_HOST_WF {
             .set { nonhost_reads_ch } 
         
 
-        /* ── extra channel: the non-host reads in tuple form ───────────── */
-        def nonhost_reads_ch = bwa_rm_contaminant_merged_fq.out.nonhost_reads
-
         HostRemovalStats( bwa_rm_contaminant_merged_fq.out.host_rm_stats )
 
 
