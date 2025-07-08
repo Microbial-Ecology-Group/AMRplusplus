@@ -2,7 +2,7 @@ include { FASTQ_QC_WF } from "$baseDir/subworkflows/fastq_information.nf"
 include { FASTQ_TRIM_WF } from "$baseDir/subworkflows/fastq_QC_trimming.nf"
 include { FASTQ_MERGE_WF } from "$baseDir/subworkflows/fastq_merging.nf"
 include { MERGED_FASTQ_RM_HOST_WF } from "$baseDir/subworkflows/fastq_host_removal.nf" 
-include { FASTQ_RESISTOME_WF } from "$baseDir/subworkflows/fastq_resistome.nf"
+include { MERGED_FASTQ_RESISTOME_WF } from "$baseDir/subworkflows/fastq_resistome.nf"
 
 workflow STANDARD_merged_AMRplusplus {
     take: 
@@ -26,7 +26,7 @@ workflow STANDARD_merged_AMRplusplus {
         MERGED_FASTQ_RM_HOST_WF(hostfasta, merged_reads_ch)
 
         // AMR alignment
-        //MERGED_FASTQ_RESISTOME_WF(MERGED_FASTQ_RM_HOST_WF.out.nonhost_reads, amr,annotation)
+        MERGED_FASTQ_RESISTOME_WF(MERGED_FASTQ_RM_HOST_WF.out.nonhost_reads, amr,annotation)
 
     //emit:
         //fastqc = fastqc.out   

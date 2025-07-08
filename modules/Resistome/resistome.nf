@@ -265,3 +265,108 @@ process snpresults {
 
     """
 }
+
+
+‑ complete set of updated modules + workflow
+//  Keep merged and unmerged read streams separate throughout the resistome
+//  pipeline while avoiding filename collisions.
+// ─────────────────────────────────────────────────────────────────────────────
+
+nextflow.enable.dsl = 2
+
+// ───────── PARAMS (trim to what you really need) ─────────────────────────────
+params {
+    output     = "results"
+    snp        = 'N'      // Y|N – run SNP confirmation?
+    deduped    = 'N'      // Y|N – emit & analyse deduped BAMs?
+    threshold  = 90
+    min        = 1_000
+    max        = 100_000
+    skip       = 1_000
+    samples    = 20
+    amr_index  = null     // path to a pre‑built BWA index (optional)
+}
+
+// ───────── MODULE IMPORTS ────────────────────────────────────────────────────
+include { bwa_rm_contaminant_fq        }   from './modules/hostremoval/bwa_rm_contaminant_fq'
+include { bwa_rm_contaminant_merged_fq }   from './modules/hostremoval/bwa_rm_contaminant_merged_fq'
+include { bwa_align                    }   from './modules/alignment/bwa_align'
+include { bwa_merged_align             }   from './modules/alignment/bwa_merged_align'
+
+include {
+    runresistome; resistomeresults;
+    runrarefaction; plotrarefaction;
+    runsnp; snpresults
+} from './modules/resistome/*'
+
+include { build_dependencies; index }        from './modules/utils/*'
+include { BAM_DEDUP_RESISTOME_WF }           from './workflows/bam_dedup_resistome_wf'
+
+// ───────── bwa_merged_align MODULE DEFINITION ───────────────────────────────
+// File: modules/alignment/bwa_merged_align.nf
+process bwa_merged_align {
+    tag   { sample_id }
+    label 'alignment'
+
+    maxRetries 3
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+
+    publishDir "${params.output}/Alignment/BAM_files", mode: 'copy',
+        saveAs: { fn ->
+            if (fn.endsWith('_merged_alignment_sorted.bam')   ||
+                fn.endsWith('_unmerged_alignment_sorted.bam'))
+                    "Standard/$fn"
+            else if (fn.endsWith('_merged_alignment_dedup.bam') ||
+                     fn.endsWith('_unmerged_alignment_dedup.bam'))
+                    "Deduped/$fn"
+            else null
+        }
+
+    input:
+        path  indexfiles                 // 6‑file BWA index prefix
+        tuple val(sample_id),
+              path(merged_fq),
+              path(unmerged_fq)
+
+    output:
+        tuple val(sample_id), path("${sample_id}_merged_alignment_sorted.bam"),   emit: merged_bam
+        tuple val(sample_id), path("${sample_id}_unmerged_alignment_sorted.bam"), emit: unmerged_bam
+
+        tuple val(sample_id), path("${sample_id}_merged_alignment_dedup.bam"),    emit: merged_dedup_bam,   optional: true
+        tuple val(sample_id), path("${sample_id}_unmerged_alignment_dedup.bam"),  emit: unmerged_dedup_bam, optional: true
+
+    script:
+    def cpu = task.cpus ?: 4
+    if (params.deduped == 'N') """
+        set -euo pipefail
+
+        bwa mem ${indexfiles[0]} ${merged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_merged\tSM:${sample_id}' \
+          | samtools sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
+
+        bwa mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_unmerged\tSM:${sample_id}' \
+          | samtools sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
+    """
+    else if (params.deduped == 'Y') """
+        set -euo pipefail
+
+        # ── merged ────────────────────────────────────────────────────
+        bwa mem ${indexfiles[0]} ${merged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_merged\tSM:${sample_id}' \
+          | samtools sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
+
+        samtools fixmate -@ ${cpu} ${sample_id}_merged_alignment_sorted.bam tmp.bam
+        samtools sort -@ ${cpu} tmp.bam -o tmp.srt.bam
+        samtools rmdup -S tmp.srt.bam ${sample_id}_merged_alignment_dedup.bam
+        rm tmp.*
+
+        # ── unmerged ──────────────────────────────────────────────────
+        bwa mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_unmerged\tSM:${sample_id}' \
+          | samtools sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
+
+        samtools fixmate -@ ${cpu} ${sample_id}_unmerged_alignment_sorted.bam tmp.bam
+        samtools sort -@ ${cpu} tmp.bam -o tmp.srt.bam
+        samtools rmdup -S tmp.srt.bam ${sample_id}_unmerged_alignment_dedup.bam
+        rm tmp.*
+    """
+    else
+        error "Invalid value for --deduped: ${params.deduped}. Use Y or N."
+}

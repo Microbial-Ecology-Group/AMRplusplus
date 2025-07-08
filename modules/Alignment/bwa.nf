@@ -88,6 +88,88 @@ process bwa_align {
         error "Invalid deduplication flag --deduped: ${deduped}. Please use --deduped Y for deduplicated counts, or avoid using this flag altogether to skip this error."
 }
 
+process bwa_merged_align {
+
+    tag   { sample_id }
+    label "alignment"
+
+    maxRetries 3
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+
+    publishDir "${params.output}/Alignment/BAM_files", mode: 'copy',
+        saveAs: { fn ->
+            // “Standard” = sorted-only BAMs, “Deduped” = after rmdup
+            if (fn.endsWith('_merged_alignment_sorted.bam')   ||
+                fn.endsWith('_unmerged_alignment_sorted.bam'))
+                    "Standard/$fn"
+            else if (fn.endsWith('_merged_alignment_dedup.bam') ||
+                     fn.endsWith('_unmerged_alignment_dedup.bam'))
+                    "Deduped/$fn"
+            else
+                    null
+        }
+
+    /* ───────── inputs ───────────────────────────────────────────────
+     *  indexfiles[0]  – BWA index prefix (6 files)
+     *  merged_fq      – FLASH-merged single-end reads
+     *  unmerged_fq    – FLASH-unmerged single-end reads
+     */
+    input:
+        path  indexfiles
+        tuple val(sample_id), path(merged_fq), path(unmerged_fq)
+
+    /* ───────── outputs ────────────────────────────────────────────── */
+    output:
+        tuple val(sample_id), path("${sample_id}_merged_alignment_sorted.bam"),   emit: merged_bam
+        tuple val(sample_id), path("${sample_id}_unmerged_alignment_sorted.bam"), emit: unmerged_bam
+
+        tuple val(sample_id), path("${sample_id}_merged_alignment_dedup.bam"),    emit: merged_dedup_bam,    optional: true
+        tuple val(sample_id), path("${sample_id}_unmerged_alignment_dedup.bam"),  emit: unmerged_dedup_bam,  optional: true
+
+    /* ───────── script ─────────────────────────────────────────────── */
+    script:
+    def cpu = task.cpus ?: threads                            // convenience
+    if (deduped == 'N') """
+        set -euo pipefail
+
+        # ───── merged reads ──────────────────────────────────────────
+        bwa mem ${indexfiles[0]} ${merged_fq} -t ${cpu} \
+             -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
+        | samtools sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
+
+        # ───── un-merged reads ───────────────────────────────────────
+        bwa mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} \
+             -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
+        | samtools sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
+    """
+    else if (deduped == 'Y') """
+        set -euo pipefail
+
+        # ───── merged reads (deduped) ────────────────────────────────
+        bwa mem ${indexfiles[0]} ${merged_fq} -t ${cpu} \
+             -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
+        | samtools sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
+
+        samtools fixmate -@ ${cpu} ${sample_id}_merged_alignment_sorted.bam tmp.bam
+        samtools sort    -@ ${cpu} tmp.bam -o tmp.srt.bam
+        samtools rmdup -S tmp.srt.bam ${sample_id}_merged_alignment_dedup.bam
+        rm tmp.bam tmp.srt.bam
+
+        # ───── un-merged reads (deduped) ─────────────────────────────
+        bwa mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} \
+             -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
+        | samtools sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
+
+        samtools fixmate -@ ${cpu} ${sample_id}_unmerged_alignment_sorted.bam tmp.bam
+        samtools sort    -@ ${cpu} tmp.bam -o tmp.srt.bam
+        samtools rmdup -S tmp.srt.bam ${sample_id}_unmerged_alignment_dedup.bam
+        rm tmp.bam tmp.srt.bam
+    """
+    else
+        error "Invalid --deduped flag: ${deduped}. Use Y or N."
+}
+
+
 process bwa_rm_contaminant_fq {
     tag { pair_id }
     label "alignment"
