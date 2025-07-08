@@ -72,15 +72,19 @@ workflow FASTQ_RESISTOME_WF {
  *───────────────────────────────────────────────────────────────────────────*/
 workflow MERGED_FASTQ_RESISTOME_WF {
 
-    /* -------------------------------------------------------------- INPUTS */
+    /* ------------ INPUTS -------------------------------------------------- */
     take:
-        merged_reads_ch      // tuple(sample_id , merged_fq , unmerged_fq)
+        merged_reads_ch      // tuple(id, merged_fq, unmerged_fq)
         amr
         annotation
 
-    /* ---------------------------------------------------- (1) DEPENDENCIES */
+    /* ------------ (1)  DEPENDENCIES -------------------------------------- */
+    // declare vars first
+    def resistomeanalyzer
+    def rarefactionanalyzer
+    def amrsnp
 
-    if ( file("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").isEmpty() ) {
+    if( !new File("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").exists() ) {
         build_dependencies()
         resistomeanalyzer   = build_dependencies.out.resistomeanalyzer
         rarefactionanalyzer = build_dependencies.out.rarefactionanalyzer
@@ -90,55 +94,66 @@ workflow MERGED_FASTQ_RESISTOME_WF {
         rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
         amrsnp              = file("${baseDir}/bin/AmrPlusPlus_SNP/*")
     }
-
-    /* ---------------------------------------------------- (2) AMR INDEX */
+    /* ------------ (2)  AMR INDEX ----------------------------------------- */
+    // declare the channel handle first
+    def amr_index_files
 
     if( params.amr_index == null ) {
-        index(amr)
-        amr_index_files = index.out
+
+        // run the indexing process you already defined
+        index( amr )
+        amr_index_files = index.out          // <-- channel of 6 files
+
     } else {
+
+        // read files matching the user-supplied pattern
         amr_index_files = Channel
-              .fromPath(Paths.get(params.amr_index))
-              .map{ file(it.toString()) }
-              .filter{ it.exists() }
-              .collect()
-              .map { files ->
-                    if( files.size() < 6 ) error "Expected 6 AMR index files, found ${files.size()}"
-                    files.sort()
-              }
+            .fromPath( params.amr_index )    // emit each path
+            .ifEmpty {
+                error "No files matched '${params.amr_index}'. " +
+                    "Did you forget the * wildcard?"
+            }
+            .collect()                       // gather into a single list
+            .map { files ->
+                if( files.size() != 6 )
+                    throw new RuntimeException(
+                        "Expected 6 AMR index files, found ${files.size()}"
+                    )
+                files.sort()                 // ensure deterministic order
+            }
     }
 
-    /* ---------------------------------------------------- (3) ALIGN READS */
+    /* ------------ (3)  ALIGN READS --------------------------------------- */
     bwa_merged_align( amr_index_files, merged_reads_ch )
 
-    /* ---------------------------------------------------- (4) MERGE BAMs */
-    bam_pairs_ch = bwa_merged_align.out.merged_bam  \
-                     .mix( bwa_merged_align.out.unmerged_bam )
-                   .groupTuple()                    // (id, [bam1,bam2])
+    /* ------------ (4)  MERGE BAMs ---------------------------------------- */
+    def bam_pairs_ch = bwa_merged_align.out.merged_bam \
+                         .mix( bwa_merged_align.out.unmerged_bam ) \
+                         .groupTuple()          // (id, [bam1,bam2])
 
     samtools_merge_bams( bam_pairs_ch )
+    def combo_bam_ch = samtools_merge_bams.out.combo_bam
 
-    combo_bam_ch = samtools_merge_bams.out.combo_bam
-
-    /* ---------------------------------------------------- (5) RESISTOME */
+    /* ------------ (5)  RESISTOME / RAREFACTION --------------------------- */
     runresistome   ( combo_bam_ch, amr, annotation, resistomeanalyzer )
     resistomeresults( runresistome.out.resistome_counts.collect() )
 
     runrarefaction ( combo_bam_ch, annotation, amr, rarefactionanalyzer )
     plotrarefaction( runrarefaction.out.rarefaction.collect() )
 
-    /* ---------------------------------------------------- (6) SNP (opt.) */
+    /* ------------ (6)  SNP (optional) ------------------------------------ */
     if( params.snp == 'Y' ) {
-        runsnp     ( combo_bam_ch, resistomeresults.out.snp_count_matrix )
-        snpresults ( runsnp.out.snp_counts.collect() )
+        runsnp    ( combo_bam_ch, resistomeresults.out.snp_count_matrix )
+        snpresults( runsnp.out.snp_counts.collect() )
     }
 
-    /* ---------------------------------------------------- (7) DEDUP (opt.) */
+    /* ------------ (7)  DEDUP (optional) ---------------------------------- */
     if( params.deduped == 'Y' ) {
-        dedup_pairs_ch = bwa_merged_align.out.merged_dedup_bam \
-                           .mix( bwa_merged_align.out.unmerged_dedup_bam )
-                         .groupTuple()
+        def dedup_pairs_ch = bwa_merged_align.out.merged_dedup_bam \
+                                .mix( bwa_merged_align.out.unmerged_dedup_bam ) \
+                                .groupTuple()
         samtools_merge_bams( dedup_pairs_ch )
-        BAM_DEDUP_RESISTOME_WF( samtools_merge_bams.out.combo_bam, amr, annotation )
+        BAM_DEDUP_RESISTOME_WF( samtools_merge_bams.out.combo_bam,
+                                amr, annotation )
     }
 }
