@@ -20,7 +20,7 @@ workflow STANDARD_merged_AMRplusplus {
         FASTQ_MERGE_WF( FASTQ_TRIM_WF.out.trimmed_reads )
         
         FASTQ_MERGE_WF.out.merged
-              .join( GSV_2_WF.out.unmerged )
+              .join( FASTQ_MERGE_WF.out.unmerged )
               .set { merged_reads_ch }
         // remove host DNA
         MERGED_FASTQ_RM_HOST_WF(hostfasta, merged_reads_ch)
