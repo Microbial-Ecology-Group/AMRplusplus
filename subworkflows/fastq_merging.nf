@@ -3,7 +3,7 @@ include { index ; bwa_align } from '../modules/Alignment/bwa'
 
 import java.nio.file.Paths
 
-workflow FASTQ_MERGED_WF {
+workflow FASTQ_MERGE_WF {
     take: 
         read_pairs_ch
 
