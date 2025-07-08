@@ -32,3 +32,29 @@ process MergeReadsFlash {
     flash -M 120 -o ${sample_id} --interleaved-output -z -t ${task.cpus} ${reads[0]} ${reads[1]}  &> ${sample_id}.log
     """
 }
+
+process SeqkitReadCounts {
+
+    tag "seqkit"
+    label "micro"
+
+    publishDir "${params.output}/Results/Stats", mode: 'copy'
+
+    /*
+     * fastqs  – a *list* of Path objects (all merged & unmerged reads)
+     * prefix  – e.g. params.QC_prefix  →  <prefix>_reads.txt
+     */
+    input:
+        path fastqs            // list because we used collect()
+        val  prefix
+
+    output:
+        path("${prefix}_reads.txt"), emit: readCounts
+
+    script:
+    """
+    set -euo pipefail
+    seqkit stats -T -j ${task.cpus} ${fastqs.join(' ')} \
+        > ${prefix}_reads.txt
+    """
+}

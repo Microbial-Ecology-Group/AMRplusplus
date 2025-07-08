@@ -1,6 +1,9 @@
 // Load modules
 include { index } from '../modules/Alignment/bwa'
 include { bwa_align ; bwa_rm_contaminant_fq ; bwa_rm_contaminant_merged_fq; HostRemovalStats} from '../modules/Alignment/bwa'
+include { SeqkitReadCounts } from '../modules/QC/merge'
+
+
 
 import java.nio.file.Paths
 
@@ -57,8 +60,16 @@ workflow MERGED_FASTQ_RM_HOST_WF {
             .join( bwa_rm_contaminant_merged_fq.out.nonhost_unmerged )
             .set { nonhost_reads_ch } 
         
-
-        HostRemovalStats( bwa_rm_contaminant_merged_fq.out.host_rm_stats )
+        /* merged + unmerged non-host FASTQs  → one channel  */
+        Mergedbwa_rm_contaminant_fq.out.nonhost_merged
+            .mix( Mergedbwa_rm_contaminant_fq.out.nonhost_unmerged )
+            .set { only_reads_ch }            // ← make it top-level
+        
+        
+        /* 3 ─ one-shot SeqKit on all non-host FASTQs ----------------------- */
+        seqkit_input_ch = only_reads_ch.map{ sid,f -> f }.collect()
+        
+        SeqkitReadCounts( seqkit_input_ch , "NonHost" )
 
 
 
