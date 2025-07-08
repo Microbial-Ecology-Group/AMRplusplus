@@ -1,5 +1,5 @@
 // Load modules
-include { index ; bwa_align } from '../modules/Alignment/bwa'
+include {MergeReadsFlash } from '../modules/QC/merge'
 
 import java.nio.file.Paths
 
