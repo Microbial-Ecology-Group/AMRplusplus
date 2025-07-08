@@ -306,17 +306,17 @@ process bwa_merged_align {
         set -euo pipefail
 
         bwa mem ${indexfiles[0]} ${merged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_merged\tSM:${sample_id}' \
-          | samtools sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
+          | samtools sort -@ ${cpu} -o ${sample_id}_merged_alignment_sorted.bam -
 
         bwa mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_unmerged\tSM:${sample_id}' \
-          | samtools sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
+          | samtools sort -@ ${cpu} -o ${sample_id}_unmerged_alignment_sorted.bam -
     """
     else if (params.deduped == 'Y') """
         set -euo pipefail
 
         # ── merged ────────────────────────────────────────────────────
         bwa mem ${indexfiles[0]} ${merged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_merged\tSM:${sample_id}' \
-          | samtools sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
+          | samtools sort -@ ${cpu} -o ${sample_id}_merged_alignment_sorted.bam -
 
         samtools fixmate -@ ${cpu} ${sample_id}_merged_alignment_sorted.bam tmp.bam
         samtools sort -@ ${cpu} tmp.bam -o tmp.srt.bam
@@ -325,7 +325,7 @@ process bwa_merged_align {
 
         # ── unmerged ──────────────────────────────────────────────────
         bwa mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_unmerged\tSM:${sample_id}' \
-          | samtools sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
+          | samtools sort -@ ${cpu} -o ${sample_id}_unmerged_alignment_sorted.bam -
 
         samtools fixmate -@ ${cpu} ${sample_id}_unmerged_alignment_sorted.bam tmp.bam
         samtools sort -@ ${cpu} tmp.bam -o tmp.srt.bam
