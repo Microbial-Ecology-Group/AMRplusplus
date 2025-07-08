@@ -294,3 +294,23 @@ process HostRemovalStats {
     ${PYTHON3} $baseDir/bin/samtools_idxstats.py -i ${host_rm_stats} -o host.removal.stats
     """
 }
+
+process samtools_merge_bams {
+    tag { sample_id }
+    label 'alignment'
+
+    publishDir "${params.output}/Alignment/BAM_files/Combined", mode: 'copy'
+
+    input:
+        tuple val(sample_id), path(bam_list)  // list‑of‑two BAMs
+
+    output:
+        tuple val(sample_id), path("${sample_id}_combined.bam"), emit: combo_bam
+
+    script:
+    def cpu = task.cpus ?: 4
+    """
+    samtools merge -@ ${cpu} ${sample_id}_combined.bam ${bam_list.join(' ')}
+    samtools index ${sample_id}_combined.bam
+    """
+}
