@@ -1,5 +1,5 @@
 // Load modules
-include { index ; bwa_align ; bwa_merged_align ; samtools_merge_bams} from '../modules/Alignment/bwa'
+include { index ; bwa_align ; bwa_merged_align ; samtools_merge_bams ;  samtools_merge_bams as  samtools_merge_bams_dedup} from '../modules/Alignment/bwa'
 
 // resistome
 include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
@@ -148,8 +148,8 @@ workflow MERGED_FASTQ_RESISTOME_WF {
             def dedup_pairs_ch = bwa_merged_align.out.merged_dedup_bam \
                                     .mix( bwa_merged_align.out.unmerged_dedup_bam ) \
                                     .groupTuple()
-            samtools_merge_bams( dedup_pairs_ch )
-            BAM_DEDUP_RESISTOME_WF( samtools_merge_bams.out.combo_bam,
+            samtools_merge_bams_dedup( dedup_pairs_ch )
+            BAM_DEDUP_RESISTOME_WF( samtools_merge_bams_dedup.out.combo_bam,
                                     amr, annotation )
         }
 }

@@ -212,7 +212,7 @@ Running the ${params.pipeline} subworkflow
                     error "Sample ${sid} is missing merged or unmerged FASTQ"
                 tuple( sid, merged_fq, unmerged_fq )
             }
-            .set { to_deto_host_rm_chdup_ch }      // ( sid , merged , unmerged )
+            .set { to_host_rm_ch }      // ( sid , merged , unmerged )
         MERGED_FASTQ_RM_HOST_WF(params.host, to_host_rm_ch)
     }  
     else if(params.pipeline == "merged_resistome") {
@@ -232,7 +232,7 @@ Running the ${params.pipeline} subworkflow
           }
           .set { to_resistome_ch }
 
-        MERGED_FASTQ_RESISTOME_WF(to_resistome_ch, amr,annotation)
+        MERGED_FASTQ_RESISTOME_WF(to_resistome_ch, params.amr,params.annotation)
     
     }  
 

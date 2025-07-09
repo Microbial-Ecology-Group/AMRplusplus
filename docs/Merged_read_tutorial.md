@@ -1,5 +1,10 @@
 # Overview of steps in AMR++ with merged reads
 
+# Confirm everything works
+
+You'll need to load the typical AMR++ environment, plus add "FLASH" and "SeqKit". Or you can simply re-install the AMR++ conda environment using the recipe as shown in the installation tutorial. 
+
+You'll still need to run the "demo" as this downloads the github with the SNP confirmation software. If you forget to do this, make sure your sbatch script includes the module that allows internet connection (e.g. "module load WebProxy").
 
 # Full pipeline
 
@@ -36,3 +41,9 @@ Parameters that have to change:
 * `--pipeline` ==> `--pipeline merged_resistome`
 * `--merged_reads`  ==> `--merged_reads 'Merged_AMR++_analysis/HostRemoval/NonHostFastq/*.{merged,unmerged}.non.host.fastq.gz'`
 
+SNP confirmation and count deduplication is performed by default.
+
+Example command:
+```
+nextflow run main_main++.nf --pipeline merged_resistome --output Merged_AMR++_analysis --merged_reads 'Merged_AMR++_analysis/Flash_reads/*.{extendedFrags,notCombined}.fastq.gz' -profile local
+``` 
