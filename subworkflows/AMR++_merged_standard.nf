@@ -28,11 +28,7 @@ workflow STANDARD_merged_AMRplusplus {
         // AMR alignment
         MERGED_FASTQ_RESISTOME_WF(MERGED_FASTQ_RM_HOST_WF.out.nonhost_reads, amr,annotation)
 
-    //emit:
-        //fastqc = fastqc.out   
-        //multiqc = multiqc.out
-        //trim_reads = runqc.out.paired_fastq
-        //non_host_reads = bwa_rm_contaminant_fq.out.nonhost_reads
+
 }
 
 

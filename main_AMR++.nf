@@ -80,9 +80,13 @@ include { FAST_AMRplusplus } from './subworkflows/AMR++_fast.nf'
 include { STANDARD_AMRplusplus_wKraken } from './subworkflows/AMR++_standard_wKraken.nf'
 
 // Load merged read workflows
-
 include { STANDARD_merged_AMRplusplus } from './subworkflows/AMR++_merged_standard.nf'
 
+include { FASTQ_QC_WF } from "$baseDir/subworkflows/fastq_information.nf"
+include { FASTQ_TRIM_WF } from "$baseDir/subworkflows/fastq_QC_trimming.nf"
+include { FASTQ_MERGE_WF } from "$baseDir/subworkflows/fastq_merging.nf"
+include { MERGED_FASTQ_RM_HOST_WF } from "$baseDir/subworkflows/fastq_host_removal.nf" 
+include { MERGED_FASTQ_RESISTOME_WF } from "$baseDir/subworkflows/fastq_resistome.nf"
 
 // Load subworkflows
 include { FASTQ_QC_WF } from './subworkflows/fastq_information.nf'
@@ -97,16 +101,21 @@ include { FASTQ_QIIME2_WF } from './subworkflows/fastq_16S_qiime2.nf'
 include { BAM_RESISTOME_WF } from './subworkflows/bam_resistome.nf'
 include { BAM_RESISTOME_COUNTS_WF } from './subworkflows/bam_resistome_counts.nf'
 
+workflow.onStart {
+    if( pipe == 'demo' && params.pipeline == 'help' )
+        println helpMessage                                        // user asked for help
 
+    log.info """
+    ===================================
+    Running the ${params.pipeline} pipeline
+    ===================================
+    """
+}
 
 workflow {
     if (params.pipeline == null || params.pipeline == "help") {
         println helpMessage
-        log.info """\
-===================================
-Running a demonstration of AMR++
-===================================
-        """
+
         //run with demo params, use params.config
         FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
     }
@@ -121,27 +130,15 @@ Running a demonstration of AMR++
     } 
     else if(params.pipeline == "standard_AMR") {
 
-        log.info """\
-===================================
-Running the ${params.pipeline} pipeline
-===================================
-        """
+
         STANDARD_AMRplusplus(fastq_files,params.host, params.amr, params.annotation)
     } 
     else if(params.pipeline == "fast_AMR") {
-        log.info """\
-===================================
-Running the ${params.pipeline} pipeline
-===================================
-        """
+
         FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
     } 
     else if(params.pipeline == "standard_AMR_wKraken") {
-        log.info """\
-===================================
-Running the ${params.pipeline} pipeline
-===================================
-        """
+
         STANDARD_AMRplusplus_wKraken(fastq_files,params.host, params.amr, params.annotation, params.kraken_db)
     } 
     else if(params.pipeline == "eval_qc") {
@@ -193,32 +190,54 @@ Running the ${params.pipeline} subworkflow
         FASTQ_KRAKEN_WF( fastq_files , params.kraken_db)
     }
     else if(params.pipeline == "merged_AMR") {
-
-        log.info """\
-===================================
-Running the ${params.pipeline} pipeline
-===================================
-        """
         STANDARD_merged_AMRplusplus(fastq_files,params.host, params.amr, params.annotation)
+    } 
+    else if(params.pipeline == "merge_reads") {
+        FASTQ_MERGE_WF( fastq_files )
     }  
-    else if(params.pipeline == "qiime2") {
-        log.info"""\
-        ===================================
-        Running the ${params.pipeline} subworkflow
-        ===================================
-                """
+    else if(params.pipeline == "merged_rm_host") {
         Channel
-            .fromFilePairs( params.reads, flat: true )
-            .ifEmpty { exit 1, "Read pair files could not be found: ${params.reads}" }
-            .map { name, forward, reverse -> [ forward.drop(forward.findLastIndexOf{"/"})[0], forward, reverse ] } //extract file name
-            .map { name, forward, reverse -> [ name.toString().take(name.toString().indexOf("_")), forward, reverse ] } //extract sample name
-            .map { name, forward, reverse -> [ name +","+ forward + ",forward\n" + name +","+ reverse +",reverse" ] } //prepare basic synthax
-            .flatten()
-            .collectFile(name: 'manifest.txt', newLine: true, storeDir: "${params.output}/demux", seed: "sample-id,absolute-filepath,direction")
-            .set { ch_manifest }
-        
-        FASTQ_QIIME2_WF( ch_manifest , params.dada2_db)
-    }
+            .fromPath( params.merged_reads , glob:true )
+            .ifEmpty { error "No FASTQs match: ${params.merged_reads}" }
+            .map { Path f ->
+                // capture sample ID and read-type
+                def m = (f.name =~ /(.+?)_(merged|unmerged)\.dedup\.fastq\.gz$/)
+                if( !m ) error "Bad name for deduped reads: ${f.name}"
+                tuple( m[0][1], tuple(m[0][2], f) )      // (sid , (type , file))
+            }
+            .groupTuple()                                // (sid , [ (type,file) , … ])
+            .map { sid, list ->
+                def merged_fq   = list.find { it[0] == 'merged'   }?.getAt(1)
+                def unmerged_fq = list.find { it[0] == 'unmerged' }?.getAt(1)
+                if( !merged_fq || !unmerged_fq )
+                    error "Sample '${sid}' missing merged or unmerged FASTQ"
+                tuple( sid, merged_fq, unmerged_fq )      // final 3-element tuple
+            }
+            .set { to_host_rm_ch }
+        MERGED_FASTQ_RM_HOST_WF(params.host, to_host_rm_ch)
+    }  
+    else if(params.pipeline == "merged_resistome") {
+        Channel
+          .fromFilePairs( params.merged_reads, glob: true )
+          .ifEmpty { error "No FASTQ files match: ${params.merged_reads}" }
+          .map { sample_id, files ->
+            //
+            // files will be e.g.
+            //   [ Path(…/S1_test_merged.dedup.fastq.gz),
+            //     Path(…/S1_test_unmerged.dedup.fastq.gz) ]
+            //
+            def merged   = files.find { it.name.contains('merged')   }
+            def unmerged = files.find { it.name.contains('unmerged') }
+            assert merged && unmerged : "Sample $sample_id missing one of merged/unmerged"
+            tuple( sample_id, merged, unmerged )
+          }
+          .set { to_resistome_ch }
+
+        MERGED_FASTQ_RESISTOME_WF(to_resistome_ch, amr,annotation)
+    
+    }  
+
+
     else if(params.pipeline == "bam_resistome"){
         log.info """\
                     =======================================

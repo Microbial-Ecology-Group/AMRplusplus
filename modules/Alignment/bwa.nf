@@ -310,7 +310,10 @@ process samtools_merge_bams {
     script:
     def cpu = task.cpus ?: 4
     """
-    samtools merge -@ ${cpu} ${sample_id}_combined.bam ${bam_list.join(' ')}
+    samtools merge -@ ${cpu} ${sample_id}_combined.unsorted.bam ${bam_list.join(' ')}
+
+    samtools sort  -@ ${cpu} -o ${sample_id}_combined.bam  ${sample_id}_combined.unsorted.bam
+
     samtools index ${sample_id}_combined.bam
     """
 }
