@@ -15,7 +15,11 @@ log.info """\
  Reads being analyzed : ${params.reads}
  With the pipeline    : ${params.pipeline}
  Output folder        : ${params.output}
- """
+
+===================================
+ Running the ${params.pipeline} pipeline
+===================================
+"""
 
 
 def helpMessage = """\
@@ -81,10 +85,6 @@ include { STANDARD_AMRplusplus_wKraken } from './subworkflows/AMR++_standard_wKr
 
 // Load merged read workflows
 include { STANDARD_merged_AMRplusplus } from './subworkflows/AMR++_merged_standard.nf'
-
-include { FASTQ_QC_WF } from "$baseDir/subworkflows/fastq_information.nf"
-include { FASTQ_TRIM_WF } from "$baseDir/subworkflows/fastq_QC_trimming.nf"
-include { FASTQ_MERGE_WF } from "$baseDir/subworkflows/fastq_merging.nf"
 include { MERGED_FASTQ_RM_HOST_WF } from "$baseDir/subworkflows/fastq_host_removal.nf" 
 include { MERGED_FASTQ_RESISTOME_WF } from "$baseDir/subworkflows/fastq_resistome.nf"
 
@@ -101,16 +101,7 @@ include { FASTQ_QIIME2_WF } from './subworkflows/fastq_16S_qiime2.nf'
 include { BAM_RESISTOME_WF } from './subworkflows/bam_resistome.nf'
 include { BAM_RESISTOME_COUNTS_WF } from './subworkflows/bam_resistome_counts.nf'
 
-workflow.onStart {
-    if( pipe == 'demo' && params.pipeline == 'help' )
-        println helpMessage                                        // user asked for help
 
-    log.info """
-    ===================================
-    Running the ${params.pipeline} pipeline
-    ===================================
-    """
-}
 
 workflow {
     if (params.pipeline == null || params.pipeline == "help") {
