@@ -132,7 +132,7 @@ workflow MERGED_FASTQ_RESISTOME_WF {
 
         /* ------------ (5)  RESISTOME / RAREFACTION --------------------------- */
         runresistome   ( combo_bam_ch, amr, annotation, resistomeanalyzer )
-        resistomeresults( runresistome.out.resistome_counts.collect() )
+        resistomeresults( runresistome.out.resistome_counts.collect() , "AMR")
 
         runrarefaction ( combo_bam_ch, annotation, amr, rarefactionanalyzer )
         plotrarefaction( runrarefaction.out.rarefaction.collect() )
@@ -140,7 +140,7 @@ workflow MERGED_FASTQ_RESISTOME_WF {
         /* ------------ (6)  SNP (optional) ------------------------------------ */
         if( params.snp == 'Y' ) {
             runsnp    ( combo_bam_ch, resistomeresults.out.snp_count_matrix )
-            snpresults( runsnp.out.snp_counts.collect() )
+            snpresults( runsnp.out.snp_counts.collect() ,"AMR")
         }
 
         /* ------------ (7)  DEDUP (optional) ---------------------------------- */

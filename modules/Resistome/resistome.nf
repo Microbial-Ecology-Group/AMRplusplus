@@ -113,6 +113,7 @@ process resistomeresults {
 
     input:
         path(resistomes)
+        val  prefix
 
     output:
         path("${prefix}_analytic_matrix.csv"), emit: raw_count_matrix
@@ -255,6 +256,7 @@ process snpresults {
 
     input:
         path(snp_counts)
+        val  prefix
 
     output:
         path("*_analytic_matrix.csv"), emit: snp_matrix
