@@ -6,6 +6,16 @@ You'll need to load the typical AMR++ environment, plus add "FLASH" and "SeqKit"
 
 You'll still need to run the "demo" as this downloads the github with the SNP confirmation software. If you forget to do this, make sure your sbatch script includes the module that allows internet connection (e.g. "module load WebProxy").
 
+## Download a new AMR++ repository and switch to "dev" branch
+
+```
+git clone https://github.com/Microbial-Ecology-Group/AMRplusplus
+
+cd AMRplusplus/
+
+git pull origin dev
+```
+
 # Full pipeline
 
 You can run the full AMR++ pipeline (without kraken) by specifying the path to your `--reads` and using the `--pipeline merged_rm_host` flag. This could work well if you re-direct the results or the work directory `-w /path/to/shared_drive`.
