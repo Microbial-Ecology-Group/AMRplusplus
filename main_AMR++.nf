@@ -85,6 +85,7 @@ include { STANDARD_AMRplusplus_wKraken } from './subworkflows/AMR++_standard_wKr
 
 // Load merged read workflows
 include { STANDARD_merged_AMRplusplus } from './subworkflows/AMR++_merged_standard.nf'
+include { FASTQ_MERGE_WF } from "$baseDir/subworkflows/fastq_merging.nf"
 include { MERGED_FASTQ_RM_HOST_WF } from "$baseDir/subworkflows/fastq_host_removal.nf" 
 include { MERGED_FASTQ_RESISTOME_WF } from "$baseDir/subworkflows/fastq_resistome.nf"
 

@@ -1,5 +1,5 @@
 // Deduped functions with prefix for name
-include {runresistome as runresistome_dedup ; runsnp as runsnp_dedup; resistomeresults as resistomeresults_dedup ; snpresults as snpresults_dedup ; build_dependencies} from '../modules/Resistome/resistome' addParams(prefix: 'dedup_AMR')
+include {runresistome as runresistome_dedup ; runsnp as runsnp_dedup; resistomeresults as resistomeresults_dedup ; snpresults as snpresults_dedup ; build_dependencies} from '../modules/Resistome/resistome' 
 
 
 workflow BAM_DEDUP_RESISTOME_WF {
