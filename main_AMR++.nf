@@ -189,23 +189,30 @@ Running the ${params.pipeline} subworkflow
     }  
     else if(params.pipeline == "merged_rm_host") {
         Channel
-            .fromPath( params.merged_reads , glob:true )
+            .fromPath( params.merged_reads, glob:true )
             .ifEmpty { error "No FASTQs match: ${params.merged_reads}" }
-            .map { Path f ->
-                // capture sample ID and read-type
-                def m = (f.name =~ /(.+?)_(merged|unmerged)\.dedup\.fastq\.gz$/)
-                if( !m ) error "Bad name for deduped reads: ${f.name}"
-                tuple( m[0][1], tuple(m[0][2], f) )      // (sid , (type , file))
+        
+            /* keep sample-ID (sid), read-type (rtype), and the Path itself */
+            .map { f ->
+                def m = (f.name =~ /(.+?).(extendedFrags|notCombined)\.fastq\.gz$/)
+                if( !m ) error "Unrecognised FLASH name: ${f.name}"
+                def sid   = m[0][1]
+                def rtype = m[0][2]            // extendedFrags | notCombined
+                tuple( sid, tuple(rtype, f) )  // --> (sid , (rtype , file))
             }
-            .groupTuple()                                // (sid , [ (type,file) , … ])
+        
+            /* group by sample ID → (sid , [ (rtype,file) , … ]) */
+            .groupTuple()
+        
+            /* split the list into the two files we need */
             .map { sid, list ->
-                def merged_fq   = list.find { it[0] == 'merged'   }?.getAt(1)
-                def unmerged_fq = list.find { it[0] == 'unmerged' }?.getAt(1)
+                def merged_fq   = list.find { it[0] == 'extendedFrags' }?.getAt(1)
+                def unmerged_fq = list.find { it[0] == 'notCombined'   }?.getAt(1)
                 if( !merged_fq || !unmerged_fq )
-                    error "Sample '${sid}' missing merged or unmerged FASTQ"
-                tuple( sid, merged_fq, unmerged_fq )      // final 3-element tuple
+                    error "Sample ${sid} is missing merged or unmerged FASTQ"
+                tuple( sid, merged_fq, unmerged_fq )
             }
-            .set { to_host_rm_ch }
+            .set { to_deto_host_rm_chdup_ch }      // ( sid , merged , unmerged )
         MERGED_FASTQ_RM_HOST_WF(params.host, to_host_rm_ch)
     }  
     else if(params.pipeline == "merged_resistome") {

@@ -1,0 +1,38 @@
+# Overview of steps in AMR++ with merged reads
+
+
+# Full pipeline
+
+You can run the full AMR++ pipeline (without kraken) by specifying the path to your `--reads` and using the `--pipeline merged_rm_host` flag. This could work well if you re-direct the results or the work directory `-w /path/to/shared_drive`.
+
+## Step 1: Run the "eval_qc" pipeline as normal with `--reads`
+
+## Step 2: Run "trim_qc" as normal with `--reads`
+
+## Step 3: Run "merge_reads" as normal with `--reads`
+
+This will output two files per sample, the "extendedFrags" (merged) and "notCombined" (unmerged).
+
+## Step 4: Run "merged_rm_host" with a new flag, `--merged_reads`
+
+### Parameters to change
+
+Parameters that have to change:
+* `--pipeline` ==> `--pipeline merged_rm_host`
+* `--merged_reads`  ==> `--merged_reads 'Merged_AMR++_analysis/Flash_reads/*.{extendedFrags,notCombined}.fastq.gz'`
+    * Remember, it's very important to use the single quote (') and not the backtick or backquote (`) that's on the same key as the tilde. 
+* `host` ==> `--host "/path/to/your/host/chr21.fasta.gz"` 
+    * remember, you can change this in `params.config` file or add it to your nextflow command.
+    * On grace, bovine: `/scratch/group/big_scratch/SHARED_resources/host_genome/GCF_002263795.3_ARS-UCD2.0_genomic.fna`
+
+Example command:
+```
+nextflow run main_main++.nf --pipeline merged_rm_host --output Merged_AMR++_analysis --merged_reads 'Merged_AMR++_analysis/Flash_reads/*.{extendedFrags,notCombined}.fastq.gz' -profile local
+``` 
+
+## Step 5: Run "merged_resistome" and point to non host reads with `--merged_reads`
+
+Parameters that have to change:
+* `--pipeline` ==> `--pipeline merged_resistome`
+* `--merged_reads`  ==> `--merged_reads 'Merged_AMR++_analysis/HostRemoval/NonHostFastq/*.{merged,unmerged}.non.host.fastq.gz'`
+
