@@ -18,13 +18,18 @@ git pull origin dev
 
 # Full pipeline
 
-You can run the full AMR++ pipeline (without kraken) by specifying the path to your `--reads` and using the `--pipeline merged_rm_host` flag. This could work well if you re-direct the results or the work directory `-w /path/to/shared_drive`.
+You can run the full AMR++ pipeline (without kraken) by specifying the path to your `--reads` and using the `--pipeline merged_AMR` flag. This could work well if you re-direct the results or the work directory `-w /path/to/shared_drive`.
 
-## Step 1: Run the "eval_qc" pipeline as normal with `--reads`
+## Step 1 : Run the "eval_qc" pipeline as normal with `--reads`
 
-## Step 2: Run "trim_qc" as normal with `--reads`
 
-## Step 3: Run "merge_reads" as normal with `--reads`
+## Step 2: Run "trim_qc" pipeline as normal with `--reads`
+Modify trimming parameters as needed in the `params.txt` file. 
+
+## Step 3: Run new "merge_reads" pipeline as normal with `--reads`
+
+### Parameters that have to change:
+* `--pipeline` ==> `--pipeline merge_reads`
 
 This will output two files per sample, the "extendedFrags" (merged) and "notCombined" (unmerged).
 
