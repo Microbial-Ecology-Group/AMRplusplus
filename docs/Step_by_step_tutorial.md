@@ -102,7 +102,7 @@ conda env create -f envs/AMR++_env.yaml
 # This can take 5-10 mins (or more) depending on your internet speed, computing resources, etc. 
 
 # Once it's completed, activate the environment
-conda activate AMR++_env.yaml
+conda activate AMR++_env
 
 # You now have access to all the AMR++ software dependencies (locally)
 samtools --help
