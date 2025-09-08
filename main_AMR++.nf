@@ -85,9 +85,11 @@ include { STANDARD_AMRplusplus_wKraken } from './subworkflows/AMR++_standard_wKr
 
 // Load merged read workflows
 include { STANDARD_merged_AMRplusplus } from './subworkflows/AMR++_merged_standard.nf'
+include { STANDARD_merged_AMRplusplus_wKraken } from './subworkflows/AMR++_merged_standard.nf'
 include { FASTQ_MERGE_WF } from "$baseDir/subworkflows/fastq_merging.nf"
 include { MERGED_FASTQ_RM_HOST_WF } from "$baseDir/subworkflows/fastq_host_removal.nf" 
 include { MERGED_FASTQ_RESISTOME_WF } from "$baseDir/subworkflows/fastq_resistome.nf"
+include { MERGED_FASTQ_KRAKEN_WF } from "$baseDir/subworkflows/fastq_microbiome.nf"
 
 // Load subworkflows
 include { FASTQ_QC_WF } from './subworkflows/fastq_information.nf'
@@ -184,6 +186,9 @@ Running the ${params.pipeline} subworkflow
     else if(params.pipeline == "merged_AMR") {
         STANDARD_merged_AMRplusplus(fastq_files,params.host, params.amr, params.annotation)
     } 
+    else if(params.pipeline == "merged_AMR_wKraken") {
+        STANDARD_merged_AMRplusplus_wKraken(fastq_files,params.host, params.amr, params.annotation)
+    } 
     else if(params.pipeline == "merge_reads") {
         FASTQ_MERGE_WF( fastq_files )
     }  
@@ -235,8 +240,26 @@ Running the ${params.pipeline} subworkflow
         MERGED_FASTQ_RESISTOME_WF(to_resistome_ch, params.amr,params.annotation)
     
     }  
+    else if(params.pipeline == "merged_microbiome") {
+        Channel
+          .fromFilePairs( params.merged_reads, glob: true )
+          .ifEmpty { error "No FASTQ files match: ${params.merged_reads}" }
+          .map { sample_id, files ->
+            //
+            // files will be e.g.
+            //   [ Path(…/S1_test_merged.dedup.fastq.gz),
+            //     Path(…/S1_test_unmerged.dedup.fastq.gz) ]
+            //
+            def merged   = files.find { it.name.contains('merged')   }
+            def unmerged = files.find { it.name.contains('unmerged') }
+            assert merged && unmerged : "Sample $sample_id missing one of merged/unmerged"
+            tuple( sample_id, merged, unmerged )
+          }
+          .set { to_microbiome_ch }
 
-
+        MERGED_FASTQ_KRAKEN_WF(to_microbiome_ch)
+    
+    }  
     else if(params.pipeline == "bam_resistome"){
         log.info """\
                     =======================================

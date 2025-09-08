@@ -183,6 +183,7 @@ process plotrarefaction {
 
     input:
         path(rarefaction)
+        val  prefix
 
     output:
         path("*.png"), emit: plots
@@ -190,7 +191,7 @@ process plotrarefaction {
     """
     mkdir -p data/
     mv *.tsv data/
-    python $baseDir/bin/rfplot.py --dir ./data --nd --s --sd .
+    python $baseDir/bin/rfplot.py --dir ./data --nd --s --sd . --prefix ${prefix}
     """
 }
 

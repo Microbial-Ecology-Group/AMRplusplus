@@ -55,6 +55,73 @@ process runkraken {
     """
 }
 
+process runkraken_merged {
+
+    tag   { sample_id }
+    // robust to null | String | List
+    // make sure to test this functionality
+    label {
+        def optsStr =
+            (params.kraken_options instanceof List) ? params.kraken_options.join(' ')
+          : (params.kraken_options != null)         ? params.kraken_options.toString()
+                                                    : ''
+
+        optsStr.contains('--memory-mapping') ? 'small_memory_long_time' : 'large_long'
+    }
+
+    publishDir "${params.output}/MicrobiomeAnalysis", mode: 'copy',
+        saveAs: { fn ->
+            if      (fn.endsWith('.kraken.raw'))   "Kraken/standard/$fn"
+            else if (fn.endsWith('.kraken.report'))"Kraken/standard_report/$fn"
+            else if (fn.endsWith('.fastq.gz'))     "Kraken/extracted_reads/$fn"
+        }
+
+    input:
+        tuple val(sample_id), path(merged), path(unmerged)   // now BOTH are single files
+        val krakendb
+
+    output:
+        tuple val(sample_id), path("${sample_id}.merged.kraken.raw"),      emit: kraken_raw_merged
+        path("${sample_id}.merged.kraken.report"),                         emit: kraken_report_merged
+        tuple val(sample_id), path("${sample_id}_extracted_merged.fastq.gz"), emit: extracted_merged
+
+        tuple val(sample_id), path("${sample_id}.unmerged.kraken.raw"),    emit: kraken_raw_unmerged
+        path("${sample_id}.unmerged.kraken.report"),                       emit: kraken_report_unmerged
+        tuple val(sample_id), path("${sample_id}_extracted_unmerged.fastq.gz"), emit: extracted_unmerged
+
+    script:
+    """
+    # ── merged file ─────────────────────────────────────────────
+    ${KRAKEN2} --db ${krakendb} ${kraken_options} --confidence ${kraken_confidence} \
+               --threads ${task.cpus} \
+               --report ${sample_id}.merged.kraken.report \
+               ${merged} \
+               > ${sample_id}.merged.kraken.raw
+
+    extract_kraken_reads.py -k ${sample_id}.merged.kraken.raw \
+        --max 1000000000 --report ${sample_id}.merged.kraken.report \
+        --taxid ${extract_reads_taxid} ${extract_reads_options_single} \
+        --fastq-output -s ${merged} \
+        -o ${sample_id}_extracted_merged.fastq
+
+    pigz --processes ${task.cpus} ${sample_id}_extracted_merged.fastq
+
+    # ── unmerged (now interleaved single) ───────────────────────
+    ${KRAKEN2} --db ${krakendb} ${kraken_options} --confidence ${kraken_confidence} \
+               --threads ${task.cpus} \
+               --report ${sample_id}.unmerged.kraken.report \
+               ${unmerged} \
+               > ${sample_id}.unmerged.kraken.raw
+
+    extract_kraken_reads.py -k ${sample_id}.unmerged.kraken.raw \
+        --max 1000000000 --report ${sample_id}.unmerged.kraken.report \
+        --taxid ${extract_reads_taxid} ${extract_reads_options_single} \
+        --fastq-output -s ${unmerged} \
+        -o ${sample_id}_extracted_unmerged.fastq
+
+    pigz --processes ${task.cpus} ${sample_id}_extracted_unmerged.fastq
+    """
+}
 
 process krakenresults {
     tag { }

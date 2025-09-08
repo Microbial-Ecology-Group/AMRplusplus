@@ -1,5 +1,5 @@
 // Load modules
-include { runkraken ; krakenresults ; dlkraken} from '../modules/Microbiome/kraken2.nf' 
+include { runkraken ; krakenresults ; dlkraken ; runkraken_merged} from '../modules/Microbiome/kraken2.nf' 
 
 workflow FASTQ_KRAKEN_WF {
     take: 
@@ -25,3 +25,61 @@ workflow FASTQ_KRAKEN_WF {
         }
         krakenresults(runkraken.out.kraken_report.collect())
 }
+
+
+workflow MERGED_FASTQ_KRAKEN_WF {
+
+    take:
+        merged_reads_ch   
+
+    main:
+
+        
+        /*  Build ( sid , mergedFile , unmergedFile )  -------------------------- */
+
+          
+          // now each item is exactly: ( sid, Path-to-merged, Path-to-unmerged )
+                
+        /*──────────────── choose / download Kraken DB ───────────────*/
+        def kraken_db_ch
+        def default_db = "$baseDir/data/kraken_db/k2_standard_08gb_20250402/"
+        if( file(default_db).exists() )
+             kraken_db_ch = Channel.value(default_db)
+        else if( params.kraken_db )
+             kraken_db_ch = Channel.value(params.kraken_db)
+        else {
+             dlkraken()
+             kraken_db_ch = dlkraken.out
+        }
+
+        /*──────────────── Kraken 2  ─────────────────────────────────*/
+        runkraken_merged( merged_reads_ch , kraken_db_ch )
+
+        
+        /* ---------- run krakenresults once all reports are ready ---------- */
+        def kraken_reports_list = runkraken_merged.out.kraken_report_merged
+                                    .mix( runkraken_merged.out.kraken_report_unmerged )
+                                    .collect()                       // Java List (one per sample)
+        
+        krakenresults( kraken_reports_list )   // ← plain value, no Channel.value()
+        
+        /* ---------- gather extracted reads -------------------------------- */
+        runkraken_merged.out.extracted_merged
+                    .join( runkraken_merged.out.extracted_unmerged )
+                    .set { extracted_reads_ch }     
+
+        runkraken_merged.out.extracted_merged
+            .mix( runkraken_merged.out.extracted_unmerged )
+            .set { only_extracted_reads_ch }          // ← promote to workflow scope
+          
+          
+        /* ---------- one-shot SeqKit on all extracted FASTQs --------------- */
+        //seqkit_fastq_list = only_extracted_reads_ch.map{ sid,f -> f }.collect()
+        //SeqkitReadCounts( seqkit_fastq_list , "Kraken_extracted" )
+
+
+            
+            
+            
+}
+

@@ -22,6 +22,8 @@ workflow BAM_RESISTOME_COUNTS_WF {
         // Split sections below for standard and dedup_ed results
         runresistome(bam_ch,amr, annotation, resistomeanalyzer )
         resistomeresults(runresistome.out.resistome_counts.collect())
+        runrarefaction(bwa_align.out.bwa_bam, annotation, amr, rarefactionanalyzer,"AMR_deduped")
+        plotrarefaction(runrarefaction.out.rarefaction.collect(),"AMR_deduped")
         // Add SNP confirmation
         if (params.snp == "Y") {
             runsnp(bam_ch, resistomeresults.out.snp_count_matrix)
