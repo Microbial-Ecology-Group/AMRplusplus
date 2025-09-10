@@ -22,16 +22,32 @@ You can run the full AMR++ pipeline (without kraken) by specifying the path to y
 
 ## Step 1 : Run the "eval_qc" pipeline as normal with `--reads`
 
+Example command:
+```
+nextflow run main_AMR++.nf --pipeline eval_qc --output Merged_AMR++_analysis --reads "data/raw/*_R{1,2}.fastq.gz" -profile local
+``` 
 
 ## Step 2: Run "trim_qc" pipeline as normal with `--reads`
 Modify trimming parameters as needed in the `params.txt` file. 
 
+
+Example command:
+```
+nextflow run main_AMR++.nf --pipeline trim_qc --output Merged_AMR++_analysis --reads "data/raw/*_R{1,2}.fastq.gz" -profile local
+``` 
+
 ## Step 3: Run new "merge_reads" pipeline as normal with `--reads`
 
 ### Parameters that have to change:
+* `--reads` ==> `--reads "Merged_AMR++_analysis/QC_trimming/Paired/*{1,2}P.fastq.gz"`
 * `--pipeline` ==> `--pipeline merge_reads`
 
 This will output two files per sample, the "extendedFrags" (merged) and "notCombined" (unmerged).
+Example command:
+```
+nextflow run main_AMR++.nf --pipeline merge_reads --output Merged_AMR++_analysis --reads "Merged_AMR++_analysis/QC_trimming/Paired/*{1,2}P.fastq.gz" -profile local
+``` 
+
 
 ## Step 4: Run "merged_rm_host" with a new flag, `--merged_reads`
 
@@ -47,7 +63,7 @@ Parameters that have to change:
 
 Example command:
 ```
-nextflow run main_main++.nf --pipeline merged_rm_host --output Merged_AMR++_analysis --merged_reads 'Merged_AMR++_analysis/Flash_reads/*.{extendedFrags,notCombined}.fastq.gz' -profile local
+nextflow run main_AMR++.nf --pipeline merged_rm_host --output Merged_AMR++_analysis --merged_reads 'Merged_AMR++_analysis/Flash_reads/*.{extendedFrags,notCombined}.fastq.gz' -profile local
 ``` 
 
 ## Step 5: Run "merged_resistome" and point to non host reads with `--merged_reads`
@@ -56,11 +72,11 @@ Parameters that have to change:
 * `--pipeline` ==> `--pipeline merged_resistome`
 * `--merged_reads`  ==> `--merged_reads 'Merged_AMR++_analysis/HostRemoval/NonHostFastq/*.{merged,unmerged}.non.host.fastq.gz'`
 
-SNP confirmation and count deduplication is performed by default.
+SNP confirmation and alignment deduplication is performed by default.
 
 Example command:
 ```
-nextflow run main_main++.nf --pipeline merged_resistome --output Merged_AMR++_analysis --merged_reads 'Merged_AMR++_analysis/Flash_reads/*.{extendedFrags,notCombined}.fastq.gz' -profile local
+nextflow run main_AMR++.nf --pipeline merged_resistome --output Merged_AMR++_analysis --merged_reads 'Merged_AMR++_analysis/HostRemoval/NonHostFastq/*.{merged,unmerged}.non.host.fastq.gz' -profile local
 ``` 
 
 
@@ -76,5 +92,5 @@ Parameter still pointing to nonhost merged reads
 
 Example command:
 ```
-nextflow run main_main++.nf --pipeline merged_kraken --output Merged_AMR++_analysis --merged_reads 'Merged_AMR++_analysis/Flash_reads/*.{extendedFrags,notCombined}.fastq.gz' --kraken_db "/path/to/your/kraken_db" -profile local
+nextflow run main_AMR++.nf --pipeline merged_kraken --output Merged_AMR++_analysis --merged_reads 'Merged_AMR++_analysis/HostRemoval/NonHostFastq/*.{merged,unmerged}.non.host.fastq.gz' --kraken_db "/path/to/your/kraken_db" -profile local
 ``` 

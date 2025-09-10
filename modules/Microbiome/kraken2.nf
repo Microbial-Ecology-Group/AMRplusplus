@@ -3,6 +3,7 @@ params.readlen = 150
 
 threads = params.threads
 kraken_confidence = params.kraken_confidence
+kraken_options = params.kraken_options
 
 process dlkraken {
     tag { }
@@ -14,11 +15,12 @@ process dlkraken {
     publishDir "$baseDir/data/kraken_db/", mode: 'copy'
 
     output:
-        path("minikraken_8GB_20200312/")
+        path("k2_minusb_20250714/")
 
     """
-        wget ftp://ftp.ccb.jhu.edu/pub/data/kraken2_dbs/minikraken_8GB_202003.tgz
-        tar -xvzf minikraken_8GB_202003.tgz
+        wget https://genome-idx.s3.amazonaws.com/kraken/k2_minusb_20250714.tar.gz
+        mkdir -p k2_minusb_20250714
+        tar -xvzf k2_minusb_20250714.tar.gz -C k2_minusb_20250714
 
     """
 }

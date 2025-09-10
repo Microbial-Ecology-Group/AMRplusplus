@@ -8,7 +8,7 @@ workflow FASTQ_KRAKEN_WF {
 
     main:
         // Define the default database path
-        def default_db_path = "$baseDir/data/kraken_db/minikraken_8GB_20200312/"
+        def default_db_path = "$baseDir/data/kraken_db/k2_minusb_20250714/"
         
         // Prioritize params.kraken_db over the default_db_path if defined
         def db_path = params.kraken_db ?: (file(default_db_path).exists() ? default_db_path : null)
@@ -42,7 +42,7 @@ workflow MERGED_FASTQ_KRAKEN_WF {
                 
         /*──────────────── choose / download Kraken DB ───────────────*/
         def kraken_db_ch
-        def default_db = "$baseDir/data/kraken_db/k2_standard_08gb_20250402/"
+        def default_db = "$baseDir/data/kraken_db/k2_minusb_20250714/"
         if( file(default_db).exists() )
              kraken_db_ch = Channel.value(default_db)
         else if( params.kraken_db )
@@ -79,7 +79,7 @@ workflow FASTQ_KRAKEN_SE_WF {
         se_nonhost_ch
 
     main:
-        def default_db = "$baseDir/data/kraken_db/k2_standard_08gb_20250402/"
+        def default_db = "$baseDir/data/kraken_db/k2_minusb_20250714/"
         def db_ch =
             (params.kraken_db ? Channel.value(params.kraken_db)
           : file(default_db).exists() ? Channel.value(default_db)
