@@ -77,7 +77,6 @@ workflow MERGED_FASTQ_KRAKEN_WF {
 workflow FASTQ_KRAKEN_SE_WF {
     take:
         se_nonhost_ch
-        krakendb
 
     main:
         def default_db = "$baseDir/data/kraken_db/k2_standard_08gb_20250402/"

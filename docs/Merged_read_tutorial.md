@@ -62,3 +62,19 @@ Example command:
 ```
 nextflow run main_main++.nf --pipeline merged_resistome --output Merged_AMR++_analysis --merged_reads 'Merged_AMR++_analysis/Flash_reads/*.{extendedFrags,notCombined}.fastq.gz' -profile local
 ``` 
+
+
+## Optional - Step 6: Run "merged_kraken" and point to non host reads with `--merged_reads`
+
+Parameters that have to change:
+* `--pipeline` ==> `--pipeline merged_kraken`
+* `--kraken_db` ==> `--kraken_db /path/to/your/kraken_db`
+
+
+Parameter still pointing to nonhost merged reads
+* `--merged_reads`  ==> `--merged_reads 'Merged_AMR++_analysis/HostRemoval/NonHostFastq/*.{merged,unmerged}.non.host.fastq.gz'`
+
+Example command:
+```
+nextflow run main_main++.nf --pipeline merged_kraken --output Merged_AMR++_analysis --merged_reads 'Merged_AMR++_analysis/Flash_reads/*.{extendedFrags,notCombined}.fastq.gz' --kraken_db "/path/to/your/kraken_db" -profile local
+``` 

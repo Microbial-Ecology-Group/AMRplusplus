@@ -1,5 +1,5 @@
 // Load modules
-include { fastqc ; multiqc } from '../modules/Fastqc/fastqc'
+include { fastqc ; multiqc ; fastqc_se } from '../modules/Fastqc/fastqc'
 
 // fastQC
 workflow FASTQ_QC_WF {

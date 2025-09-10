@@ -313,7 +313,7 @@ Running the ${params.pipeline} subworkflow
             .fromPath(params.reads)
             .map { f -> tuple(f.baseName, f) }
             .set { read_se_ch }
-        SE_AMRplusplus_wKraken( read_se_ch )
+        SE_AMRplusplus_wKraken( read_se_ch , params.host, params.amr, params.annotation )
     } 
     else {
             println "ERROR ################################################################"

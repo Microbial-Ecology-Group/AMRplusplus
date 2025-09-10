@@ -2,7 +2,7 @@
 include { index } from '../modules/Alignment/bwa'
 include { bwa_align ; bwa_rm_contaminant_fq ; bwa_rm_contaminant_merged_fq; HostRemovalStats} from '../modules/Alignment/bwa'
 include { SeqkitReadCounts } from '../modules/QC/merge'
-include { bwa_rm_contaminant_se } from '../modules/alignment/bwa_rm_host_se.nf'
+include { bwa_rm_contaminant_se } from '../modules/Alignment/bwa'
 
 
 

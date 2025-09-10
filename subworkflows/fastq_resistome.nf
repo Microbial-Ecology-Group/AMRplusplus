@@ -7,8 +7,7 @@ include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefac
 // Deduped resistome
 include { BAM_DEDUP_RESISTOME_WF } from '../subworkflows/bam_deduped_resistome.nf'
 
-include { bwa_align_se }             from '../modules/alignment/bwa_align.nf'
-include { samtools_dedup_se }        from '../modules/alignment/samtools_dedup.nf'
+include { bwa_align_se ; samtools_dedup_se }             from '../modules/Alignment/bwa'
 
 import java.nio.file.Paths
 
