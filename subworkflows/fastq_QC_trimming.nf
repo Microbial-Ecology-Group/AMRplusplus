@@ -1,5 +1,7 @@
 // Load modules
 include { runqc ; QCstats } from '../modules/Trimming/trimmomatic'
+// Load modules (SE versions)
+include { runqc_se  } from '../modules/Trimming/trimmomatic'
 
 // WC trimming
 workflow FASTQ_TRIM_WF {
@@ -18,3 +20,17 @@ workflow FASTQ_TRIM_WF {
         
 }
 
+
+// Single-end trimming
+workflow FASTQ_TRIM_SE_WF {
+    take:
+        read_se_ch   // emits: tuple(sample_id, read.fastq[.gz])
+
+    main:
+        runqc_se(read_se_ch)
+        QCstats(runqc_se.out.trimmomatic_stats.collect())
+
+    emit:
+        trimmed_reads = runqc_se.out.se_fastq
+        trim_stats    = QCstats.out.combo_trim_stats
+}

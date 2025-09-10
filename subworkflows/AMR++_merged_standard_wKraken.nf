@@ -27,12 +27,11 @@ workflow STANDARD_merged_AMRplusplus_wKraken {
         // remove host DNA
         MERGED_FASTQ_RM_HOST_WF(hostfasta, merged_reads_ch)
 
-        MERGED_FASTQ_RM_HOST_WF.out.nonhost_reads.into { nonhost_for_amr; nonhost_for_kraken }
-
         // AMR alignment
-        MERGED_FASTQ_RESISTOME_WF(nonhost_for_amr, amr,annotation)
+        MERGED_FASTQ_RESISTOME_WF(MERGED_FASTQ_RM_HOST_WF.out.nonhost_reads, amr,annotation)
 
-        MERGED_FASTQ_KRAKEN_WF(nonhost_for_kraken)
+        // Microbiome kraken2
+        MERGED_FASTQ_KRAKEN_WF(MERGED_FASTQ_RM_HOST_WF.out.nonhost_reads)
 
 }
 

@@ -85,11 +85,16 @@ include { STANDARD_AMRplusplus_wKraken } from './subworkflows/AMR++_standard_wKr
 
 // Load merged read workflows
 include { STANDARD_merged_AMRplusplus } from './subworkflows/AMR++_merged_standard.nf'
-include { STANDARD_merged_AMRplusplus_wKraken } from './subworkflows/AMR++_merged_standard.nf'
+include { STANDARD_merged_AMRplusplus_wKraken } from './subworkflows/AMR++_merged_standard_wKraken.nf'
 include { FASTQ_MERGE_WF } from "$baseDir/subworkflows/fastq_merging.nf"
 include { MERGED_FASTQ_RM_HOST_WF } from "$baseDir/subworkflows/fastq_host_removal.nf" 
 include { MERGED_FASTQ_RESISTOME_WF } from "$baseDir/subworkflows/fastq_resistome.nf"
 include { MERGED_FASTQ_KRAKEN_WF } from "$baseDir/subworkflows/fastq_microbiome.nf"
+
+// Load SE read workflows
+include { SE_AMRplusplus_wKraken } from './subworkflows/AMR++_SE_standard_wKraken.nf'
+
+
 
 // Load subworkflows
 include { FASTQ_QC_WF } from './subworkflows/fastq_information.nf'
@@ -240,7 +245,7 @@ Running the ${params.pipeline} subworkflow
         MERGED_FASTQ_RESISTOME_WF(to_resistome_ch, params.amr,params.annotation)
     
     }  
-    else if(params.pipeline == "merged_microbiome") {
+    else if(params.pipeline == "merged_kraken") {
         Channel
           .fromFilePairs( params.merged_reads, glob: true )
           .ifEmpty { error "No FASTQ files match: ${params.merged_reads}" }
@@ -302,6 +307,14 @@ Running the ${params.pipeline} subworkflow
             .set {bam_files_ch}
         BAM_RESISTOME_COUNTS_WF( bam_files_ch , params.amr, params.annotation )
     }
+    else if(params.pipeline == "se_AMR") {
+        // Example: params.reads = 'data/se/*.fastq.gz'
+        Channel
+            .fromPath(params.reads)
+            .map { f -> tuple(f.baseName, f) }
+            .set { read_se_ch }
+        SE_AMRplusplus_wKraken( read_se_ch )
+    } 
     else {
             println "ERROR ################################################################"
             println "Please choose a pipeline!!!" 

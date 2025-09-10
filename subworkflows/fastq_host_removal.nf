@@ -2,6 +2,7 @@
 include { index } from '../modules/Alignment/bwa'
 include { bwa_align ; bwa_rm_contaminant_fq ; bwa_rm_contaminant_merged_fq; HostRemovalStats} from '../modules/Alignment/bwa'
 include { SeqkitReadCounts } from '../modules/QC/merge'
+include { bwa_rm_contaminant_se } from '../modules/alignment/bwa_rm_host_se.nf'
 
 
 
@@ -75,4 +76,25 @@ workflow MERGED_FASTQ_RM_HOST_WF {
 
     emit:
         nonhost_reads
+}
+
+workflow FASTQ_RM_HOST_SE_WF {
+    take:
+        hostfasta
+        se_reads_ch   // tuple(sample_id, read.fastq[.gz])
+
+    main:
+        def host_index_ch = params.host_index
+            ? Channel.fromPath(params.host_index, glob:true)
+                     .ifEmpty { error "No files match --host_index '${params.host_index}'" }
+                     .toList()
+                     .map { it.sort() }
+            : { index(hostfasta); index.out }()
+
+        bwa_rm_contaminant_se( host_index_ch, se_reads_ch )
+        HostRemovalStats( bwa_rm_contaminant_se.out.host_rm_stats.collect() )
+
+    emit:
+        nonhost_reads = bwa_rm_contaminant_se.out.nonhost_reads   // tuple(sample_id, *.non.host.fastq.gz)
+        host_rm_stats = HostRemovalStats.out.combo_host_rm_stats
 }

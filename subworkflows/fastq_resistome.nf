@@ -7,6 +7,9 @@ include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefac
 // Deduped resistome
 include { BAM_DEDUP_RESISTOME_WF } from '../subworkflows/bam_deduped_resistome.nf'
 
+include { bwa_align_se }             from '../modules/alignment/bwa_align.nf'
+include { samtools_dedup_se }        from '../modules/alignment/samtools_dedup.nf'
+
 import java.nio.file.Paths
 
 workflow FASTQ_RESISTOME_WF {
@@ -50,9 +53,9 @@ workflow FASTQ_RESISTOME_WF {
         bwa_align(amr_index_files, read_pairs_ch )
         // Split sections below for standard and dedup_ed results
         runresistome(bwa_align.out.bwa_bam,amr, annotation, resistomeanalyzer )
-        resistomeresults(runresistome.out.resistome_counts.collect())
+        resistomeresults(runresistome.out.resistome_counts.collect(), "AMR")
         runrarefaction(bwa_align.out.bwa_bam, annotation, amr, rarefactionanalyzer)
-        plotrarefaction(runrarefaction.out.rarefaction.collect())
+        plotrarefaction(runrarefaction.out.rarefaction.collect(), "AMR")
         // Add SNP confirmation
         if (params.snp == "Y") {
             runsnp(bwa_align.out.bwa_bam, resistomeresults.out.snp_count_matrix)
@@ -135,7 +138,7 @@ workflow MERGED_FASTQ_RESISTOME_WF {
         resistomeresults( runresistome.out.resistome_counts.collect() , "AMR")
 
         runrarefaction ( combo_bam_ch, annotation, amr, rarefactionanalyzer )
-        plotrarefaction( runrarefaction.out.rarefaction.collect() )
+        plotrarefaction( runrarefaction.out.rarefaction.collect(), "AMR" )
 
         /* ------------ (6)  SNP (optional) ------------------------------------ */
         if( params.snp == 'Y' ) {
@@ -151,5 +154,45 @@ workflow MERGED_FASTQ_RESISTOME_WF {
             samtools_merge_bams_dedup( dedup_pairs_ch )
             BAM_DEDUP_RESISTOME_WF( samtools_merge_bams_dedup.out.combo_bam,
                                     amr, annotation )
+        }
+}
+
+
+workflow FASTQ_RESISTOME_SE_WF {
+    take:
+        se_nonhost_ch
+        amr
+        annotation
+
+    main:
+        if( !file("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").exists() ) {
+            build_dependencies()
+        }
+
+        def amr_index_files = params.amr_index
+            ? Channel.fromPath(params.amr_index)
+                     .ifEmpty { error "No files matched --amr_index '${params.amr_index}'" }
+                     .collect()
+                     .map { it.sort() }
+            : { index(amr); index.out }()
+
+        // Align SE → coordinate-sorted BAM + index
+        bwa_align_se( amr_index_files, se_nonhost_ch )
+
+        // Optional de-dup using samtools markdup
+        samtools_dedup_se( bwa_align_se.out.bwa_bam )
+        def bam_for_resistome = (params.deduped == 'Y') \
+            ? samtools_dedup_se.out.dedup_bam \
+            : bwa_align_se.out.bwa_bam
+
+        runresistome   ( bam_for_resistome, amr, annotation, file("${baseDir}/bin/resistome") )
+        resistomeresults( runresistome.out.resistome_counts.collect(), "AMR" )
+
+        runrarefaction ( bam_for_resistome, annotation, amr, file("${baseDir}/bin/rarefaction") )
+        plotrarefaction( runrarefaction.out.rarefaction.collect(), "AMR" )
+
+        if( params.snp == 'Y' ) {
+            runsnp    ( bam_for_resistome, resistomeresults.out.snp_count_matrix )
+            snpresults( runsnp.out.snp_counts.collect(), "AMR" )
         }
 }

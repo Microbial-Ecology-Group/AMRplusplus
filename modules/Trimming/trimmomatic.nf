@@ -53,6 +53,38 @@ process runqc {
     """
 }
 
+process runqc_se {
+    tag { sample_id }
+    label "trimming"
+
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
+    publishDir "${params.output}/QC_trimming_SE", mode: 'copy', pattern: '*.fastq.gz',
+        saveAs: { fn -> fn } // keep SE output filenames as-is
+
+    input:
+        tuple val(sample_id), path(read)  // single file
+
+    output:
+        tuple val(sample_id), path("${sample_id}.trimmed.fastq.gz"), emit: se_fastq
+        path("${sample_id}.trimmomatic.stats.log"),               emit: trimmomatic_stats
+
+    script:
+    """
+    ${TRIMMOMATIC} \
+      SE \
+      -threads ${threads} \
+      ${read} ${sample_id}.trimmed.fastq.gz \
+      ILLUMINACLIP:${adapters}:2:30:10:3:TRUE \
+      LEADING:${leading} \
+      TRAILING:${trailing} \
+      SLIDINGWINDOW:${slidingwindow} \
+      MINLEN:${minlen} \
+      2> ${sample_id}.trimmomatic.stats.log
+    """
+}
+
 process QCstats {
     tag "Make QC summary file"
     label "python"

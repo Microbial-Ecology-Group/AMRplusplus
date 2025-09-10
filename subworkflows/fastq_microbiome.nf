@@ -1,5 +1,5 @@
 // Load modules
-include { runkraken ; krakenresults ; dlkraken ; runkraken_merged} from '../modules/Microbiome/kraken2.nf' 
+include { runkraken ; krakenresults ; dlkraken ; runkraken_merged ; runkraken_se} from '../modules/Microbiome/kraken2.nf' 
 
 workflow FASTQ_KRAKEN_WF {
     take: 
@@ -62,16 +62,7 @@ workflow MERGED_FASTQ_KRAKEN_WF {
                                     .collect()                       // Java List (one per sample)
         
         krakenresults( kraken_reports_list )   // ← plain value, no Channel.value()
-        
-        /* ---------- gather extracted reads -------------------------------- */
-        runkraken_merged.out.extracted_merged
-                    .join( runkraken_merged.out.extracted_unmerged )
-                    .set { extracted_reads_ch }     
-
-        runkraken_merged.out.extracted_merged
-            .mix( runkraken_merged.out.extracted_unmerged )
-            .set { only_extracted_reads_ch }          // ← promote to workflow scope
-          
+              
           
         /* ---------- one-shot SeqKit on all extracted FASTQs --------------- */
         //seqkit_fastq_list = only_extracted_reads_ch.map{ sid,f -> f }.collect()
@@ -83,3 +74,18 @@ workflow MERGED_FASTQ_KRAKEN_WF {
             
 }
 
+workflow FASTQ_KRAKEN_SE_WF {
+    take:
+        se_nonhost_ch
+        krakendb
+
+    main:
+        def default_db = "$baseDir/data/kraken_db/k2_standard_08gb_20250402/"
+        def db_ch =
+            (params.kraken_db ? Channel.value(params.kraken_db)
+          : file(default_db).exists() ? Channel.value(default_db)
+          : { dlkraken(); dlkraken.out }() )
+
+        runkraken_se( se_nonhost_ch, db_ch )
+        krakenresults( runkraken_se.out.kraken_report.collect() )
+}

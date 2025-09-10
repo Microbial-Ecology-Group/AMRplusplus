@@ -169,6 +169,61 @@ process bwa_merged_align {
         error "Invalid --deduped flag: ${deduped}. Use Y or N."
 }
 
+process bwa_align_se {
+    tag { sample_id }
+    label "alignment"
+
+    publishDir "${params.output}/Alignment/BAM_files", mode: "copy",
+        saveAs: { fn -> fn.endsWith("_alignment_sorted.bam") ? "Standard/$fn" : null }
+
+    input:
+        path indexfiles
+        tuple val(sample_id), path(read)
+
+    output:
+        tuple val(sample_id), path("${sample_id}_alignment_sorted.bam"), emit: bwa_bam
+
+    script:
+    """
+    set -euo pipefail
+
+    ${BWA} mem ${indexfiles[0]} ${read} -t ${task.cpus} \
+        -R '@RG\\tID:${sample_id}\\tSM:${sample_id}' \
+      | ${SAMTOOLS} sort -@ ${task.cpus} -o ${sample_id}_alignment_sorted.bam -
+
+    ${SAMTOOLS} index ${sample_id}_alignment_sorted.bam
+    """
+}
+
+process samtools_dedup_se {
+    tag { sample_id }
+    label "alignment"
+
+    publishDir "${params.output}/Alignment/BAM_files/Deduped", mode: "copy"
+
+    input:
+        tuple val(sample_id), path(bam_in)  // coord-sorted BAM with index
+
+    output:
+        tuple val(sample_id), path("${sample_id}_alignment_dedup.bam"), emit: dedup_bam
+
+    script:
+    """
+    set -euo pipefail
+
+    # ensure coordinate sort (safe to re-sort; markdup requires coord-sorted)
+    ${SAMTOOLS} sort -@ ${task.cpus} -o ${sample_id}.coord.bam ${bam_in}
+    ${SAMTOOLS} index ${sample_id}.coord.bam
+
+    # remove duplicates
+    ${SAMTOOLS} markdup -r -@ ${task.cpus} ${sample_id}.coord.bam ${sample_id}_alignment_dedup.bam
+    ${SAMTOOLS} index ${sample_id}_alignment_dedup.bam
+
+    # clean temp
+    rm -f ${sample_id}.coord.bam ${sample_id}.coord.bam.bai
+    """
+}
+
 
 process bwa_rm_contaminant_fq {
     tag { pair_id }
@@ -269,6 +324,38 @@ process bwa_rm_contaminant_merged_fq {
 
     samtools view -b -f 4 ${sample_id}.unmerged.host.sorted.bam \
       | samtools fastq -@ ${task.cpus} -c 6 - | pigz -p ${task.cpus} -c > ${sample_id}.unmerged.non.host.fastq.gz
+    """
+}
+
+process bwa_rm_contaminant_se {
+    tag { sample_id }
+    label "alignment"
+
+    publishDir "${params.output}/HostRemoval", mode: 'copy',
+        saveAs: { fn -> fn.endsWith('.fastq.gz') ? "NonHostFastq/$fn" : null }
+
+    input:
+        path  indexfiles
+        tuple val(sample_id), path(read)
+
+    output:
+        tuple val(sample_id), path("${sample_id}.non.host.fastq.gz"), emit: nonhost_reads
+        path("${sample_id}.samtools.idxstats"),                        emit: host_rm_stats
+
+    script:
+    """
+    set -euo pipefail
+
+    bwa mem ${indexfiles[0]} ${read} -t ${task.cpus} \
+      | samtools sort -@ ${task.cpus} -o ${sample_id}.host.sorted.bam -
+
+    samtools index ${sample_id}.host.sorted.bam
+    samtools idxstats ${sample_id}.host.sorted.bam > ${sample_id}.samtools.idxstats
+
+    # keep only reads UNMAPPED to host
+    samtools view -b -f 4 ${sample_id}.host.sorted.bam \
+      | samtools fastq -@ ${task.cpus} -c 6 - \
+      | pigz -p ${task.cpus} -c > ${sample_id}.non.host.fastq.gz
     """
 }
 
