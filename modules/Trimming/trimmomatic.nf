@@ -121,24 +121,16 @@ process QCstats_SE {
     path("trimmomatic.stats"), emit: combo_trim_stats
 
   """
-  set -euo pipefail
-
-  echo -e "sample\\ttotal\\tforward_surviving\\treverse_surviving\\tdropped" > trimmomatic.stats
-
-  for f in ${summaries}; do
-    sample=\\$(basename "\\$f" .trimmomatic.summary.txt)
-
-    # Example line (SE): "Input Reads: 12345 Surviving: 10000 (81.0%) Dropped: 2345 (19.0%)"
-    line=\\$(grep -E '^Input Reads' "\\$f" | tail -1 || true)
-
-    total=\\$(echo "\\$line" | grep -oE 'Input Reads: *[0-9,]+' | awk '{gsub(/,/,"",\\$3); print \\$3}')
-    surv=\\$(echo "\\$line" | grep -oE 'Surviving: *[0-9,]+'   | awk '{gsub(/,/,"",\\$2); print \\$2}')
-    drop=\\$(echo "\\$line" | grep -oE 'Dropped: *[0-9,]+'     | awk '{gsub(/,/,"",\\$2); print \\$2}')
-
-    total=\\${total:-0}; surv=\\${surv:-0}; drop=\\${drop:-0}
-
-    # SE: surviving goes in "forward_surviving"; no reverse reads in SE
-    echo -e "\\$sample\\t\\$total\\t\\$surv\\t0\\t\\$drop" >> trimmomatic.stats
-  done
+    set -euo pipefail
+    echo -e "sample\\ttotal\\tforward_surviving\\treverse_surviving\\tdropped" > trimmomatic.stats
+    for f in ${summaries}; do
+      sample=`basename "\\$f" .trimmomatic.summary.txt`
+      line=`grep -E '^Input Reads' "\\$f" | tail -1 || true`
+      total=`echo "\\$line" | grep -oE 'Input Reads: *[0-9,]+' | awk '{gsub(/,/,"",\\$3); print \\$3}'`
+      surv=`echo "\\$line"  | grep -oE 'Surviving: *[0-9,]+'   | awk '{gsub(/,/,"",\\$2); print \\$2}'`
+      drop=`echo "\\$line"  | grep -oE 'Dropped: *[0-9,]+'     | awk '{gsub(/,/,"",\\$2); print \\$2}'`
+      total=\\${total:-0}; surv=\\${surv:-0}; drop=\\${drop:-0}
+      echo -e "\\$sample\\t\\$total\\t\\$surv\\t0\\t\\$drop" >> trimmomatic.stats
+    done
   """
 }
