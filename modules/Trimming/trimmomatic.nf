@@ -115,22 +115,37 @@ process QCstats_SE {
     saveAs: { fn -> fn.endsWith(".stats") ? "Stats/$fn" : null }
 
   input:
-    file(summaries)  // collected *.trimmomatic.summary.txt files
+    file(summaries)
 
   output:
     path("trimmomatic.stats"), emit: combo_trim_stats
 
   """
-    set -euo pipefail
-    echo -e "sample\\ttotal\\tforward_surviving\\treverse_surviving\\tdropped" > trimmomatic.stats
-    for f in ${summaries}; do
-      sample=`basename "\\$f" .trimmomatic.summary.txt`
-      line=`grep -E '^Input Reads' "\\$f" | tail -1 || true`
-      total=`echo "\\$line" | grep -oE 'Input Reads: *[0-9,]+' | awk '{gsub(/,/,"",\\$3); print \\$3}'`
-      surv=`echo "\\$line"  | grep -oE 'Surviving: *[0-9,]+'   | awk '{gsub(/,/,"",\\$2); print \\$2}'`
-      drop=`echo "\\$line"  | grep -oE 'Dropped: *[0-9,]+'     | awk '{gsub(/,/,"",\\$2); print \\$2}'`
-      total=\\${total:-0}; surv=\\${surv:-0}; drop=\\${drop:-0}
-      echo -e "\\$sample\\t\\$total\\t\\$surv\\t0\\t\\$drop" >> trimmomatic.stats
-    done
+  set -euo pipefail
+
+  cat > parse_se_trim.py <<'PY'
+    import sys, os, re
+
+    def extract(pattern, s):
+        m = re.search(pattern, s)
+        return int(m.group(1).replace(',', '')) if m else 0
+
+    with open('trimmomatic.stats', 'w') as out:
+        out.write("sample\ttotal\tforward_surviving\treverse_surviving\tdropped\n")
+        for f in sys.argv[1:]:
+            sample = os.path.basename(f).replace('.trimmomatic.summary.txt','')
+            line = ''
+            with open(f) as fh:
+                for l in fh:
+                    if l.startswith('Input Reads'):
+                        line = l.strip()
+            total = extract(r'Input Reads:\s*([\d,]+)', line)
+            surv  = extract(r'Surviving:\s*([\d,]+)',   line)
+            drop  = extract(r'Dropped:\s*([\d,]+)',     line)
+            out.write(f"{sample}\t{total}\t{surv}\t0\t{drop}\n")
+    PY
+
+  ${PYTHON3} parse_se_trim.py ${summaries}
   """
 }
+

@@ -1,5 +1,6 @@
 // Load modules
-include { fastqc ; multiqc ; fastqc_se } from '../modules/Fastqc/fastqc'
+include { fastqc ; multiqc } from '../modules/Fastqc/fastqc'
+include { SeqkitReadCounts } from '../modules/QC/merge'
 
 // fastQC
 workflow FASTQ_QC_WF {
@@ -9,7 +10,8 @@ workflow FASTQ_QC_WF {
     main:
         fastqc( read_pairs_ch )
         multiqc(fastqc.out.collect(), params.multiqc )
-
+        //seqkit_input_ch = read_pairs_ch.map{ sid,f -> f }.collect())
+        //SeqkitReadCounts( seqkit_input_ch , "Raw" )
 }
 
 // Single-end FastQC + MultiQC
