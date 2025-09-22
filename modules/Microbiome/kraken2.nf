@@ -7,7 +7,7 @@ kraken_options = params.kraken_options
 
 process dlkraken {
     tag { }
-    label "python"
+    label "micro"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -27,7 +27,15 @@ process dlkraken {
 
 process runkraken {
     tag { sample_id }
-    label "microbiome"
+    label (
+        (
+          (params.kraken_options instanceof List)
+            ? params.kraken_options.join(' ')
+            : (params.kraken_options ?: '')
+        ).contains('--memory-mapping')
+           ? 'large'
+           : 'xlarge'
+    )
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -49,9 +57,10 @@ process runkraken {
       path("${sample_id}.conf_${kraken_confidence}.kraken.report"), emit: kraken_report
       tuple val(sample_id), path("${sample_id}.conf_${kraken_confidence}.kraken.krona"), emit: krakenkrona_filtered
 
-
+    script:
+    def opts = (params.kraken_options instanceof List) ? params.kraken_options.join(' ') : (params.kraken_options ?: '')
      """
-     ${KRAKEN2} --db ${krakendb} --confidence ${kraken_confidence} --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.conf_${kraken_confidence}.kraken.report > ${sample_id}.conf_${kraken_confidence}.kraken.raw
+     ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${kraken_confidence} --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.conf_${kraken_confidence}.kraken.report > ${sample_id}.conf_${kraken_confidence}.kraken.raw
 
      cut -f 2,3  ${sample_id}.conf_${kraken_confidence}.kraken.raw > ${sample_id}.conf_${kraken_confidence}.kraken.krona
     """
@@ -68,8 +77,8 @@ process runkraken_merged {
             ? params.kraken_options.join(' ')
             : (params.kraken_options ?: '')
         ).contains('--memory-mapping')
-           ? 'small_memory_long_time'
-           : 'large_long'
+           ? 'large'
+           : 'xlarge'
     )
 
     publishDir "${params.output}/MicrobiomeAnalysis", mode: 'copy',
@@ -91,16 +100,17 @@ process runkraken_merged {
         path("${sample_id}.unmerged.kraken.report"),                       emit: kraken_report_unmerged
 
     script:
+    def opts = (params.kraken_options instanceof List) ? params.kraken_options.join(' ') : (params.kraken_options ?: '')
     """
     # ── merged file ─────────────────────────────────────────────
-    ${KRAKEN2} --db ${krakendb} ${kraken_options} --confidence ${kraken_confidence} \
+    ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${kraken_confidence} \
                --threads ${task.cpus} \
                --report ${sample_id}.merged.kraken.report \
                ${merged} \
                > ${sample_id}.merged.kraken.raw
 
     # ── unmerged (now interleaved single) ───────────────────────
-    ${KRAKEN2} --db ${krakendb} ${kraken_options} --confidence ${kraken_confidence} \
+    ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${kraken_confidence} \
                --threads ${task.cpus} \
                --report ${sample_id}.unmerged.kraken.report \
                ${unmerged} \
@@ -111,7 +121,15 @@ process runkraken_merged {
 
 process runkraken_se {
     tag { sample_id }
-    label "microbiome"
+    label (
+        (
+          (params.kraken_options instanceof List)
+            ? params.kraken_options.join(' ')
+            : (params.kraken_options ?: '')
+        ).contains('--memory-mapping')
+           ? 'large'
+           : 'xlarge'
+    )
 
     publishDir "${params.output}/MicrobiomeAnalysis", mode: 'copy',
         saveAs: { fn ->
@@ -142,7 +160,7 @@ process runkraken_se {
 
 process krakenresults {
     tag { }
-    label "python"
+    label "micro"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -163,7 +181,7 @@ process krakenresults {
 
 
 process runbracken {
-    label "microbiome"
+    label "micro"
     
     input:
        tuple val(sample_id), path(krakenout)
@@ -188,7 +206,7 @@ process runbracken {
 }
 
 process kronadb {
-    label "microbiome"
+    label "micro"
     output:
         file("krona_db/taxonomy.tab") optional true into krona_db_ch // is this a value ch?
 
@@ -203,7 +221,7 @@ process kronadb {
 
 process kronafromkraken {
     publishDir params.outdir, mode: 'copy'
-    label "microbiome"
+    label "micro"
     input:
         file(x) from kraken2krona_ch.collect()
         //file(y) from kaiju2krona_ch.collect()

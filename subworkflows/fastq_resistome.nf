@@ -58,7 +58,7 @@ workflow FASTQ_RESISTOME_WF {
         // Add SNP confirmation
         if (params.snp == "Y") {
             runsnp(bwa_align.out.bwa_bam, resistomeresults.out.snp_count_matrix)
-            snpresults(runsnp.out.snp_counts.collect() )
+            snpresults(runsnp.out.snp_counts.collect() ,"AMR" )
         }
         // Add analysis of deduped counts
         if (params.deduped == "Y"){

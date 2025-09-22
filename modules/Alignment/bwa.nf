@@ -17,7 +17,7 @@ deduped = params.deduped
 
 process index {
     tag "Creating bwa index"
-    label "alignment"
+    label "micro"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -40,7 +40,7 @@ process index {
 
 process bwa_align {
     tag "$pair_id"
-    label "alignment"
+    label "small"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -91,7 +91,7 @@ process bwa_align {
 process bwa_merged_align {
 
     tag   { sample_id }
-    label "alignment"
+    label "small"
 
     maxRetries 3
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
@@ -171,7 +171,7 @@ process bwa_merged_align {
 
 process bwa_align_se {
     tag { sample_id }
-    label "alignment"
+    label "small"
 
     publishDir "${params.output}/Alignment/BAM_files", mode: "copy",
         saveAs: { fn -> fn.endsWith("_alignment_sorted.bam") ? "Standard/$fn" : null }
@@ -197,7 +197,7 @@ process bwa_align_se {
 
 process samtools_dedup_se {
     tag { sample_id }
-    label "alignment"
+    label "small"
 
     publishDir "${params.output}/Alignment/BAM_files/Deduped", mode: "copy"
 
@@ -227,7 +227,7 @@ process samtools_dedup_se {
 
 process bwa_rm_contaminant_fq {
     tag { pair_id }
-    label "alignment"
+    label "medium"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3 
@@ -329,7 +329,7 @@ process bwa_rm_contaminant_merged_fq {
 
 process bwa_rm_contaminant_se {
     tag { sample_id }
-    label "alignment"
+    label "medium"
 
     publishDir "${params.output}/HostRemoval", mode: 'copy',
         saveAs: { fn -> fn.endsWith('.fastq.gz') ? "NonHostFastq/$fn" : null }
@@ -361,7 +361,7 @@ process bwa_rm_contaminant_se {
 
 process HostRemovalStats {
     tag { sample_id }
-    label "alignment"
+    label "micro"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3 
@@ -384,7 +384,7 @@ process HostRemovalStats {
 
 process samtools_merge_bams {
     tag { sample_id }
-    label 'alignment'
+    label 'small'
 
     publishDir "${params.output}/Alignment/BAM_files/Combined", mode: 'copy'
 

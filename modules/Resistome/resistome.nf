@@ -19,7 +19,7 @@ prefix = params.prefix
 
 process build_dependencies {
     tag { dl_dependencies }
-    label "python"
+    label "nano"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -62,7 +62,7 @@ process build_dependencies {
 
 process runresistome {
     tag { sample_id }
-    label "alignment"
+    label "medium"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -104,7 +104,7 @@ process runresistome {
 
 process resistomeresults {
     tag "Make AMR count matrix"
-    label "python"
+    label "small"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -126,7 +126,7 @@ process resistomeresults {
 
 process runrarefaction {
     tag { sample_id }
-    label "alignment"
+    label "small"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -170,7 +170,7 @@ process runrarefaction {
 
 process plotrarefaction {
     tag "Plot rarefaction results"
-    label "python"
+    label "micro"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -198,7 +198,7 @@ process plotrarefaction {
 
 process runsnp {
     tag {sample_id}
-    label "python"
+    label "small"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -246,7 +246,7 @@ process runsnp {
 
 process snpresults {
     tag "Make SNP-confirmed matrix"
-    label "python"
+    label "micro"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -274,7 +274,7 @@ process snpresults {
 // File: modules/alignment/bwa_merged_align.nf
 process bwa_merged_align {
     tag   { sample_id }
-    label 'alignment'
+    label 'small'
 
     maxRetries 3
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }

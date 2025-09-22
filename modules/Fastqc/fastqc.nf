@@ -2,7 +2,7 @@
 
 process fastqc {
     tag "FASTQC on $sample_id"
-    label "fastqc"
+    label "micro"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -26,7 +26,7 @@ process fastqc {
 
 process multiqc {
     tag "Running multiQC"
-    label "fastqc"
+    label "micro"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
