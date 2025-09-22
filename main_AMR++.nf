@@ -93,7 +93,11 @@ include { MERGED_FASTQ_KRAKEN_WF } from "$baseDir/subworkflows/fastq_microbiome.
 
 // Load SE read workflows
 include { SE_AMRplusplus_wKraken } from './subworkflows/AMR++_SE_standard_wKraken.nf'
-
+include { FASTQ_QC_SE_WF } from './subworkflows/fastq_information.nf'
+include { FASTQ_TRIM_SE_WF } from './subworkflows/fastq_QC_trimming.nf'
+include { FASTQ_RM_HOST_SE_WF   } from './subworkflows/fastq_host_removal.nf'
+include { FASTQ_RESISTOME_SE_WF } from './subworkflows/fastq_resistome.nf'
+include { FASTQ_KRAKEN_SE_WF    } from './subworkflows/fastq_microbiome.nf'
 
 
 // Load subworkflows
@@ -314,7 +318,47 @@ Running the ${params.pipeline} subworkflow
             .map { f -> tuple(f.baseName, f) }
             .set { read_se_ch }
         SE_AMRplusplus_wKraken( read_se_ch , params.host, params.amr, params.annotation )
-    } 
+    }
+    else if(params.pipeline == "se_eval_qc") {
+        // Example: params.reads = 'data/se/*.fastq.gz'
+        Channel
+            .fromPath(params.reads)
+            .map { f -> tuple(f.baseName, f) }
+            .set { read_se_ch }
+        FASTQ_QC_SE_WF( read_se_ch )
+    }
+    else if(params.pipeline == "se_trim_qc") {
+        // Example: params.reads = 'data/se/*.fastq.gz'
+        Channel
+            .fromPath(params.reads)
+            .map { f -> tuple(f.baseName, f) }
+            .set { read_se_ch }
+        FASTQ_TRIM_SE_WF( read_se_ch )
+    }
+    else if(params.pipeline == "se_rm_host") {
+        // Example: params.reads = 'data/se/*.fastq.gz'
+        Channel
+            .fromPath(params.reads)
+            .map { f -> tuple(f.baseName, f) }
+            .set { read_se_ch }
+        FASTQ_RM_HOST_SE_WF( params.host, read_se_ch )
+    }
+    else if(params.pipeline == "se_resistome") {
+        // Example: params.reads = 'data/se/*.fastq.gz'
+        Channel
+            .fromPath(params.reads)
+            .map { f -> tuple(f.baseName, f) }
+            .set { read_se_ch }
+        FASTQ_RESISTOME_SE_WF( read_se_ch , params.amr, params.annotation )
+    }
+    else if(params.pipeline == "se_microbiome") {
+        // Example: params.reads = 'data/se/*.fastq.gz'
+        Channel
+            .fromPath(params.reads)
+            .map { f -> tuple(f.baseName, f) }
+            .set { read_se_ch }
+        FASTQ_KRAKEN_SE_WF( read_se_ch )
+    }
     else {
             println "ERROR ################################################################"
             println "Please choose a pipeline!!!" 
