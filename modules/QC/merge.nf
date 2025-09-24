@@ -36,7 +36,7 @@ process MergeReadsFlash {
 process SeqkitReadCounts {
 
     tag "seqkit"
-    label "micro"
+    label "small"
 
     publishDir "${params.output}/Results/Stats", mode: 'copy'
 
