@@ -7,7 +7,7 @@ threads = params.threads
 
 process Qiime2Import {
     tag { }
-    label "qiime2"
+    label "small"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -32,7 +32,7 @@ process Qiime2Import {
 
 process Qiime2Dada2 {
     tag { }
-    label "qiime2"
+    label "medium"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -56,7 +56,7 @@ process Qiime2Dada2 {
 
 process Qiime2Classify {
     tag { }
-    label "qiime2"
+    label "medium"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -78,7 +78,7 @@ process Qiime2Classify {
 
 process Qiime2Filter {
     tag { }
-    label "qiime2"
+    label "medium"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -104,7 +104,7 @@ process Qiime2Filter {
 
 process Qiime2Tree {
     tag { }
-    label "qiime2"
+    label "medium"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -130,7 +130,7 @@ process Qiime2Tree {
 
 process Qiime2Export {
     tag { }
-    label "qiime2"
+    label "medium"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3

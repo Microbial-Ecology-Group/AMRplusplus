@@ -38,7 +38,8 @@ workflow FASTQ_TRIM_SE_WF {
   take: read_se_ch
   main:
     runqc_se(read_se_ch)
-    SeqkitReadCounts( runqc_se.out.se_fastq , "SE_QC_trimmed" )
+    seqkit_input_ch = read_se_ch.map{ sid,f -> f }.collect()
+    SeqkitReadCounts( seqkit_input_ch , "SE_QC_trimmed" )
     //QCstats_SE(runqc.out.trimmomatic_summary.collect())   // use the summary files
   emit:
     trimmed_reads = runqc_se.out.se_fastq

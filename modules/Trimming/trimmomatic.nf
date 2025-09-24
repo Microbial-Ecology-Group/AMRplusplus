@@ -18,7 +18,7 @@ minlen = params.minlen
 
 process runqc {
     tag { sample_id }
-    label "small"
+    label "micro_long"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3

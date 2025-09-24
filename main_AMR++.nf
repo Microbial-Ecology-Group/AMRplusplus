@@ -315,7 +315,7 @@ Running the ${params.pipeline} subworkflow
         // Example: params.reads = 'data/se/*.fastq.gz'
         Channel
             .fromPath(params.reads)
-            .map { f -> tuple(f.baseName, f) }
+            .map { f -> tuple(f.name.replaceFirst(/\.f(ast)?q(\.gz)?$/, ''), f) }
             .set { read_se_ch }
         SE_AMRplusplus_wKraken( read_se_ch , params.host, params.amr, params.annotation )
     }
@@ -358,6 +358,24 @@ Running the ${params.pipeline} subworkflow
             .map { f -> tuple(f.baseName, f) }
             .set { read_se_ch }
         FASTQ_KRAKEN_SE_WF( read_se_ch )
+    }
+    else if(params.pipeline == "qiime2") {
+        log.info"""\
+        ===================================
+        Running the ${params.pipeline} subworkflow
+        ===================================
+                """
+        Channel
+            .fromFilePairs( params.reads, flat: true )
+            .ifEmpty { exit 1, "Read pair files could not be found: ${params.reads}" }
+            .map { name, forward, reverse -> [ forward.drop(forward.findLastIndexOf{"/"})[0], forward, reverse ] } //extract file name
+            .map { name, forward, reverse -> [ name.toString().take(name.toString().indexOf("_")), forward, reverse ] } //extract sample name
+            .map { name, forward, reverse -> [ name +","+ forward + ",forward\n" + name +","+ reverse +",reverse" ] } //prepare basic synthax
+            .flatten()
+            .collectFile(name: 'manifest.txt', newLine: true, storeDir: "${params.output}/demux", seed: "sample-id,absolute-filepath,direction")
+            .set { ch_manifest }
+        
+        FASTQ_QIIME2_WF( ch_manifest , params.dada2_db)
     }
     else {
             println "ERROR ################################################################"
