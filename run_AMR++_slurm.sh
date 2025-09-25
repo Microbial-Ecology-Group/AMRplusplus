@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -J AMR++ -o AMR++_log.out -t 24:00:00 -p amilan --mem=40G --nodes=1 --ntasks=4 --cpus-per-task=8
+#SBATCH -J AMR++ -o AMR++_log.out -t 24:00:00 --mem=5G --nodes=1 --ntasks=1 --cpus-per-task=1
 
 # Remember to change the "maxForks" parameter in the config file that you are using. This corresponds with "--ntasks" 
 # to control how many jobs are submitted at once. The "--threads" argument should also match the --cpus-per-task to 

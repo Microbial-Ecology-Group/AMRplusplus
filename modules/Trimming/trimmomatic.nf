@@ -15,6 +15,7 @@ leading = params.leading
 trailing = params.trailing
 slidingwindow = params.slidingwindow
 minlen = params.minlen
+crop_len = params.crop_len
 
 process runqc {
     tag { sample_id }
@@ -48,6 +49,7 @@ process runqc {
       TRAILING:${trailing} \
       SLIDINGWINDOW:${slidingwindow} \
       MINLEN:${minlen} \
+      CROP:${crop_len} \
       2> ${sample_id}.trimmomatic.stats.log
       
     """
@@ -79,6 +81,7 @@ process runqc_se {
     TRAILING:${trailing} \
     SLIDINGWINDOW:${slidingwindow} \
     MINLEN:${minlen} \
+    CROP:${crop_len} \
     2> ${sample_id}.trimmomatic.stats.log
   """
 }
