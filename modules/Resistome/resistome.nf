@@ -232,13 +232,18 @@ process runsnp {
 
     python3 SNP_Verification.py -c config.ini -t ${threads} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output = True
 
-    cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${sample_id}.${prefix}_SNPs${snp_count_matrix}` ${sample_id}.${prefix}_SNPs${snp_count_matrix} > ${sample_id}.${prefix}_SNP_count_col
+    #cut -d ',' -f `awk -v RS=',' "/${sample_id}/{print NR; exit}" ${sample_id}.${prefix}_SNPs${snp_count_matrix}` ${sample_id}.${prefix}_SNPs${snp_count_matrix} > ${sample_id}.${prefix}_SNP_count_col
+    #cut -d ',' -f 1 ${sample_id}.${prefix}_SNPs${snp_count_matrix} > gene_accession_labels
+    #paste gene_accession_labels ${sample_id}.${prefix}_SNP_count_col > ${sample_id}.SNP_confirmed_gene.tsv
 
-    cut -d ',' -f 1 ${sample_id}.${prefix}_SNPs${snp_count_matrix} > gene_accession_labels
+    
+    python3 $baseDir/bin/extract_snp_column.py \
+      --sample-id "${sample_id}" \
+      --matrix "${sample_id}.${prefix}_SNPs${snp_count_matrix}" \
+      --out-tsv "${sample_id}.SNP_confirmed_gene.tsv"
 
-    paste gene_accession_labels ${sample_id}.${prefix}_SNP_count_col > ${sample_id}.SNP_confirmed_gene.tsv
+    mv */resistant_reads.csv ${sample_id}_${prefix}_SNPresistant_reads.txt
 
-    mv ${sample_id}.${prefix}_SNPs${sample_id}/resistant_reads.csv ${sample_id}_${prefix}_SNPresistant_reads.txt
 
     """
 }

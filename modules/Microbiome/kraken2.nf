@@ -111,6 +111,7 @@ process runkraken_merged {
 
     # ── unmerged (now interleaved single) ───────────────────────
     ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${kraken_confidence} \
+               --paired \
                --threads ${task.cpus} \
                --report ${sample_id}.unmerged.kraken.report \
                ${unmerged} \
