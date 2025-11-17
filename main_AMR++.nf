@@ -351,7 +351,7 @@ Running the ${params.pipeline} subworkflow
             .set { read_se_ch }
         FASTQ_RESISTOME_SE_WF( read_se_ch , params.amr, params.annotation )
     }
-    else if(params.pipeline == "se_microbiome") {
+    else if(params.pipeline == "se_kraken") {
         // Example: params.reads = 'data/se/*.fastq.gz'
         Channel
             .fromPath(params.reads)
