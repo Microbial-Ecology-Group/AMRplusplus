@@ -68,6 +68,43 @@ nextflow run main_AMR++.nf
 ```
 Now, you can check out the results in the newly created "test_results" directory.
 
+## AMR++ demonstration on Verily Workbench
+Create a new Workbench workspace.
+
+In the **Apps** tab of the new workspace, add the following git repository and give it the name **AMRplusplus**.
+```
+https://github.com/samhornstein/AMRplusplus.git
+```
+
+Create a new JupyterLab app instance. Once it has been created, which may take several minutes, launch the app and open the terminal.
+
+Workbench comes preinstalled with `conda`, but it must be initialized.
+```bash
+conda init
+source ~/.bashrc
+```
+
+The AMR++ git repository will have been cloned automatically. Navigate to it. 
+```bash
+cd repos/AMRplusplus
+```
+
+Create and activate the conda environment using the included recipe. This can take 5-10 mins (or more) depending on your internet speed, computing resources, etc.
+```bash
+conda env create -f envs/AMR++_env.yaml
+conda activate AMR++_env
+``` 
+
+Confirm Nextflow version 24 is installed. This is a temporary solution to [this issue](https://github.com/Microbial-Ecology-Group/AMRplusplus/issues/53).
+```bash
+nextflow -v
+```
+
+Run the test command, which can take 5 minutes or more. It should finish with **Succeeded: 24** and the `~/repos/AMRplusplus/test_results` directory being created.
+```bash
+nextflow run main_AMR++.nf
+```
+
 # Using AMR++ to analyze your data
 
 AMR++ is customizable to suit your computing needs and analyze your data. Primarily, the ```-profile``` paramater allows you to choose between running AMR++ using a singularity container, docker container, anaconda packages, or a local installation of your software. 
