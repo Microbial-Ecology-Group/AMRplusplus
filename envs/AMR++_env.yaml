@@ -16,5 +16,5 @@ dependencies:
   - pandas
   - trimmomatic
   - biopython
-  - nextflow
+  - nextflow = 24
   - git
