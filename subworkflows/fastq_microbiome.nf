@@ -4,7 +4,6 @@ include { runkraken ; krakenresults ; dlkraken ; runkraken_merged ; runkraken_se
 workflow FASTQ_KRAKEN_WF {
     take: 
         read_pairs_ch
-        krakendb
 
     main:
         // Define the default database path
