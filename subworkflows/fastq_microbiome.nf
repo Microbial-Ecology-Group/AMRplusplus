@@ -52,7 +52,7 @@ workflow FASTQ_KRAKEN_WF {
     emit:
         kraken_raw = runkraken.out.kraken_raw
         kraken_report = runkraken.out.kraken_report
-        krakenkrona = runkraken.out.krakenkrona_filtered
+
 }
 
 workflow MERGED_FASTQ_KRAKEN_WF {
