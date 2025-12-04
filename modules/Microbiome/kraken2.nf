@@ -5,7 +5,7 @@ threads = params.threads
 kraken_confidence = params.kraken_confidence
 
 process dlkraken {
-    tag { }
+    tag { "downloading kraken db"}
     label "python"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
@@ -17,8 +17,8 @@ process dlkraken {
         path("minikraken_8GB_20200312/"), emit:kraken_db
 
     """
-        wget ftp://ftp.ccb.jhu.edu/pub/data/kraken2_dbs/minikraken_8GB_202003.tgz
-        tar -xvzf minikraken_8GB_202003.tgz
+    wget ftp://ftp.ccb.jhu.edu/pub/data/kraken2_dbs/minikraken_8GB_202003.tgz
+    tar -xvzf minikraken_8GB_202003.tgz
 
     """
 }
