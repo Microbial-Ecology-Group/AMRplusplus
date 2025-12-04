@@ -6,7 +6,7 @@ kraken_confidence = params.kraken_confidence
 kraken_options = params.kraken_options
 
 process dlkraken {
-    tag { }
+    tag { "downloading_kraken_db"}
     label "micro"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
@@ -15,7 +15,7 @@ process dlkraken {
     publishDir "$baseDir/data/kraken_db/", mode: 'copy'
 
     output:
-        path("k2_minusb_20250714/")
+        path("k2_minusb_20250714/"), emit: kraken_db
 
     """
         wget https://genome-idx.s3.amazonaws.com/kraken/k2_minusb_20250714.tar.gz
@@ -55,7 +55,6 @@ process runkraken {
    output:
       tuple val(sample_id), path("${sample_id}.conf_${kraken_confidence}.kraken.raw"), emit: kraken_raw
       path("${sample_id}.conf_${kraken_confidence}.kraken.report"), emit: kraken_report
-      tuple val(sample_id), path("${sample_id}.conf_${kraken_confidence}.kraken.krona"), emit: krakenkrona_filtered
 
     script:
     def opts = (params.kraken_options instanceof List) ? params.kraken_options.join(' ') : (params.kraken_options ?: '')

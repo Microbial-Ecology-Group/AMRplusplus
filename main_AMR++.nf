@@ -190,7 +190,7 @@ Running the ${params.pipeline} subworkflow
 Running the ${params.pipeline} subworkflow
 ===================================
         """
-        FASTQ_KRAKEN_WF( fastq_files , params.kraken_db)
+        FASTQ_KRAKEN_WF( fastq_files )
     }
     else if(params.pipeline == "merged_AMR") {
         STANDARD_merged_AMRplusplus(fastq_files,params.host, params.amr, params.annotation)
