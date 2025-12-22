@@ -1,5 +1,5 @@
 // resistome
-include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
+include {temp_runsnp; plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
 
 
 workflow BAM_RESISTOME_WF {
@@ -24,11 +24,14 @@ workflow BAM_RESISTOME_WF {
         // Split sections below for standard and dedup_ed results
         runresistome(bam_ch,amr, annotation, resistomeanalyzer )
         resistomeresults(runresistome.out.resistome_counts.collect(), "AMR")
-        runrarefaction(bam_ch, annotation, amr, rarefactionanalyzer)
-        plotrarefaction(runrarefaction.out.rarefaction.collect(), "AMR")
+        // Rarefaction
+        if (params.rarefaction == "Y") {
+            runrarefaction(bam_ch, annotation, amr, rarefactionanalyzer)
+            plotrarefaction(runrarefaction.out.rarefaction.collect(), "AMR")
+        }
         // Add SNP confirmation
         if (params.snp == "Y") {
-            runsnp(bam_ch, resistomeresults.out.snp_count_matrix)
+            temp_runsnp(bam_ch, resistomeresults.out.snp_count_matrix,file("${baseDir}/bin/AmrPlusPlus_SNP/*"))
             snpresults(runsnp.out.snp_counts.collect(), "AMR")
         }
 }

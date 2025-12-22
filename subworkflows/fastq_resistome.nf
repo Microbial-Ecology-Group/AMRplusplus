@@ -2,7 +2,7 @@
 include { index ; bwa_align ; bwa_merged_align ; samtools_merge_bams ;  samtools_merge_bams as  samtools_merge_bams_dedup} from '../modules/Alignment/bwa'
 
 // resistome
-include {plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
+include {temp_runsnp; plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
 
 // Deduped resistome
 include { BAM_DEDUP_RESISTOME_WF } from '../subworkflows/bam_deduped_resistome.nf'
@@ -53,8 +53,10 @@ workflow FASTQ_RESISTOME_WF {
         // Split sections below for standard and dedup_ed results
         runresistome(bwa_align.out.bwa_bam,amr, annotation, resistomeanalyzer )
         resistomeresults(runresistome.out.resistome_counts.collect(), "AMR")
-        runrarefaction(bwa_align.out.bwa_bam, annotation, amr, rarefactionanalyzer)
-        plotrarefaction(runrarefaction.out.rarefaction.collect(), "AMR")
+        if (params.rarefaction == "Y") {
+            runrarefaction(bwa_align.out.bwa_bam, annotation, amr, rarefactionanalyzer)
+            plotrarefaction(runrarefaction.out.rarefaction.collect(), "AMR")
+        }
         // Add SNP confirmation
         if (params.snp == "Y") {
             runsnp(bwa_align.out.bwa_bam, resistomeresults.out.snp_count_matrix)

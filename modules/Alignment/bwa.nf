@@ -64,7 +64,7 @@ process bwa_align {
     if( deduped == "N")
         """
         ${BWA} mem ${indexfiles[0]} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
-        ${SAMTOOLS} view -@ ${threads} -S -b ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
+        ${SAMTOOLS} view -@ ${threads} -S -b -F 2304 ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
         rm ${pair_id}_alignment.sam
         ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
         rm ${pair_id}_alignment.bam
@@ -72,7 +72,7 @@ process bwa_align {
     else if( deduped == "Y")
         """
         ${BWA} mem ${indexfiles[0]} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
-        ${SAMTOOLS} view -@ ${threads} -S -b ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
+        ${SAMTOOLS} view -@ ${threads} -S -b -F 2304 ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
         rm ${pair_id}_alignment.sam
         ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
         rm ${pair_id}_alignment.bam
@@ -134,12 +134,14 @@ process bwa_merged_align {
 
         # ───── merged reads ──────────────────────────────────────────
         bwa mem ${indexfiles[0]} ${merged_fq} -t ${cpu} \
-             -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
+            -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
+        | samtools view -@ ${cpu} -b -F 2304 - \
         | samtools sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
 
         # ───── un-merged reads ───────────────────────────────────────
         bwa mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} \
-             -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
+            -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
+        | samtools view -@ ${cpu} -b -F 2304 - \
         | samtools sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
     """
     else if (deduped == 'Y') """
@@ -147,9 +149,9 @@ process bwa_merged_align {
 
         # ───── merged reads (deduped) ────────────────────────────────
         bwa mem ${indexfiles[0]} ${merged_fq} -t ${cpu} \
-             -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
+            -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
+        | samtools view -@ ${cpu} -b -F 2304 - \
         | samtools sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
-
         samtools fixmate -@ ${cpu} ${sample_id}_merged_alignment_sorted.bam tmp.bam
         samtools sort    -@ ${cpu} tmp.bam -o tmp.srt.bam
         samtools rmdup -S tmp.srt.bam ${sample_id}_merged_alignment_dedup.bam
@@ -157,9 +159,9 @@ process bwa_merged_align {
 
         # ───── un-merged reads (deduped) ─────────────────────────────
         bwa mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} \
-             -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
+            -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
+        | samtools view -@ ${cpu} -b -F 2304 - \
         | samtools sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
-
         samtools fixmate -@ ${cpu} ${sample_id}_unmerged_alignment_sorted.bam tmp.bam
         samtools sort    -@ ${cpu} tmp.bam -o tmp.srt.bam
         samtools rmdup -S tmp.srt.bam ${sample_id}_unmerged_alignment_dedup.bam
@@ -189,7 +191,8 @@ process bwa_align_se {
 
     ${BWA} mem ${indexfiles[0]} ${read} -t ${task.cpus} \
         -R '@RG\\tID:${sample_id}\\tSM:${sample_id}' \
-      | ${SAMTOOLS} sort -@ ${task.cpus} -o ${sample_id}_alignment_sorted.bam -
+    | ${SAMTOOLS} view -@ ${task.cpus} -b -F 2304 - \
+    | ${SAMTOOLS} sort -@ ${task.cpus} -o ${sample_id}_alignment_sorted.bam -
 
     ${SAMTOOLS} index ${sample_id}_alignment_sorted.bam
     """

@@ -11,5 +11,7 @@ conda activate AMR++_env  # Explore the installation instructions on github to s
 
 # Because we are using the local profile, software from the conda environment will be used. The flag "maxForks" is 
 # in the local.config file and will spawn 4 processes by default, this corresponds with "--ntasks=4" in the sbatch script.
-nextflow run main_AMR++.nf -profile local --threads 8 # This will use 8 threads, which corresponds with "--cpus-per-task=8". 
+# This will use 8 threads, which corresponds with "--cpus-per-task=8". 
+nextflow run main_AMR++.nf -profile local --threads 8 
+
 

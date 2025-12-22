@@ -28,6 +28,7 @@ def main():
         reader = csv.reader(f)
         try:
             header = next(reader)
+            header = [col.strip().replace('\r', '') for col in header] # Should be able to erase this line after fixing the output for the analytic matrix
         except StopIteration:
             sys.exit(f"[ERROR] Empty file: {args.matrix}")
 
