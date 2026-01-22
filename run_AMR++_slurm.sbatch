@@ -9,9 +9,8 @@
 # environment installed on your computing environment
 conda activate AMR++_env  # Explore the installation instructions on github to see how to install this environment
 
-# Because we are using the local profile, software from the conda environment will be used. The flag "maxForks" is 
-# in the local.config file and will spawn 4 processes by default, this corresponds with "--ntasks=4" in the sbatch script.
-# This will use 8 threads, which corresponds with "--cpus-per-task=8". 
-nextflow run main_AMR++.nf -profile local --threads 8 
+# If you are submitting this script using sbatch to submit to the SLURM scheduler, we use the "-profile local_slurm". 
+# This profile will submit individual jobs to SLURM with the default resources detailed in "config/local_slurm.config" file.
+nextflow run main_AMR++.nf -profile local_slurm --threads 8 
 
 

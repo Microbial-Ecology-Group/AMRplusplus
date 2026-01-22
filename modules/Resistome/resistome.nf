@@ -254,12 +254,12 @@ process temp_runsnp {
     input:
         tuple val(sample_id), path(bam)
         path(snp_count_matrix)
-        path(snp_verification_files)
+
     output:
         path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
-        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}_${prefix}_SNPs_resistant_reads.txt")
-        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}_${prefix}_snp_coverage_stats.csv")
-        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}_${prefix}_snp_verification_summary.csv")
+        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${prefix}_SNPs_SNPs_resistant_reads.txt") , optional: true
+        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${prefix}_SNPs_snp_coverage_stats.csv")
+        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${prefix}_SNPs_snp_verification_summary.csv")
 
     """
     cp -r $baseDir/bin/AmrPlusPlus_SNP/* .
@@ -275,8 +275,6 @@ process temp_runsnp {
       --sample-id "${sample_id}" \
       --matrix ${sample_id}.${prefix}_SNPs/"${sample_id}.${prefix}_SNPs${snp_count_matrix}" \
       --out-tsv "${sample_id}.SNP_confirmed_gene.tsv"
-
-
     """
 }
 

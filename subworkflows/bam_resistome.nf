@@ -1,5 +1,5 @@
 // resistome
-include {temp_runsnp; plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
+include {temprunsnp; plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
 
 
 workflow BAM_RESISTOME_WF {
@@ -31,7 +31,7 @@ workflow BAM_RESISTOME_WF {
         }
         // Add SNP confirmation
         if (params.snp == "Y") {
-            temp_runsnp(bam_ch, resistomeresults.out.snp_count_matrix,file("${baseDir}/bin/AmrPlusPlus_SNP/*"))
+            temprunsnp(bam_ch, resistomeresults.out.snp_count_matrix,file("${baseDir}/bin/AmrPlusPlus_SNP", type: 'dir'))
             snpresults(runsnp.out.snp_counts.collect(), "AMR")
         }
 }
