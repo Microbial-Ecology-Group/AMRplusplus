@@ -22,9 +22,9 @@ workflow FASTQ_TRIM_WF {
         
   
         /* 3 ─ one-shot SeqKit on all QC FASTQs ----------------------- */
-        seqkit_input_ch = only_qc_reads_ch.map{ sid,f -> f }.collect()
+        //seqkit_input_ch = only_qc_reads_ch.map{ sid,f -> f }.collect()
         
-        SeqkitReadCounts( seqkit_input_ch , "QC_trimmed" )
+        //SeqkitReadCounts( seqkit_input_ch , "QC_trimmed" )
         
     emit:
         //bwa_align = bwa_align.out
@@ -39,7 +39,7 @@ workflow FASTQ_TRIM_SE_WF {
   main:
     runqc_se(read_se_ch)
     seqkit_input_ch = read_se_ch.map{ sid,f -> f }.collect()
-    SeqkitReadCounts( seqkit_input_ch , "SE_QC_trimmed" )
+    //SeqkitReadCounts( seqkit_input_ch , "SE_QC_trimmed" )
     //QCstats_SE(runqc.out.trimmomatic_summary.collect())   // use the summary files
   emit:
     trimmed_reads = runqc_se.out.se_fastq

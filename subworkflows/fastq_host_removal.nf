@@ -68,9 +68,9 @@ workflow MERGED_FASTQ_RM_HOST_WF {
         
         
         /* 3 ─ one-shot SeqKit on all non-host FASTQs ----------------------- */
-        seqkit_input_ch = only_reads_ch.map{ sid,f -> f }.collect()
+        //seqkit_input_ch = only_reads_ch.map{ sid,f -> f }.collect()
         
-        SeqkitReadCounts( seqkit_input_ch , "NonHost" )
+        //SeqkitReadCounts( seqkit_input_ch , "NonHost" )
 
 
 

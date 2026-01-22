@@ -1,13 +1,11 @@
 // Load modules
-include { index ; bwa_align ; bwa_merged_align ; samtools_merge_bams ;  samtools_merge_bams as  samtools_merge_bams_dedup} from '../modules/Alignment/bwa'
+include { index ; bwa_align ; bwa_merged_align ;bwa_align_se ; samtools_dedup_se ; samtools_merge_bams ;  samtools_merge_bams as  samtools_merge_bams_dedup} from '../modules/Alignment/bwa'
 
 // resistome
-include {temp_runsnp; plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
+include { plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
 
 // Deduped resistome
 include { BAM_DEDUP_RESISTOME_WF } from '../subworkflows/bam_deduped_resistome.nf'
-
-include { bwa_align_se ; samtools_dedup_se }             from '../modules/Alignment/bwa'
 
 import java.nio.file.Paths
 

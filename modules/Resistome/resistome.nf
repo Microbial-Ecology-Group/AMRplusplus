@@ -18,7 +18,7 @@ deduped = params.deduped
 prefix = params.prefix
 
 process build_dependencies {
-    tag { dl_dependencies }
+    tag "Download SNP dependencies"
     label "nano"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
@@ -241,42 +241,6 @@ process runsnp {
 }
 
 
-process temp_runsnp {
-    tag {sample_id}
-    label "snp_ignore"
-
-    publishDir "${params.output}/ResistomeAnalysis/SNP_verification", mode: "copy",
-            saveAs: { filename ->
-                if(filename.indexOf(".tsv") > 0) "SNP_verification_counts/$filename"
-                else "SNP_detailed_output/$filename"
-            }
-    errorStrategy = 'ignore'
-    input:
-        tuple val(sample_id), path(bam)
-        path(snp_count_matrix)
-
-    output:
-        path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
-        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${prefix}_SNPs_SNPs_resistant_reads.txt") , optional: true
-        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${prefix}_SNPs_snp_coverage_stats.csv")
-        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${prefix}_SNPs_snp_verification_summary.csv")
-
-    """
-    cp -r $baseDir/bin/AmrPlusPlus_SNP/* .
-
-    # change name to stay consistent with count matrix name, but only if the names don't match
-    if [ "${bam}" != "${sample_id}.bam" ]; then
-        mv ${bam} ${sample_id}.bam
-    fi
-
-    python3 SNP_Verification.py -c config.ini -t ${threads} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all
-
-    python3 $baseDir/bin/extract_snp_column.py \
-      --sample-id "${sample_id}" \
-      --matrix ${sample_id}.${prefix}_SNPs/"${sample_id}.${prefix}_SNPs${snp_count_matrix}" \
-      --out-tsv "${sample_id}.SNP_confirmed_gene.tsv"
-    """
-}
 
 process snpresults {
     tag "Make SNP-confirmed matrix"
@@ -304,71 +268,3 @@ process snpresults {
 }
 
 
-// ───────── bwa_merged_align MODULE DEFINITION ───────────────────────────────
-// File: modules/alignment/bwa_merged_align.nf
-process bwa_merged_align {
-    tag   { sample_id }
-    label 'small'
-
-    maxRetries 3
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-
-    publishDir "${params.output}/Alignment/BAM_files", mode: 'copy',
-        saveAs: { fn ->
-            if (fn.endsWith('_merged_alignment_sorted.bam')   ||
-                fn.endsWith('_unmerged_alignment_sorted.bam'))
-                    "Standard/$fn"
-            else if (fn.endsWith('_merged_alignment_dedup.bam') ||
-                     fn.endsWith('_unmerged_alignment_dedup.bam'))
-                    "Deduped/$fn"
-            else null
-        }
-
-    input:
-        path  indexfiles                 // 6‑file BWA index prefix
-        tuple val(sample_id),
-              path(merged_fq),
-              path(unmerged_fq)
-
-    output:
-        tuple val(sample_id), path("${sample_id}_merged_alignment_sorted.bam"),   emit: merged_bam
-        tuple val(sample_id), path("${sample_id}_unmerged_alignment_sorted.bam"), emit: unmerged_bam
-
-        tuple val(sample_id), path("${sample_id}_merged_alignment_dedup.bam"),    emit: merged_dedup_bam,   optional: true
-        tuple val(sample_id), path("${sample_id}_unmerged_alignment_dedup.bam"),  emit: unmerged_dedup_bam, optional: true
-
-    script:
-    def cpu = task.cpus ?: 4
-    if (params.deduped == 'N') """
-        set -euo pipefail
-
-        bwa mem ${indexfiles[0]} ${merged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_merged\tSM:${sample_id}' \
-          | samtools sort -@ ${cpu} -o ${sample_id}_merged_alignment_sorted.bam -
-
-        bwa mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_unmerged\tSM:${sample_id}' \
-          | samtools sort -@ ${cpu} -o ${sample_id}_unmerged_alignment_sorted.bam -
-    """
-    else if (params.deduped == 'Y') """
-        set -euo pipefail
-
-        # ── merged ────────────────────────────────────────────────────
-        bwa mem ${indexfiles[0]} ${merged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_merged\tSM:${sample_id}' \
-          | samtools sort -@ ${cpu} -o ${sample_id}_merged_alignment_sorted.bam -
-
-        samtools fixmate -@ ${cpu} ${sample_id}_merged_alignment_sorted.bam tmp.bam
-        samtools sort -@ ${cpu} tmp.bam -o tmp.srt.bam
-        samtools rmdup -S tmp.srt.bam ${sample_id}_merged_alignment_dedup.bam
-        rm tmp.*
-
-        # ── unmerged ──────────────────────────────────────────────────
-        bwa mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_unmerged\tSM:${sample_id}' \
-          | samtools sort -@ ${cpu} -o ${sample_id}_unmerged_alignment_sorted.bam -
-
-        samtools fixmate -@ ${cpu} ${sample_id}_unmerged_alignment_sorted.bam tmp.bam
-        samtools sort -@ ${cpu} tmp.bam -o tmp.srt.bam
-        samtools rmdup -S tmp.srt.bam ${sample_id}_unmerged_alignment_dedup.bam
-        rm tmp.*
-    """
-    else
-        error "Invalid value for --deduped: ${params.deduped}. Use Y or N."
-}

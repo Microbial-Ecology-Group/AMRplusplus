@@ -17,11 +17,25 @@ Additionally, you may want to know if the depth of your sequencing (how many rea
 
 With AMR++, you will obtain alignment count files for each sample that are combined into a count matrix that can be analyzed using any statistical and mathematical techniques that can operate on a matrix of observations.
 
+## Important changes to AMR++
+
+[Detailed changes here.](docs/CHANGELOG.md)
+
+Brief overview:
+1. Switch to only counting primary resistome alignments. 
+2. Changed default AMR gene fraction ```--threshold``` to `0`. We recommend running statistical analysis of count matrices after aggregating to the "Group" level to account for possible false-positive calls of individual gene accessions. 
+3. Added single-end and merged-read analysis.
+4. Changed defaults to skip rarefaction analysis, but default to running the SNP confirmation and deduplication of resistome counts.
+
 More Information
 ----------------
 
 - [Installation](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/installation.md)
 - [Usage](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/usage.md)
+  - [Choosing the right pipeline](docs/choosing_pipeline.md)
+  - [Paired-end analysis step-by-step](docs/Step_by_step_tutorial.md)
+  - [Single-end analysis step-by-step](docs/SingleEnd_read_tutorial.md)
+  - [Merged-read analysis step-by-step](docs/Merged_read_tutorial.md)
 - [Configuration](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/configuration.md)
 - [Output](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/output.md)
 - [Dependencies](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/dependencies.md)
@@ -83,8 +97,22 @@ To change the reads that were analyzed, you should specify the ```--reads`` para
 nextflow run main_AMR++.nf --reads "path/to/your/reads/*_R{1,2}.fastq.gz" 
 ```
 
-#### [Here's an extended tutorial to run each AMR++ component individually](docs/Step_by_step_tutorial.md)
 
+## Choosing the right pipeline
+
+AMR++ analyzes data by combining workflows that takes a set of sequencing reads through various bioinformatic software. We recommend our standard AMR++ pipeline as a comprehensive way to start from raw sequencing reads, QC assessment, host DNA removal, and resistome analysis with MEGARes. However, users might only want to replicate portions of the pipeline and have more control over their computing needs. Using the ```--pipeline``` parameter, users can now change how AMR++ runs.
+
+Check out [this document](docs/choosing_pipeline.md) for more details and guidance on picking the right ```--pipeline``` parameter.
+
+## Running analyses in steps
+
+Realistically, running the entire pipeline can be challenging due to storage limitations. Instead, we recommend running the pipeline in steps, which allows for erasing the "work" directory in between analytic steps. Remember, the work directory is only needed in case the pipeline run fails and you want to use ```-resume``` to pick up where you left off. 
+
+Here are some tutorials to run each analysis step by step:
+
+- [Paired-end analysis step-by-step](docs/Step_by_step_tutorial.md)
+- [Single-end analysis step-by-step](docs/SingleEnd_read_tutorial.md)
+- [Merged-read analysis step-by-step](docs/Merged_read_tutorial.md) 
 
 
 # Optional flags
@@ -108,50 +136,12 @@ nextflow run main_AMR++.nf -profile conda --snp Y --deduped Y
 
 With this flag, AMR++ will extract the deduplicated alignments to MEGARes also output a count matrix with deduplicated counts. Since also we included the ```--snp Y``` flag, we will end up with 4 total output count matrices.
 
-# Choosing the right pipeline
+## Rarefaction analyzer
 
-AMR++ analyzes data by combining workflows that takes a set of sequencing reads through various bioinformatic software. We recommend our standard AMR++ pipeline as a comprehensive way to start from raw sequencing reads, QC assessment, host DNA removal, and resistome analysis with MEGARes. However, users might only want to replicate portions of the pipeline and have more control over their computing needs. Using the ```--pipeline``` parameter, users can now change how AMR++ runs.
-
-
-
-## Pipeline workflows
-*  omitting the ```--pipeline``` flag or using ```--pipeline demo```    
-    * Simple demonstration on test data
-
-* ```--pipeline standard_AMR```   
-    * Steps: QC trimming > Host DNA removal > Resistome alignment > Resistome results
-
-* ```--pipeline fast_AMR```
-    * This workflow simply skips host removal to speed up analysis.
-    * Steps: QC trimming > Resistome alignment > Resistome results
-
-* ```--pipeline standard_AMR_wKraken```
-    * This workflow adds microbiome analysis with kraken. It requires having a local kraken database. The minikraken_8GB_202003 will be downloaded automatically and requires ~8GB of space. Otherwise, you can specify the location to your own database with the flag, ```--kraken_db "/Path/to/KrakenDb/"```
-    * Steps:
-        * QC trimming > Host DNA removal > Resistome alignment > Resistome results 
-        * Non-host reads > Microbiome analysis
-
-## Pipeline subworkflows
-* ```--pipeline eval_qc```  
-    * Evaluate sample QC 
-* ```--pipeline trim_qc```  
-    * QC trimming using trimmomatic 
-* ```--pipeline rm_host```  
-    * Align reads to host DNA using bwa and remove contaminants 
-* ```--pipeline resistome```  
-    * Align reads to MEGARes using bwa, perform rarefaction and resistome analysis
-* ```--pipeline kraken```  
-    * Classify reads taxonomically using kraken.
-* ```--pipeline bam_resistome```
-    * This will run the resistome pipeline starting with bam files from a previous alignment to MEGARes.
-    * Need to include ```--bam_files "Path/to/BAM/*.bam"``` in the command line.
-
-## Example command
-In the following example, we'll choose to run the standard AMR++ workflow, which includes QC trimming, host removal, and Resistome analysis. Since we included the ```--snp Y --deduped Y``` flags, we'll also get ouput for deduped counts and SNP confirmed counts.
-
-Alternatively, you can modify all of these variables and more in the "params.config" file which will be loaded automatically. Just make sure to include the "-profile" and "--pipeline" flags. More information [in this document](docs/configuration.md)
+The final optional analyis is to perform rarefaction on resistome counts to evaluate sequencing depth at all resistome annotation levels (i.e. Type, Class, Mechanism, Group, Gene). You can run this analysis by adding ```--rarefaction Y``` to your command or modifying the params.config file. 
 
 ```bash
-# Remember to update the --reads flag to match your read location
-nextflow run main_AMR++.nf -profile conda --pipeline standard_AMR --reads "path/to/your/reads/*_R{1,2}.fastq.gz" --snp Y --deduped Y
+nextflow run main_AMR++.nf -profile conda --snp Y --deduped Y --rarefaction Y
 ```
+
+With rarefaction analysis, we'll create various figures to summarize sequencing depth and output figures in the "ResistomeAnalysis/Rarefaction/Figures" directory. 

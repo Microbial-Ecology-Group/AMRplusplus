@@ -198,6 +198,73 @@ process bwa_align_se {
     """
 }
 
+process bwa_merged_align {
+    tag   { sample_id }
+    label 'small'
+
+    maxRetries 3
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+
+    publishDir "${params.output}/Alignment/BAM_files", mode: 'copy',
+        saveAs: { fn ->
+            if (fn.endsWith('_merged_alignment_sorted.bam')   ||
+                fn.endsWith('_unmerged_alignment_sorted.bam'))
+                    "Standard/$fn"
+            else if (fn.endsWith('_merged_alignment_dedup.bam') ||
+                     fn.endsWith('_unmerged_alignment_dedup.bam'))
+                    "Deduped/$fn"
+            else null
+        }
+
+    input:
+        path  indexfiles                 // 6‑file BWA index prefix
+        tuple val(sample_id),
+              path(merged_fq),
+              path(unmerged_fq)
+
+    output:
+        tuple val(sample_id), path("${sample_id}_merged_alignment_sorted.bam"),   emit: merged_bam
+        tuple val(sample_id), path("${sample_id}_unmerged_alignment_sorted.bam"), emit: unmerged_bam
+
+        tuple val(sample_id), path("${sample_id}_merged_alignment_dedup.bam"),    emit: merged_dedup_bam,   optional: true
+        tuple val(sample_id), path("${sample_id}_unmerged_alignment_dedup.bam"),  emit: unmerged_dedup_bam, optional: true
+
+    script:
+    def cpu = task.cpus ?: 4
+    if (params.deduped == 'N') """
+        set -euo pipefail
+
+        bwa mem ${indexfiles[0]} ${merged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_merged\tSM:${sample_id}' \
+          | ${SAMTOOLS} view -@ ${task.cpus} -b ${samtools_flag} - | ${SAMTOOLS} sort -@ ${cpu} -o ${sample_id}_merged_alignment_sorted.bam -
+
+        bwa mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_unmerged\tSM:${sample_id}' \
+          | ${SAMTOOLS} view -@ ${task.cpus} -b ${samtools_flag} - | ${SAMTOOLS} sort -@ ${cpu} -o ${sample_id}_unmerged_alignment_sorted.bam -
+    """
+    else if (params.deduped == 'Y') """
+        set -euo pipefail
+
+        # ── merged ────────────────────────────────────────────────────
+        bwa mem ${indexfiles[0]} ${merged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_merged\tSM:${sample_id}' \
+          | ${SAMTOOLS} view -@ ${task.cpus} -b ${samtools_flag} - | ${SAMTOOLS} sort -@ ${cpu} -o ${sample_id}_merged_alignment_sorted.bam -
+
+        ${SAMTOOLS} fixmate -@ ${cpu} ${sample_id}_merged_alignment_sorted.bam tmp.bam
+        ${SAMTOOLS} sort -@ ${cpu} tmp.bam -o tmp.srt.bam
+        ${SAMTOOLS} rmdup -S tmp.srt.bam ${sample_id}_merged_alignment_dedup.bam
+        rm tmp.*
+
+        # ── unmerged ──────────────────────────────────────────────────
+        bwa mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} -R '@RG\tID:${sample_id}_unmerged\tSM:${sample_id}' \
+          | ${SAMTOOLS} view -@ ${task.cpus} -b ${samtools_flag} - | ${SAMTOOLS} sort -@ ${cpu} -o ${sample_id}_unmerged_alignment_sorted.bam -
+
+        ${SAMTOOLS} fixmate -@ ${cpu} ${sample_id}_unmerged_alignment_sorted.bam tmp.bam
+        ${SAMTOOLS} sort -@ ${cpu} tmp.bam -o tmp.srt.bam
+        ${SAMTOOLS} rmdup -S tmp.srt.bam ${sample_id}_unmerged_alignment_dedup.bam
+        rm tmp.*
+    """
+    else
+        error "Invalid value for --deduped: ${params.deduped}. Use Y or N."
+}
+
 process samtools_dedup_se {
     tag { sample_id }
     label "small"
