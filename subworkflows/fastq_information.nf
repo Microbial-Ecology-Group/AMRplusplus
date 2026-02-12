@@ -10,7 +10,7 @@ workflow FASTQ_QC_WF {
     main:
         fastqc( read_pairs_ch )
         multiqc(fastqc.out.collect(), params.multiqc )
-        //seqkit_input_ch = read_pairs_ch.map{ sid,f -> f }.collect())
+        //seqkit_input_ch = read_pairs_ch.map{ sid,f -> f }.collect()
         //SeqkitReadCounts( seqkit_input_ch , "Raw" )
 }
 

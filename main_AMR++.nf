@@ -201,9 +201,6 @@ Channel
     }
     .set {fastq_files}
 
-// Load null pipeline
-params.pipeline = null
-
 // Load main pipeline workflows
 include { STANDARD_AMRplusplus } from './subworkflows/AMR++_standard.nf' 
 include { FAST_AMRplusplus } from './subworkflows/AMR++_fast.nf'
