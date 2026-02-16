@@ -33,7 +33,7 @@ log.info """\
  ===================================
  Pipeline             : ${params.pipeline ?: 'demo'}
  Pipeline type        : ${pipelineType}
- Input (${inputParam.padRight(14)}) : ${inputPath}
+ Input (${inputParam.padRight(12)}) : ${inputPath}
  Output folder        : ${params.output}
  ===================================
 """

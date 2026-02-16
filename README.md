@@ -21,6 +21,8 @@ With AMR++, you will obtain alignment count files for each sample that are combi
 
 [Detailed changes here.](docs/CHANGELOG.md)
 
+[Additional analysis tips here.](docs/Analysis_recommendations.md)
+
 Brief overview:
 1. Switch to only counting primary resistome alignments. 
 2. Changed default AMR gene fraction ```--threshold``` to `0`. We recommend running statistical analysis of count matrices after aggregating to the "Group" level to account for possible false-positive calls of individual gene accessions. 
@@ -33,14 +35,16 @@ More Information
 - [Installation](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/installation.md)
 - [Usage](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/usage.md)
   - [Choosing the right pipeline](docs/choosing_pipeline.md)
+  - [Analysis recommendations](docs/Analysis_recommendations.md)
   - [Paired-end analysis step-by-step](docs/Step_by_step_tutorial.md)
   - [Single-end analysis step-by-step](docs/SingleEnd_read_tutorial.md)
   - [Merged-read analysis step-by-step](docs/Merged_read_tutorial.md)
 - [Configuration](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/configuration.md)
+  - [Tips for using SLURM](docs/Running_with_SLURM.md)
 - [Output](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/output.md)
 - [Dependencies](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/dependencies.md)
 - [Software Requirements](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/requirements.md)
-- [FAQs](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/FAQs.md)
+- [Troubleshooting and FAQs](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/FAQs.md)
 - [Details on AMR++ updates](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/update_details.md)
 - [Contact](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/contact.md)
 
