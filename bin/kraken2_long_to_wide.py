@@ -3,10 +3,11 @@
 import sys
 import argparse
 import numpy as np
+import re
 
-__author__ = 'Steven Lakin'
-__maintainer__ = 'lakinsm'
-__email__ = 'Steven.Lakin@colostate.edu'
+__authors__ = 'Steven Lakin & Enrique Doster'
+__maintainer__ = 'Enrique Doster'
+__email__ = 'enriquedoster@tamu.edu'
 
 
 taxa_levels = {
@@ -41,6 +42,8 @@ def parse_cmdline_params(cmdline_params):
                         help='Use globstar to pass a list of files, (Ex: *.tsv)')
     parser.add_argument('-o', '--output_file', required=True,
                         help='Output file name for writing the kraken_analytic_matrix.csv file')
+    parser.add_argument('--merged', action='store_true',
+                        help='If set, combine paired samples ending with merged/unmerged into one *_combined column')
     return parser.parse_args(cmdline_params)
 
 
@@ -61,6 +64,81 @@ def dict_to_matrix(D):
                 return_values[i, j] = float(tdict[taxon])
     return return_values, unique_nodes, samples
 
+def _split_base_and_tag(sample_id):
+    """
+    Return (base, tag) where tag is 'merged' or 'unmerged' if present at the end,
+    preceded optionally by '.', '_' or '-'. Otherwise tag is None.
+    Examples:
+      'S1.merged'   -> ('S1', 'merged')
+      'S1-unmerged' -> ('S1', 'unmerged')
+      'S1'          -> ('S1', None)
+    """
+    m = re.search(r'^(?P<base>.*?)(?:[._-]?)(?P<tag>merged|unmerged)$', sample_id)
+    if m:
+        return m.group('base'), m.group('tag')
+    return sample_id, None
+
+
+def combine_merged_unmerged(counts_dict, unclassifieds_dict):
+    """
+    counts_dict: { sample_id: {taxon: count, ...}, ... }
+    unclassifieds_dict: { sample_id: [unclassified, total, percent], ... }
+
+    Returns new dicts where paired (base.merged, base.unmerged) are replaced by base_combined.
+    """
+    from collections import defaultdict
+
+    # Group sample IDs by their 'base'
+    groups = defaultdict(dict)  # base -> {'merged': id, 'unmerged': id}
+    for sid in counts_dict.keys():
+        base, tag = _split_base_and_tag(sid)
+        if tag in ('merged', 'unmerged'):
+            groups[base][tag] = sid
+
+    # Start with a copy; we’ll rebuild to avoid in-place confusion
+    out_counts = {}
+    out_uncls  = {}
+
+    # First, mark all paired sids so we can skip copying them verbatim
+    paired = set()
+    for base, d in groups.items():
+        if 'merged' in d and 'unmerged' in d:
+            paired.add(d['merged'])
+            paired.add(d['unmerged'])
+
+    # Copy over everything that is not part of a complete pair
+    for sid, tdict in counts_dict.items():
+        if sid not in paired:
+            out_counts[sid] = dict(tdict)
+            if sid in unclassifieds_dict:
+                out_uncls[sid] = list(unclassifieds_dict[sid])
+
+    # Now add combined entries for complete pairs
+    for base, d in groups.items():
+        if 'merged' in d and 'unmerged' in d:
+            s_merged   = d['merged']
+            s_unmerged = d['unmerged']
+            combined_sid = f"{base}_combined"
+
+            # Sum taxon counts
+            combo = {}
+            for k, v in counts_dict[s_merged].items():
+                combo[k] = combo.get(k, 0.0) + float(v)
+            for k, v in counts_dict[s_unmerged].items():
+                combo[k] = combo.get(k, 0.0) + float(v)
+            out_counts[combined_sid] = combo
+
+            # Sum unclassifieds; recompute percent
+            u1 = unclassifieds_dict.get(s_merged,  [0, 0, 0.0])
+            u2 = unclassifieds_dict.get(s_unmerged, [0, 0, 0.0])
+            u = [0, 0, 0.0]
+            u[0] = (u1[0] if isinstance(u1[0], int) else int(u1[0])) + (u2[0] if isinstance(u2[0], int) else int(u2[0]))
+            u[1] = (u1[1] if isinstance(u1[1], int) else int(u1[1])) + (u2[1] if isinstance(u2[1], int) else int(u2[1]))
+            u[2] = (100.0 * u[0] / u[1]) if u[1] else 0.0
+            out_uncls[combined_sid] = u
+
+    return out_counts, out_uncls
+
 
 def kraken2_load_analytic_data(file_name_list):
     return_values = {}
@@ -76,6 +154,11 @@ def kraken2_load_analytic_data(file_name_list):
                 if not line:
                     continue
                 entries = line.split('\t')
+                if len(entries) >= 6:
+                    node_level = (entries[3] or '').strip()
+                    node_name  = entries[5].strip()
+                    if not node_level and (node_name.lower() == 'root' or entries[4].strip() == '1'):
+                        entries[3] = 'R'
                 node_count = int(entries[2])
                 node_level = entries[3]
                 node_name = entries[5].strip()
@@ -109,13 +192,13 @@ def kraken2_load_analytic_data(file_name_list):
                         return_values[sample_id].setdefault(this_taxonomy_string, node_count)
                     except KeyError:
                         return_values.setdefault(sample_id, {this_taxonomy_string: node_count})
-    return dict_to_matrix(return_values), unclassifieds
+    return return_values, unclassifieds
 
 
 def output_kraken2_analytic_data(outfile, M, m_names, n_names, unclassifieds):
     with open(outfile, 'w') as out, \
             open(f"unclassifieds_{outfile}", 'w') as u_out:
-        out.write(','.join(n_names) + '\n')
+        out.write(','.join(['taxa'] + n_names) + '\n')
         for i, row in enumerate(M):
             out.write('\"{}\",'.format(
                 m_names[i].replace(',', '')
@@ -131,6 +214,11 @@ def output_kraken2_analytic_data(outfile, M, m_names, n_names, unclassifieds):
 
 if __name__ == '__main__':
     opts = parse_cmdline_params(sys.argv[1:])
-    kraken2_load_analytic_data(opts.input_files)
-    (K, m, n), u = kraken2_load_analytic_data(opts.input_files)
-    output_kraken2_analytic_data(opts.output_file, K, m, n, u)
+    
+    counts_by_sample, uncls = kraken2_load_analytic_data(opts.input_files)
+    if opts.merged:
+        counts_by_sample, uncls = combine_merged_unmerged(counts_by_sample, uncls)
+    # Now build the matrix once
+    K, m, n = dict_to_matrix(counts_by_sample)
+
+    output_kraken2_analytic_data(opts.output_file, K, m, n, uncls)

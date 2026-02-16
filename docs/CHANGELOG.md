@@ -1,6 +1,44 @@
 Details on AMR++ updates
 ------------
 
+## 2026-01-19: AMR++ v3 update
+- Added functionality for single end reads and a pipeline to merge reads with FLASH and analyze both merged fragments and unmerged reads.
+- Resistome analysis: Changed default gene fraction threshold to "0" and changed extraction of alignments from the BAM file to only include primary alignments (one read = one alignment)
+  - Based on evaluation of various datasets, we identified that secondary and supplemental alignments make up less than 2% of all alignments and only a small subset of reads contain more than a primary alignment.
+  - Therefore we decided to simplify counting of alignments to only include primary alignments
+- Updated slurm configuration profiles to include custom SBATCH parameters corresponding to each module in AMR++. This allows for submission of an SBATCH script with minimal resources to run AMR++ and each job will automatically be submitted with the required resources.
+- Improved Kraken2 database handling and output processing
+  - Fixed kraken2 long-to-wide format conversion
+  - Added support for paired-end flag in kraken workflow
+  - Added merged kraken workflow for analyzing merged reads
+- Enhanced SNP verification workflow
+  - Updated SNP results parsing for better handling of detailed output
+  - Improved SNP confirmation code integration
+  - Store detailed SNP verification output
+- Improved documentation
+  - Added comprehensive step-by-step tutorials
+  - Created Single-End read tutorial
+  - Updated installation documentation for Apptainer
+  - Corrected parameter documentation (--host instead of --reference)
+- Configuration improvements
+  - Updated MultiQC integration and conda environment
+  - Enhanced resource allocation defaults
+  - Added QIIME workflow integration
+  - Improved slurm profile labels and configuration
+- Bug fixes and optimizations
+  - Fixed host removal command and samtools flags
+  - Improved sample ID naming and handling
+  - Fixed kraken output saving and database selection
+  - Cleaned up output directory structure
+  - Fixed deduplication processes
+  - Updated trimming parameters (added crop_len option)
+  - Various fixes to process dependencies and naming conventions
+- Maintenance updates
+  - Updated to Python 3.9 in Docker container
+  - Cleaned up container documentation
+  - Updated help messages and usage documentation 
+
+
 ## 2022-09-06 : AMR++ v3 update
 - Change in repository from [AMR++ v2](https://github.com/meglab-metagenomics/amrplusplus_v2) to this repository under the [microbial ecology group github page](https://github.com/Microbial-Ecology-Group/AMRplusplus). This repository will include all further updates to AMR++. 
 - Addition of [SNP confirmation software](https://github.com/Isabella136/AmrPlusPlus_SNP)

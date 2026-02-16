@@ -1,112 +1,113 @@
-import matplotlib.pyplot as plt
+#!/usr/bin/env python3
+"""
+Plot rarefaction curves and export raw counts.
+
+Usage example
+-------------
+python rfplot.py \
+       --dir results/Temp_rarefaction \
+       --s --sd figs/ \
+       --prefix myRun
+"""
+import argparse
 import csv
 import os
-import argparse
+from pathlib import Path
 
-# Author: Jacob Singer (https://github.com/JacobSinger42)
-# retrieves the command-line arguments and flags
+import matplotlib.pyplot as plt
 
+# ────────────────────────── CLI ──────────────────────────────────
 parser = argparse.ArgumentParser()
-
-parser.add_argument('--dir', type=str, help='path (relative or absolute) to the directory with the sample files')
-parser.add_argument('--nd', action='store_true', help='no display: whether to display the generated graphs, typically used with -s')
-parser.add_argument('--s', action='store_true', help='save: whether to save the generated graphs')
-parser.add_argument('--sd', type=str, help='save directory: path (relative or absolute) at which to save the graphs if -s is used')
-
+parser.add_argument("--dir", type=str, required=True,
+                    help="Directory containing the *.tsv rarefaction files")
+parser.add_argument("--nd", action="store_true",
+                    help="No display: do not open the Matplotlib windows")
+parser.add_argument("--s", action="store_true",
+                    help="Save the generated figures")
+parser.add_argument("--sd", type=str, default="",
+                    help="Directory in which to save figures (needs -s)")
+parser.add_argument("--prefix", type=str, default="out",
+                    help="Prefix for output figure names and counts table")
 args = parser.parse_args()
 
-# empty initializations that are later sorted with values
-x_gene, y_gene = [], []
-x_group, y_group = [], []
-x_mech, y_mech = [], []
-x_class, y_class = [], []
-x_type, y_type = [], []
+indir  = Path(args.dir).expanduser().resolve()
+savedir = Path(args.sd).expanduser().resolve() if args.sd else Path.cwd()
+savedir.mkdir(parents=True, exist_ok=True)
 
-names = []
+# ───────────────────── storage for plotting ──────────────────────
+levels = ("gene", "group", "mech", "class", "type")
+x_dict = {lv: [] for lv in levels}   # list of lists → per-sample X
+y_dict = {lv: [] for lv in levels}   # list of lists → per-sample Y
+sample_names = []
 
-# gets data from sample files in directory
+# collect rows for the counts-table
+counts_rows = []
 
-dir = args.dir if args.dir[-1] == '/' else args.dir + '/'
-
-for fn in os.listdir(dir):
-
-    f = fn.split('.') # subdivides string at . in filename
-
-    if (f[-1] != 'tsv'): # ensures the file is a .tsv
+# ─────────────────── ingest every TSV file ───────────────────────
+for fn in sorted(indir.glob("*.tsv")):
+    parts = fn.stem.split(".")            # e.g. SAMPLE.gene
+    if len(parts) < 2 or parts[-1] not in levels:
         continue
 
-    if f[0] not in names:
-        names.append(f[0]) # adds the sample name to the list
+    sample = parts[0]
+    level  = parts[-1]
 
-    # checks the feature type and aliases to the corresponding lists
-    if (f[-2] == 'gene'):
-        x, y = x_gene, y_gene
-    elif (f[-2] == 'group'):
-        x, y = x_group, y_group
-    elif (f[-2] == 'mech'):
-        x, y = x_mech, y_mech
-    elif (f[-2] == 'class'):
-        x, y = x_class, y_class
-    elif (f[-2] == 'type'): 
-        x, y = x_type, y_type
+    if sample not in sample_names:
+        sample_names.append(sample)
 
-    # adds a new empty list to the feature type for the sample
-    x.append([])
-    y.append([])
+    x_dict[level].append([])
+    y_dict[level].append([])
 
-    # writes the data from the file to the list
-    with open(dir + fn) as file:
-        tsv = csv.reader(file, delimiter='\t')
-        for i in tsv:
-            x[-1].append(int(i[0]))
-            y[-1].append(int(i[1]))
+    with fn.open() as fh:
+        tsv = csv.reader(fh, delimiter="\t")
+        for row in tsv:
+            subsample_pct = int(row[0])
+            count         = int(row[1])
 
-# displays retrieved data using PyPlot
+            # for plots
+            x_dict[level][-1].append(subsample_pct)
+            y_dict[level][-1].append(count)
 
-sps = []
-for i in range (5):
-    sps.append(plt.subplots()) # creates a list of tuples with the figure and axes objects
+            # for summary file
+            counts_rows.append(
+                (sample, level, count, subsample_pct)
+            )
 
-# plots the data from each sample list
-for i in range (len(names)): 
-    sps[0][1].plot(x_gene[i], y_gene[i], label=names[i])
-    sps[1][1].plot(x_group[i], y_group[i], label=names[i])
-    sps[2][1].plot(x_mech[i], y_mech[i], label=names[i])
-    sps[3][1].plot(x_class[i], y_class[i], label=names[i])
-    sps[4][1].plot(x_type[i], y_type[i], label=names[i])
+# ──────────────────── write counts table ─────────────────────────
+counts_file = Path(f"rarefaction_{args.prefix}_counts.txt")
+with counts_file.open("w", newline="") as fh:
+    writer = csv.writer(fh, delimiter="\t")
+    writer.writerow(["Sample", "Level", "Count", "SubsamplePercent"])
+    writer.writerows(counts_rows)
 
-# adds additional formatting to the graphs
-for i in range(5):
-    sps[i][1].set_xlabel('% of data subsampled')
-    sps[i][1].set_ylabel('unique features identified')
-    sps[i][1].legend(bbox_to_anchor=(1.05,1.0), loc='upper left')
-    sps[i][1].set_xlim(left=0)
-    sps[i][1].set_ylim(bottom=0)
+print(f"✓ wrote count table → {counts_file}")
 
-    sps[i][0].set_facecolor('white')
-    sps[i][0].set_tight_layout(True)
+# ────────────────────────── plotting ─────────────────────────────
+fig_axes = [plt.subplots() for _ in levels]   # list of (fig, ax) tuples
 
-# sets titles for the graphs
-sps[0][1].set_title('Gene Subsampling Features')
-sps[1][1].set_title('Group Subsampling Features')
-sps[2][1].set_title('Mech Subsampling Features')
-sps[3][1].set_title('Class Subsampling Features')
-sps[4][1].set_title('Type Subsampling Features')
+for lv_idx, level in enumerate(levels):
+    fig, ax = fig_axes[lv_idx]
+    for i, sample in enumerate(sample_names):
+        if i < len(x_dict[level]):            # sample had that level
+            ax.plot(x_dict[level][i],
+                    y_dict[level][i],
+                    label=sample)
 
-# displays graphing windows
-if (not args.nd):
+    ax.set_title(f"{level.capitalize()} Subsampling Features")
+    ax.set_xlabel("% of data subsampled")
+    ax.set_ylabel("unique features identified")
+    ax.set_xlim(left=0)
+    ax.set_ylim(bottom=0)
+    ax.legend(bbox_to_anchor=(1.05, 1.0), loc="upper left")
+    fig.set_facecolor("white")
+    fig.tight_layout()
+
+# ──────────────────── show or save figures ───────────────────────
+if not args.nd:
     plt.show()
 
-# adds the save directory, if applicable
-if (args.sd):
-    sd = args.sd if args.sd[-1] == '/' else args.sd + '/'
-else:
-    sd = ''
-
-# saves the plots
-if (args.s):
-    sps[0][0].savefig(sd + 'Gene.png')
-    sps[1][0].savefig(sd + 'Group.png')
-    sps[2][0].savefig(sd + 'Mech.png')
-    sps[3][0].savefig(sd + 'Class.png')
-    sps[4][0].savefig(sd + 'Type.png')
+if args.s:
+    for (fig, _), level in zip(fig_axes, levels):
+        outfile = savedir / f"{args.prefix}_{level.capitalize()}.png"
+        fig.savefig(outfile, dpi=300)
+        print(f"✓ saved {outfile}")

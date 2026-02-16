@@ -18,3 +18,5 @@ dependencies:
   - biopython
   - nextflow
   - git
+  - flash
+  - seqkit

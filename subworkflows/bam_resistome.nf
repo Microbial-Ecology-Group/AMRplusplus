@@ -21,15 +21,18 @@ workflow BAM_RESISTOME_WF {
             resistomeanalyzer = file("${baseDir}/bin/resistome")
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
         }
-        // Split sections below for standard and dedup_ed results
+        // Split sections below for rarefaction and SNP confirmation
         runresistome(bam_ch,amr, annotation, resistomeanalyzer )
-        resistomeresults(runresistome.out.resistome_counts.collect())
-        runrarefaction(bam_ch, annotation, amr, rarefactionanalyzer)
-        plotrarefaction(runrarefaction.out.rarefaction.collect())
+        resistomeresults(runresistome.out.resistome_counts.collect(), "AMR")
+        // Rarefaction
+        if (params.rarefaction == "Y") {
+            runrarefaction(bam_ch, annotation, amr, rarefactionanalyzer)
+            plotrarefaction(runrarefaction.out.rarefaction.collect(), "AMR")
+        }
         // Add SNP confirmation
         if (params.snp == "Y") {
             runsnp(bam_ch, resistomeresults.out.snp_count_matrix)
-            snpresults(runsnp.out.snp_counts.collect())
+            snpresults(runsnp.out.snp_counts.collect(), "AMR")
         }
 }
 

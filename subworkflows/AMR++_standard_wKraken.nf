@@ -22,7 +22,7 @@ workflow STANDARD_AMRplusplus_wKraken {
         // AMR alignment
         FASTQ_RESISTOME_WF(FASTQ_RM_HOST_WF.out.nonhost_reads, amr,annotation)
         // Microbiome
-        FASTQ_KRAKEN_WF(FASTQ_RM_HOST_WF.out.nonhost_reads, params.kraken_db)
+        FASTQ_KRAKEN_WF(FASTQ_RM_HOST_WF.out.nonhost_reads)
 
 
 }

@@ -18,8 +18,8 @@ deduped = params.deduped
 prefix = params.prefix
 
 process build_dependencies {
-    tag { dl_dependencies }
-    label "python"
+    tag "Download SNP dependencies"
+    label "nano"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -62,7 +62,7 @@ process build_dependencies {
 
 process runresistome {
     tag { sample_id }
-    label "alignment"
+    label "medium"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -83,28 +83,39 @@ process runresistome {
         tuple val(sample_id), path("${sample_id}*.tsv"), emit: resistome_tsv
         path("${sample_id}.${prefix}.gene.tsv"), emit: resistome_counts
 
-    
-    
+    script:
     """
-    samtools view -h ${bam} > ${sample_id}.sam
-    
-    $resistome -ref_fp ${amr} \
-      -annot_fp ${annotation} \
-      -sam_fp ${sample_id}.sam \
-      -gene_fp ${sample_id}.${prefix}.gene.tsv \
-      -group_fp ${sample_id}.${prefix}.group.tsv \
-      -mech_fp ${sample_id}.${prefix}.mechanism.tsv \
-      -class_fp ${sample_id}.${prefix}.class.tsv \
-      -type_fp ${sample_id}.${prefix}.type.tsv \
-      -t ${threshold}
+    set -euo pipefail
 
-    rm ${sample_id}.sam
+    # Check if BAM has any alignments
+    aln_count=\$(${SAMTOOLS} view -c ${bam} 2>/dev/null || echo 0)
+
+    if [ "\$aln_count" -gt 0 ]; then
+        ${SAMTOOLS} view -h ${bam} > ${sample_id}.sam
+
+        $resistome -ref_fp ${amr} \\
+          -annot_fp ${annotation} \\
+          -sam_fp ${sample_id}.sam \\
+          -gene_fp ${sample_id}.${prefix}.gene.tsv \\
+          -group_fp ${sample_id}.${prefix}.group.tsv \\
+          -mech_fp ${sample_id}.${prefix}.mechanism.tsv \\
+          -class_fp ${sample_id}.${prefix}.class.tsv \\
+          -type_fp ${sample_id}.${prefix}.type.tsv \\
+          -t ${threshold}
+
+        rm ${sample_id}.sam
+    else
+        echo "[INFO] No alignments in BAM for ${sample_id} — writing empty resistome counts"
+        for level in gene group mechanism class type; do
+            printf "Header\\t0\\n" > ${sample_id}.${prefix}.\${level}.tsv
+        done
+    fi
     """
 }
 
 process resistomeresults {
     tag "Make AMR count matrix"
-    label "python"
+    label "small"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -113,6 +124,7 @@ process resistomeresults {
 
     input:
         path(resistomes)
+        val  prefix
 
     output:
         path("${prefix}_analytic_matrix.csv"), emit: raw_count_matrix
@@ -125,7 +137,7 @@ process resistomeresults {
 
 process runrarefaction {
     tag { sample_id }
-    label "alignment"
+    label "small"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -145,31 +157,44 @@ process runrarefaction {
     output:
         path("*.tsv"), emit: rarefaction
 
+    script:
     """
-    samtools view -h ${bam} > ${sample_id}.sam
+    set -euo pipefail
 
-    $rarefaction \
-      -ref_fp ${amr} \
-      -sam_fp ${sample_id}.sam \
-      -annot_fp ${annotation} \
-      -gene_fp ${sample_id}.gene.tsv \
-      -group_fp ${sample_id}.group.tsv \
-      -mech_fp ${sample_id}.mech.tsv \
-      -class_fp ${sample_id}.class.tsv \
-      -type_fp ${sample_id}.type.tsv \
-      -min ${min} \
-      -max ${max} \
-      -skip ${skip} \
-      -samples ${samples} \
-      -t ${threshold}
+    aln_count=\$(${SAMTOOLS} view -c ${bam} 2>/dev/null || echo 0)
 
-    rm ${sample_id}.sam
+    if [ "\$aln_count" -gt 0 ]; then
+        ${SAMTOOLS} view -h ${bam} > ${sample_id}.sam
+
+        $rarefaction \\
+          -ref_fp ${amr} \\
+          -sam_fp ${sample_id}.sam \\
+          -annot_fp ${annotation} \\
+          -gene_fp ${sample_id}.gene.tsv \\
+          -group_fp ${sample_id}.group.tsv \\
+          -mech_fp ${sample_id}.mech.tsv \\
+          -class_fp ${sample_id}.class.tsv \\
+          -type_fp ${sample_id}.type.tsv \\
+          -min ${min} \\
+          -max ${max} \\
+          -skip ${skip} \\
+          -samples ${samples} \\
+          -t ${threshold}
+
+        rm ${sample_id}.sam
+    else
+        echo "[INFO] No alignments in BAM for ${sample_id} — writing empty rarefaction counts"
+        for level in gene group mech class type; do
+            printf "0\\t0\\n" > ${sample_id}.\${level}.tsv
+        done
+    fi
     """
 }
 
+
 process plotrarefaction {
     tag "Plot rarefaction results"
-    label "python"
+    label "micro"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -182,6 +207,7 @@ process plotrarefaction {
 
     input:
         path(rarefaction)
+        val  prefix
 
     output:
         path("*.png"), emit: plots
@@ -189,59 +215,85 @@ process plotrarefaction {
     """
     mkdir -p data/
     mv *.tsv data/
-    python $baseDir/bin/rfplot.py --dir ./data --nd --s --sd .
+    python $baseDir/bin/rfplot.py --dir ./data --nd --s --sd . --prefix ${prefix}
     """
 }
 
 
 process runsnp {
     tag {sample_id}
-    label "python"
-
+    label "snp_ignore"
 
     publishDir "${params.output}/ResistomeAnalysis/SNP_verification", mode: "copy",
-        saveAs: { filename ->
-            if(filename.indexOf(".csv") > 0) "SNP_raw_output/$filename"
-            else if(filename.indexOf(".txt") > 0 ) "SNP_resistant_reads/$filename"
-            else if(filename.indexOf(".tsv") > 0 ) "SNP_verification_counts/$filename"
-            else {}
-        }
-
+            saveAs: { filename ->
+                if(filename.indexOf(".tsv") > 0) "SNP_verification_counts/$filename"
+                else "SNP_detailed_output/$filename"
+            }
     errorStrategy = 'ignore'
-
     input:
         tuple val(sample_id), path(bam)
         path(snp_count_matrix)
 
     output:
         path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
-        path("${sample_id}.${prefix}_SNPs${sample_id}/*")
-        path("${sample_id}_${prefix}_SNPresistant_reads.txt")
 
     """
-    cp -r $baseDir/bin/AmrPlusPlus_SNP/* .
+    cp -rsa $baseDir/bin/AmrPlusPlus_SNP/* .
 
     # change name to stay consistent with count matrix name, but only if the names don't match
     if [ "${bam}" != "${sample_id}.bam" ]; then
         mv ${bam} ${sample_id}.bam
     fi
 
-    python3 SNP_Verification.py -c config.ini -t ${threads} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output = True
+    python3 SNP_Verification.py -c config.ini -t ${threads} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all
 
     python3 $baseDir/bin/extract_snp_column.py \
       --sample-id "${sample_id}" \
       --matrix "${sample_id}.${prefix}_SNPs${snp_count_matrix}" \
       --out-tsv "${sample_id}.SNP_confirmed_gene.tsv"
-
-    mv */resistant_reads.csv ${sample_id}_${prefix}_SNPresistant_reads.txt
-
     """
 }
 
+process dev_runsnp {
+    tag {sample_id}
+    label "snp_ignore"
+
+    publishDir "${params.output}/ResistomeAnalysis/SNP_verification", mode: "copy",
+            saveAs: { filename ->
+                if(filename.indexOf(".tsv") > 0) "SNP_verification_counts/$filename"
+                else "SNP_detailed_output/$filename"
+            }
+    errorStrategy = 'ignore'
+    input:
+        tuple val(sample_id), path(bam)
+        path(snp_count_matrix)
+
+    output:
+        path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
+        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${prefix}_SNPs_SNPs_resistant_reads.txt") , optional: true
+        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${prefix}_SNPs_snp_coverage_stats.csv")
+        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${prefix}_SNPs_snp_verification_summary.csv")
+
+    """
+    cp -rsa $baseDir/bin/AmrPlusPlus_SNP/* .
+
+    # change name to stay consistent with count matrix name, but only if the names don't match
+    if [ "${bam}" != "${sample_id}.bam" ]; then
+        mv ${bam} ${sample_id}.bam
+    fi
+
+    python3 SNP_Verification.py -c config.ini -t ${threads} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all
+
+    python3 $baseDir/bin/extract_snp_column.py \
+      --sample-id "${sample_id}" \
+      --matrix ${sample_id}.${prefix}_SNPs/"${sample_id}.${prefix}_SNPs${snp_count_matrix}" \
+      --out-tsv "${sample_id}.SNP_confirmed_gene.tsv"
+    """
+}
 
 process snpresults {
     tag "Make SNP-confirmed matrix"
-    label "python"
+    label "micro"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -252,6 +304,7 @@ process snpresults {
 
     input:
         path(snp_counts)
+        val  prefix
 
     output:
         path("*_analytic_matrix.csv"), emit: snp_matrix
@@ -262,3 +315,5 @@ process snpresults {
 
     """
 }
+
+

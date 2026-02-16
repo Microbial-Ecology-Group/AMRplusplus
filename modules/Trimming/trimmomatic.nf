@@ -15,10 +15,11 @@ leading = params.leading
 trailing = params.trailing
 slidingwindow = params.slidingwindow
 minlen = params.minlen
+crop_len = params.crop_len
 
 process runqc {
     tag { sample_id }
-    label "trimming"
+    label "micro_long"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -48,14 +49,46 @@ process runqc {
       TRAILING:${trailing} \
       SLIDINGWINDOW:${slidingwindow} \
       MINLEN:${minlen} \
+      CROP:${crop_len} \
       2> ${sample_id}.trimmomatic.stats.log
       
     """
 }
 
+process runqc_se {
+  tag { sample_id }
+  label "small"
+
+  publishDir "${params.output}/QC_trimming_SE", mode: 'copy', pattern: '*.fastq.gz',
+    saveAs: { fn -> fn }
+
+  input:
+    tuple val(sample_id), path(read)
+
+  output:
+    tuple val(sample_id), path("${sample_id}.trimmed.fastq.gz"),            emit: se_fastq
+    path("${sample_id}.trimmomatic.stats.log"),                              emit: trimmomatic_stats    // keep if you still want the stderr log
+    path("${sample_id}.trimmomatic.summary.txt"),                            emit: trimmomatic_summary  // NEW: uniform summary
+
+  """
+  ${TRIMMOMATIC} \
+    SE \
+    -threads ${threads} \
+    -summary ${sample_id}.trimmomatic.summary.txt \
+    ${read} ${sample_id}.trimmed.fastq.gz \
+    ILLUMINACLIP:${adapters}:2:30:10:3:TRUE \
+    LEADING:${leading} \
+    TRAILING:${trailing} \
+    SLIDINGWINDOW:${slidingwindow} \
+    MINLEN:${minlen} \
+    CROP:${crop_len} \
+    2> ${sample_id}.trimmomatic.stats.log
+  """
+}
+
 process QCstats {
     tag "Make QC summary file"
-    label "python"
+    label "small"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -76,3 +109,22 @@ process QCstats {
     ${PYTHON3} $baseDir/bin/trimmomatic_stats.py -i ${stats} -o trimmomatic.stats
     """
 }
+
+process QCstats_SE {
+  tag "Make QC summary file (SE)"
+  label "small"
+
+  publishDir "${params.output}/Results", mode: 'copy',
+    saveAs: { fn -> fn.endsWith(".stats") ? "Stats/$fn" : null }
+
+  input:
+    file(summaries)
+
+  output:
+    path("trimmomatic.stats"), emit: combo_trim_stats
+
+  """
+
+  """
+}
+

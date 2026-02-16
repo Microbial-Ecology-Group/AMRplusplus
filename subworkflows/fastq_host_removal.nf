@@ -1,10 +1,14 @@
 // Load modules
 include { index } from '../modules/Alignment/bwa'
-include { bwa_align ; bwa_rm_contaminant_fq ; HostRemovalStats} from '../modules/Alignment/bwa'
+include { bwa_align ; bwa_rm_contaminant_fq ; bwa_rm_contaminant_merged_fq; HostRemovalStats} from '../modules/Alignment/bwa'
+include { SeqkitReadCounts } from '../modules/QC/merge'
+include { bwa_rm_contaminant_se } from '../modules/Alignment/bwa'
+
+
 
 import java.nio.file.Paths
 
-// WC trimming
+//  Host removal for paired reads
 workflow FASTQ_RM_HOST_WF {
     take: 
         hostfasta
@@ -32,4 +36,65 @@ workflow FASTQ_RM_HOST_WF {
         HostRemovalStats(bwa_rm_contaminant_fq.out.host_rm_stats.collect())
     emit:
         nonhost_reads = bwa_rm_contaminant_fq.out.nonhost_reads  
+}
+
+workflow MERGED_FASTQ_RM_HOST_WF {
+    take: 
+        hostfasta
+        merged_reads_ch
+
+    main:
+        /* 1 ─ build / load BWA index -------------------------------------- */
+        def reference_index_ch =
+            params.host_index
+            ? Channel.fromPath( params.host_index , glob:true )
+                    .ifEmpty { error "No files match --host_index '${params.host_index}'" }
+                    .toList()
+                    .map { it.sort() }               // bundle 6 index files
+            : { index( hostfasta ); index.out }()     // call in a closure
+
+
+        /* 2 ─ host-removal -------------------------------------------------- */
+        bwa_rm_contaminant_merged_fq( reference_index_ch , merged_reads_ch )
+        
+        bwa_rm_contaminant_merged_fq.out.nonhost_merged
+            .join( bwa_rm_contaminant_merged_fq.out.nonhost_unmerged )
+            .set { nonhost_reads } 
+        
+        /* merged + unmerged non-host FASTQs  → one channel  */
+        bwa_rm_contaminant_merged_fq.out.nonhost_merged
+            .mix( bwa_rm_contaminant_merged_fq.out.nonhost_unmerged )
+            .set { only_reads_ch }            // ← make it top-level
+        
+        
+        /* 3 ─ one-shot SeqKit on all non-host FASTQs ----------------------- */
+        //seqkit_input_ch = only_reads_ch.map{ sid,f -> f }.collect()
+        
+        //SeqkitReadCounts( seqkit_input_ch , "NonHost" )
+
+
+
+    emit:
+        nonhost_reads
+}
+
+workflow FASTQ_RM_HOST_SE_WF {
+    take:
+        hostfasta
+        se_reads_ch   // tuple(sample_id, read.fastq[.gz])
+
+    main:
+        def host_index_ch = params.host_index
+            ? Channel.fromPath(params.host_index, glob:true)
+                     .ifEmpty { error "No files match --host_index '${params.host_index}'" }
+                     .toList()
+                     .map { it.sort() }
+            : { index(hostfasta); index.out }()
+
+        bwa_rm_contaminant_se( host_index_ch, se_reads_ch )
+        HostRemovalStats( bwa_rm_contaminant_se.out.host_rm_stats.collect() )
+
+    emit:
+        nonhost_reads = bwa_rm_contaminant_se.out.nonhost_reads   // tuple(sample_id, *.non.host.fastq.gz)
+        host_rm_stats = HostRemovalStats.out.combo_host_rm_stats
 }

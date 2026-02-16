@@ -19,13 +19,13 @@ workflow BAM_RESISTOME_COUNTS_WF {
             amrsnp = file("${baseDir}/bin/AmrPlusPlus_SNP/*")
             resistomeanalyzer = file("${baseDir}/bin/resistome")
         }
-        // Split sections below for standard and dedup_ed results
+        // Run resistome analyzer and count matrix creation
         runresistome(bam_ch,amr, annotation, resistomeanalyzer )
         resistomeresults(runresistome.out.resistome_counts.collect())
         // Add SNP confirmation
         if (params.snp == "Y") {
             runsnp(bam_ch, resistomeresults.out.snp_count_matrix)
-            snpresults(runsnp.out.snp_counts.collect())
+            snpresults(runsnp.out.snp_counts.collect(), "AMR")
         }
 }
 

@@ -3,10 +3,11 @@ params.readlen = 150
 
 threads = params.threads
 kraken_confidence = params.kraken_confidence
+kraken_options = params.kraken_options
 
 process dlkraken {
-    tag { "downloading kraken db"}
-    label "python"
+    tag { "downloading_kraken_db"}
+    label "micro"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -14,18 +15,27 @@ process dlkraken {
     publishDir "$baseDir/data/kraken_db/", mode: 'copy'
 
     output:
-        path("minikraken_8GB_20200312/"), emit:kraken_db
+        path("k2_minusb_20250714/"), emit: kraken_db
 
     """
-    wget ftp://ftp.ccb.jhu.edu/pub/data/kraken2_dbs/minikraken_8GB_202003.tgz
-    tar -xvzf minikraken_8GB_202003.tgz
+        wget https://genome-idx.s3.amazonaws.com/kraken/k2_minusb_20250714.tar.gz
+        mkdir -p k2_minusb_20250714
+        tar -xvzf k2_minusb_20250714.tar.gz -C k2_minusb_20250714
 
     """
 }
 
 process runkraken {
     tag { sample_id }
-    label "microbiome"
+    label (
+        (
+          (params.kraken_options instanceof List)
+            ? params.kraken_options.join(' ')
+            : (params.kraken_options ?: '')
+        ).contains('--memory-mapping')
+           ? 'large'
+           : 'xlarge'
+    )
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -45,20 +55,130 @@ process runkraken {
    output:
       tuple val(sample_id), path("${sample_id}.conf_${kraken_confidence}.kraken.raw"), emit: kraken_raw
       path("${sample_id}.conf_${kraken_confidence}.kraken.report"), emit: kraken_report
-      tuple val(sample_id), path("${sample_id}.conf_${kraken_confidence}.kraken.krona"), emit: krakenkrona_filtered
 
-
+    script:
+    def opts = (params.kraken_options instanceof List) ? params.kraken_options.join(' ') : (params.kraken_options ?: '')
      """
-     ${KRAKEN2} --db ${krakendb} --confidence ${kraken_confidence} --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.conf_${kraken_confidence}.kraken.report > ${sample_id}.conf_${kraken_confidence}.kraken.raw
+     ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${kraken_confidence} --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.conf_${kraken_confidence}.kraken.report > ${sample_id}.conf_${kraken_confidence}.kraken.raw
 
      cut -f 2,3  ${sample_id}.conf_${kraken_confidence}.kraken.raw > ${sample_id}.conf_${kraken_confidence}.kraken.krona
     """
 }
 
+process runkraken_merged {
+
+    tag   { sample_id }
+    label (
+        (
+          (params.kraken_options instanceof List)
+            ? params.kraken_options.join(' ')
+            : (params.kraken_options ?: '')
+        ).contains('--memory-mapping')
+           ? 'large'
+           : 'xlarge'
+    )
+
+    publishDir "${params.output}/MicrobiomeAnalysis", mode: 'copy',
+        saveAs: { fn ->
+            if      (fn.endsWith('.kraken.raw'))    "Kraken/standard/$fn"
+            else if (fn.endsWith('.kraken.report')) "Kraken/standard_report/$fn"
+            else if (fn.endsWith('.fastq.gz'))      "Kraken/extracted_reads/$fn"
+        }
+
+    input:
+        tuple val(sample_id), path(merged), path(unmerged)
+        val krakendb
+
+    output:
+        tuple val(sample_id), path("${sample_id}.merged.kraken.raw"),      emit: kraken_raw_merged
+        path("${sample_id}.merged.kraken.report"),                         emit: kraken_report_merged
+
+        tuple val(sample_id), path("${sample_id}.unmerged.kraken.raw"),    emit: kraken_raw_unmerged
+        path("${sample_id}.unmerged.kraken.report"),                       emit: kraken_report_unmerged
+
+    script:
+    def opts = (params.kraken_options instanceof List) ? params.kraken_options.join(' ') : (params.kraken_options ?: '')
+    """
+    set -euo pipefail
+
+    # ── helpers ────────────────────────────────────────────────────
+    has_reads() { [ "\$(zcat "\$1" 2>/dev/null | head -c 1 | wc -c)" -gt 0 ]; }
+
+    # Produce a valid empty Kraken2 report (just the unclassified line)
+    empty_kraken() {
+        touch "\$1"                           # empty .raw
+        printf "100.00\\t0\\t0\\tU\\t0\\tunclassified\\n" > "\$2"  # minimal .report
+    }
+
+    # ── merged reads ───────────────────────────────────────────────
+    if has_reads ${merged}; then
+        ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${kraken_confidence} \\
+                   --threads ${threads} \\
+                   --report ${sample_id}.merged.kraken.report \\
+                   ${merged} \\
+                   > ${sample_id}.merged.kraken.raw
+    else
+        echo "[INFO] No merged reads for ${sample_id} — writing empty Kraken output"
+        empty_kraken ${sample_id}.merged.kraken.raw ${sample_id}.merged.kraken.report
+    fi
+
+    # ── unmerged reads ─────────────────────────────────────────────
+    if has_reads ${unmerged}; then
+        ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${kraken_confidence} \\
+                   --threads ${threads} \\
+                   --report ${sample_id}.unmerged.kraken.report \\
+                   ${unmerged} \\
+                   > ${sample_id}.unmerged.kraken.raw
+    else
+        echo "[INFO] No unmerged reads for ${sample_id} — writing empty Kraken output"
+        empty_kraken ${sample_id}.unmerged.kraken.raw ${sample_id}.unmerged.kraken.report
+    fi
+    """
+}
+
+
+process runkraken_se {
+    tag { sample_id }
+    label (
+        (
+          (params.kraken_options instanceof List)
+            ? params.kraken_options.join(' ')
+            : (params.kraken_options ?: '')
+        ).contains('--memory-mapping')
+           ? 'large'
+           : 'xlarge'
+    )
+
+    publishDir "${params.output}/MicrobiomeAnalysis", mode: 'copy',
+        saveAs: { fn ->
+            if      (fn.endsWith(".kraken.raw"))    "Kraken/Raw_output_conf_${params.kraken_confidence}/$fn"
+            else if (fn.endsWith(".kraken.report")) "Kraken/Report_conf_${params.kraken_confidence}/$fn"
+            else null
+        }
+
+    input:
+        tuple val(sample_id), path(read)   // SE
+        path(krakendb)
+
+    output:
+        tuple val(sample_id), path("${sample_id}.conf_${params.kraken_confidence}.kraken.raw"),    emit: kraken_raw
+        path("${sample_id}.conf_${params.kraken_confidence}.kraken.report"),                        emit: kraken_report
+
+    script:
+    def opts = (params.kraken_options instanceof List) ? params.kraken_options.join(' ') : (params.kraken_options ?: '')
+    """
+    ${KRAKEN2} --db ${krakendb} ${opts} \
+               --confidence ${params.kraken_confidence} \
+               --threads ${task.cpus} \
+               --report ${sample_id}.conf_${params.kraken_confidence}.kraken.report \
+               ${read} \
+      > ${sample_id}.conf_${params.kraken_confidence}.kraken.raw
+    """
+}
 
 process krakenresults {
     tag { }
-    label "python"
+    label "micro"
 
     errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
     maxRetries 3
@@ -79,7 +199,7 @@ process krakenresults {
 
 
 process runbracken {
-    label "microbiome"
+    label "micro"
     
     input:
        tuple val(sample_id), path(krakenout)
@@ -102,4 +222,3 @@ process runbracken {
         -o ${sample_id}_bracken_filtered.tsv
         """
 }
-
