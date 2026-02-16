@@ -21,13 +21,13 @@ With AMR++, you will obtain alignment count files for each sample that are combi
 
 [Detailed changes here.](docs/CHANGELOG.md)
 
-[Additional analysis tips here.](docs/Analysis_recommendations.md)
-
 Brief overview:
 1. Switch to only counting primary resistome alignments. 
 2. Changed default AMR gene fraction ```--threshold``` to `0`. We recommend running statistical analysis of count matrices after aggregating to the "Group" level to account for possible false-positive calls of individual gene accessions. 
 3. Added single-end and merged-read analysis.
 4. Changed defaults to skip rarefaction analysis, but default to running the SNP confirmation and deduplication of resistome counts.
+
+[Additional analysis tips here.](docs/Analysis_recommendations.md)
 
 More Information
 ----------------

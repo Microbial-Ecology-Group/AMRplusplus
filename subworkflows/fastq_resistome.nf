@@ -39,8 +39,8 @@ workflow FASTQ_RESISTOME_WF {
                 .filter { file(it).exists() }
                 .toList()
                 .map { files ->
-                    if (files.size() < 6) {
-                        error "Expected 6 AMR index files, found ${files.size()}. Please provide all 6 files, including the AMR database fasta file. Remember to use * in your path."
+                    if (files.size() < 7) {
+                        error "Expected 7 AMR index files, found ${files.size()}. Please provide all 7 files, including the AMR database fasta file. Remember to use * in your path."
                     } else {
                         files.sort()
                     }
@@ -113,9 +113,9 @@ workflow MERGED_FASTQ_RESISTOME_WF {
                 }
                 .collect()                       // gather into a single list
                 .map { files ->
-                    if( files.size() != 6 )
+                    if( files.size() != 7 )
                         throw new RuntimeException(
-                            "Expected 6 AMR index files, found ${files.size()}"
+                            "Expected 7 AMR index files, found ${files.size()}. Please provide all 7 files, including the AMR database fasta file. Remember to use * in your path."
                         )
                     files.sort()                 // ensure deterministic order
                 }

@@ -26,6 +26,7 @@ Using the `--pipeline` parameter, users can select from complete pipelines or in
 | Merged reads | `merged_AMR` | For FLASH-merged paired reads |
 | Merged reads | `merged_AMR_wKraken` | Merged reads + microbiome |
 | Single-end | `se_AMR` | Single-end reads analysis |
+| Single-end | `se_AMR_wKraken` | Single-end reads + microbiome |
 | BAM files | `bam_resistome` | From pre-aligned BAMs |
 
 ## Pipeline Selection Flowchart
@@ -57,14 +58,14 @@ These pipelines process standard paired-end Illumina reads using the `--reads` p
 ### `--pipeline demo` (default)
 Simple demonstration using included test data. Runs `fast_AMR` workflow.
 ```bash
-nextflow run main_AMR++.nf -profile conda --pipeline demo
+nextflow run main_AMR++.nf -profile local --pipeline demo
 ```
 
 ### `--pipeline standard_AMR`
 **Recommended for most analyses.** Complete pipeline with host removal.
 - **Steps:** QC trimming → Host DNA removal → Resistome alignment → Resistome results
 ```bash
-nextflow run main_AMR++.nf -profile conda --pipeline standard_AMR \
+nextflow run main_AMR++.nf -profile local --pipeline standard_AMR \
     --reads "path/to/reads/*_R{1,2}.fastq.gz" \
     --host /path/to/host_genome.fasta
 ```
@@ -73,7 +74,7 @@ nextflow run main_AMR++.nf -profile conda --pipeline standard_AMR \
 Streamlined pipeline that skips host removal. Use when host contamination is minimal or not a concern.
 - **Steps:** QC trimming → Resistome alignment → Resistome results
 ```bash
-nextflow run main_AMR++.nf -profile conda --pipeline fast_AMR \
+nextflow run main_AMR++.nf -profile local --pipeline fast_AMR \
     --reads "path/to/reads/*_R{1,2}.fastq.gz"
 ```
 
@@ -84,7 +85,7 @@ Full pipeline with added microbiome analysis using Kraken2.
   - Non-host reads → Kraken2 taxonomic classification
 - **Note:** Requires a Kraken database. The minikraken_8GB_202003 database (~8GB) will be downloaded automatically, or specify your own with `--kraken_db`.
 ```bash
-nextflow run main_AMR++.nf -profile conda --pipeline standard_AMR_wKraken \
+nextflow run main_AMR++.nf -profile local --pipeline standard_AMR_wKraken \
     --reads "path/to/reads/*_R{1,2}.fastq.gz" \
     --host /path/to/host_genome.fasta \
     --kraken_db /path/to/kraken_db/
@@ -108,33 +109,33 @@ Individual analysis steps that can be run independently on paired-end data.
 
 ```bash
 # Quality assessment only
-nextflow run main_AMR++.nf -profile conda --pipeline eval_qc \
+nextflow run main_AMR++.nf -profile local --pipeline eval_qc \
     --reads "path/to/reads/*_R{1,2}.fastq.gz"
 
 # Trimming only
-nextflow run main_AMR++.nf -profile conda --pipeline trim_qc \
+nextflow run main_AMR++.nf -profile local --pipeline trim_qc \
     --reads "path/to/reads/*_R{1,2}.fastq.gz"
 
 # Host removal only
-nextflow run main_AMR++.nf -profile conda --pipeline rm_host \
+nextflow run main_AMR++.nf -profile local --pipeline rm_host \
     --reads "path/to/reads/*_R{1,2}.fastq.gz" \
     --host /path/to/host_genome.fasta
 
 # Resistome analysis (alignment + counting + rarefaction)
-nextflow run main_AMR++.nf -profile conda --pipeline resistome \
+nextflow run main_AMR++.nf -profile local --pipeline resistome \
     --reads "path/to/reads/*_R{1,2}.fastq.gz"
 
 # Alignment only (generates BAM files)
-nextflow run main_AMR++.nf -profile conda --pipeline align \
+nextflow run main_AMR++.nf -profile local --pipeline align \
     --reads "path/to/reads/*_R{1,2}.fastq.gz"
 
 # Kraken classification
-nextflow run main_AMR++.nf -profile conda --pipeline kraken \
+nextflow run main_AMR++.nf -profile local --pipeline kraken \
     --reads "path/to/reads/*_R{1,2}.fastq.gz" \
     --kraken_db /path/to/kraken_db/
 
 # QIIME 2 16S analysis
-nextflow run main_AMR++.nf -profile conda --pipeline qiime2 \
+nextflow run main_AMR++.nf -profile local --pipeline qiime2 \
     --reads "path/to/reads/*_R{1,2}.fastq.gz" \
     --dada2_db /path/to/dada2_db/
 ```
@@ -150,7 +151,7 @@ For paired-end reads that have been merged using FLASH or similar tools. Use the
 Standard pipeline for FLASH-merged paired-end reads. Processes both merged and unmerged read fractions.
 - **Steps:** QC trimming → Host DNA removal → Resistome alignment → Resistome results
 ```bash
-nextflow run main_AMR++.nf -profile conda --pipeline merged_AMR \
+nextflow run main_AMR++.nf -profile local --pipeline merged_AMR \
     --merged_reads "path/to/merged/*_{merged,unmerged}.fastq.gz" \
     --host /path/to/host_genome.fasta
 ```
@@ -158,7 +159,7 @@ nextflow run main_AMR++.nf -profile conda --pipeline merged_AMR \
 ### `--pipeline merged_AMR_wKraken`
 Merged read pipeline with Kraken2 microbiome analysis.
 ```bash
-nextflow run main_AMR++.nf -profile conda --pipeline merged_AMR_wKraken \
+nextflow run main_AMR++.nf -profile local --pipeline merged_AMR_wKraken \
     --merged_reads "path/to/merged/*_{merged,unmerged}.fastq.gz" \
     --host /path/to/host_genome.fasta \
     --kraken_db /path/to/kraken_db/
@@ -179,16 +180,16 @@ Individual analysis steps for merged paired-end reads.
 
 ```bash
 # Merge paired-end reads with FLASH
-nextflow run main_AMR++.nf -profile conda --pipeline merge_reads \
+nextflow run main_AMR++.nf -profile local --pipeline merge_reads \
     --reads "path/to/reads/*_R{1,2}.fastq.gz"
 
 # Host removal on merged reads
-nextflow run main_AMR++.nf -profile conda --pipeline merged_rm_host \
+nextflow run main_AMR++.nf -profile local --pipeline merged_rm_host \
     --merged_reads "path/to/merged/*.extendedFrags.fastq.gz" \
     --host /path/to/host_genome.fasta
 
 # Resistome analysis on merged reads
-nextflow run main_AMR++.nf -profile conda --pipeline merged_resistome \
+nextflow run main_AMR++.nf -profile local --pipeline merged_resistome \
     --merged_reads "path/to/merged/*_{merged,unmerged}.fastq.gz"
 ```
 
@@ -200,9 +201,18 @@ For single-end sequencing data. Uses the `--reads` parameter with single files.
 
 ### `--pipeline se_AMR`
 Complete AMR++ pipeline for single-end reads with Kraken analysis.
+- **Steps:** QC trimming → Host DNA removal → Resistome alignment → Resistome results
+```bash
+nextflow run main_AMR++.nf -profile local --pipeline se_AMR \
+    --reads "path/to/reads/*.fastq.gz" \
+    --host /path/to/host_genome.fasta
+```
+
+### `--pipeline se_AMR_wKraken`
+Complete AMR++ pipeline for single-end reads with Kraken analysis.
 - **Steps:** QC trimming → Host DNA removal → Resistome alignment → Resistome results → Kraken2
 ```bash
-nextflow run main_AMR++.nf -profile conda --pipeline se_AMR \
+nextflow run main_AMR++.nf -profile local --pipeline se_AMR \
     --reads "path/to/reads/*.fastq.gz" \
     --host /path/to/host_genome.fasta
 ```
@@ -223,11 +233,11 @@ Individual analysis steps for single-end data.
 
 ```bash
 # Single-end QC
-nextflow run main_AMR++.nf -profile conda --pipeline se_eval_qc \
+nextflow run main_AMR++.nf -profile local --pipeline se_eval_qc \
     --reads "path/to/reads/*.fastq.gz"
 
 # Single-end resistome
-nextflow run main_AMR++.nf -profile conda --pipeline se_resistome \
+nextflow run main_AMR++.nf -profile local --pipeline se_resistome \
     --reads "path/to/reads/*.fastq.gz"
 ```
 
@@ -247,11 +257,11 @@ For analyzing pre-aligned BAM files (e.g., from a previous AMR++ alignment run).
 
 ```bash
 # Resistome analysis from existing BAM files
-nextflow run main_AMR++.nf -profile conda --pipeline bam_resistome \
+nextflow run main_AMR++.nf -profile local --pipeline bam_resistome \
     --bam_files "path/to/alignments/*.bam"
 
 # Count matrix generation from BAM files
-nextflow run main_AMR++.nf -profile conda --pipeline bam_resistome_counts \
+nextflow run main_AMR++.nf -profile local --pipeline bam_resistome_counts \
     --bam_files "path/to/alignments/*.bam"
 ```
 
@@ -262,7 +272,7 @@ nextflow run main_AMR++.nf -profile conda --pipeline bam_resistome_counts \
 In the following example, we run the standard AMR++ workflow with SNP verification and deduplicated counts:
 
 ```bash
-nextflow run main_AMR++.nf -profile conda --pipeline standard_AMR \
+nextflow run main_AMR++.nf -profile local --pipeline standard_AMR \
     --reads "path/to/your/reads/*_R{1,2}.fastq.gz" \
     --host /path/to/host_genome.fasta \
     --snp Y \

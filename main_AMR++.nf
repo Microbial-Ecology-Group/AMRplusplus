@@ -70,6 +70,7 @@ def helpMessage = """\
     For analyzing single-end sequencing data.
 
     se_AMR                  Standard AMR++ for single-end reads with Kraken
+    se_AMR_wKraken          Single-end read pipeline with Kraken analysis
 
     -------------------------------------------------------------------------------
                          PAIRED-END SUBWORKFLOWS
@@ -215,6 +216,7 @@ include { MERGED_FASTQ_RESISTOME_WF } from "$baseDir/subworkflows/fastq_resistom
 include { MERGED_FASTQ_KRAKEN_WF } from "$baseDir/subworkflows/fastq_microbiome.nf"
 
 // Load SE read workflows
+include { SE_AMRplusplus } from './subworkflows/AMR++_SE_standard.nf'
 include { SE_AMRplusplus_wKraken } from './subworkflows/AMR++_SE_standard_wKraken.nf'
 include { FASTQ_QC_SE_WF } from './subworkflows/fastq_information.nf'
 include { FASTQ_TRIM_SE_WF } from './subworkflows/fastq_QC_trimming.nf'
@@ -270,6 +272,28 @@ workflow {
             "Full pipeline with Kraken taxonomic classification.\n    Combines resistome and microbiome analysis.")
         STANDARD_AMRplusplus_wKraken(fastq_files, params.host, params.amr, params.annotation, params.kraken_db)
     } 
+
+    // =========================================================================
+    //                    SINGLE-END PIPELINES
+    // =========================================================================
+    else if(params.pipeline == "se_AMR") {
+        logPipelineStart("Single-End AMR++",
+            "Standard AMR++ pipeline for single-end reads.\n    Includes host removal, resistome, and Kraken analysis.")
+        Channel
+            .fromPath(params.reads)
+            .map { f -> tuple(f.name.replaceFirst(/\.f(ast)?q(\.gz)?$/, ''), f) }
+            .set { read_se_ch }
+        SE_AMRplusplus_wKraken( read_se_ch , params.host, params.amr, params.annotation )
+    }
+    else if(params.pipeline == "se_AMR_wKraken") {
+        logPipelineStart("Single-End AMR++",
+            "Standard AMR++ pipeline for single-end reads.\n    Includes host removal, resistome, and Kraken analysis.")
+        Channel
+            .fromPath(params.reads)
+            .map { f -> tuple(f.name.replaceFirst(/\.f(ast)?q(\.gz)?$/, ''), f) }
+            .set { read_se_ch }
+        SE_AMRplusplus_wKraken( read_se_ch , params.host, params.amr, params.annotation )
+    }
 
     // =========================================================================
     //                      MERGED READ PIPELINES
@@ -337,15 +361,6 @@ workflow {
     // =========================================================================
     //                    SINGLE-END SUBWORKFLOWS
     // =========================================================================
-    else if(params.pipeline == "se_AMR") {
-        logPipelineStart("Single-End AMR++",
-            "Standard AMR++ pipeline for single-end reads.\n    Includes host removal, resistome, and Kraken analysis.")
-        Channel
-            .fromPath(params.reads)
-            .map { f -> tuple(f.name.replaceFirst(/\.f(ast)?q(\.gz)?$/, ''), f) }
-            .set { read_se_ch }
-        SE_AMRplusplus_wKraken( read_se_ch , params.host, params.amr, params.annotation )
-    }
     else if(params.pipeline == "se_eval_qc") {
         logPipelineStart("Single-End QC Evaluation",
             "Running FastQC analysis on single-end reads.")

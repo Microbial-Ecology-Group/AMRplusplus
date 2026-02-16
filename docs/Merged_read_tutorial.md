@@ -86,6 +86,7 @@ Parameters that have to change:
 * `--pipeline` ==> `--pipeline merged_kraken`
 * `--kraken_db` ==> `--kraken_db /path/to/your/kraken_db`
 
+If you don't specify a database with ```-kraken_db```, AMR++ will automatically download the "k2_minusb_20250714" database. 
 
 Parameter still pointing to nonhost merged reads
 * `--merged_reads`  ==> `--merged_reads 'Merged_AMR++_analysis/HostRemoval/NonHostFastq/*.{merged,unmerged}.non.host.fastq.gz'`
