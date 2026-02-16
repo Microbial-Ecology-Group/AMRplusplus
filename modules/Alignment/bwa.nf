@@ -96,7 +96,6 @@ process bwa_merged_align {
 
     publishDir "${params.output}/Alignment/BAM_files", mode: 'copy',
         saveAs: { fn ->
-            // “Standard” = sorted-only BAMs, “Deduped” = after rmdup
             if (fn.endsWith('_merged_alignment_sorted.bam')   ||
                 fn.endsWith('_unmerged_alignment_sorted.bam'))
                     "Standard/$fn"
@@ -107,16 +106,10 @@ process bwa_merged_align {
                     null
         }
 
-    /* ───────── inputs ───────────────────────────────────────────────
-     *  indexfiles[0]  – BWA index prefix (6 files)
-     *  merged_fq      – FLASH-merged single-end reads
-     *  unmerged_fq    – FLASH-unmerged single-end reads
-     */
     input:
         path  indexfiles
         tuple val(sample_id), path(merged_fq), path(unmerged_fq)
 
-    /* ───────── outputs ────────────────────────────────────────────── */
     output:
         tuple val(sample_id), path("${sample_id}_merged_alignment_sorted.bam"),   emit: merged_bam
         tuple val(sample_id), path("${sample_id}_unmerged_alignment_sorted.bam"), emit: unmerged_bam
@@ -124,46 +117,77 @@ process bwa_merged_align {
         tuple val(sample_id), path("${sample_id}_merged_alignment_dedup.bam"),    emit: merged_dedup_bam,    optional: true
         tuple val(sample_id), path("${sample_id}_unmerged_alignment_dedup.bam"),  emit: unmerged_dedup_bam,  optional: true
 
-    /* ───────── script ─────────────────────────────────────────────── */
     script:
-    def cpu = task.cpus ?: threads                            // convenience
+    def cpu = task.cpus ?: threads
     if (deduped == 'N') """
         set -euo pipefail
 
+        # ── helpers ──────────────────────────────────────────────────
+        has_reads() { [ "\$(zcat "\$1" 2>/dev/null | head -c 1 | wc -c)" -gt 0 ]; }
+        empty_bam() { printf '@HD\\tVN:1.6\\tSO:unsorted\\n' | ${SAMTOOLS} view -bS -o "\$1" -; }
+
         # ───── merged reads ──────────────────────────────────────────
-        ${BWA} mem ${indexfiles[0]} ${merged_fq} -t ${cpu} \
-            -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
-        | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \
-        | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
+        if has_reads ${merged_fq}; then
+            ${BWA} mem ${indexfiles[0]} ${merged_fq} -t ${cpu} \\
+                -R '@RG\\\\tID:${sample_id}_merged\\\\tSM:${sample_id}' \\
+            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \\
+            | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
+        else
+            echo "[INFO] No merged reads for ${sample_id} — creating empty BAM"
+            empty_bam ${sample_id}_merged_alignment_sorted.bam
+        fi
 
         # ───── un-merged reads ───────────────────────────────────────
-        ${BWA} mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} \
-            -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
-        | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \
-        | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
+        if has_reads ${unmerged_fq}; then
+            ${BWA} mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} \\
+                -R '@RG\\\\tID:${sample_id}_unmerged\\\\tSM:${sample_id}' \\
+            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \\
+            | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
+        else
+            echo "[INFO] No unmerged reads for ${sample_id} — creating empty BAM"
+            empty_bam ${sample_id}_unmerged_alignment_sorted.bam
+        fi
     """
     else if (deduped == 'Y') """
         set -euo pipefail
 
-        # ───── merged reads (deduped) ────────────────────────────────
-        ${BWA} mem ${indexfiles[0]} ${merged_fq} -t ${cpu} \
-            -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
-        | ${SAMTOOLS}  view -@ ${cpu} -b ${samtools_flag} - \
-        | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
-        ${SAMTOOLS} fixmate -@ ${cpu} ${sample_id}_merged_alignment_sorted.bam tmp.bam
-        ${SAMTOOLS} sort    -@ ${cpu} tmp.bam -o tmp.srt.bam
-        ${SAMTOOLS} markdup -r tmp.srt.bam ${sample_id}_merged_alignment_dedup.bam
-        rm tmp.bam tmp.srt.bam
+        # ── helpers ──────────────────────────────────────────────────
+        has_reads() { [ "\$(zcat "\$1" 2>/dev/null | head -c 1 | wc -c)" -gt 0 ]; }
+        empty_bam() { printf '@HD\\tVN:1.6\\tSO:unsorted\\n' | ${SAMTOOLS} view -bS -o "\$1" -; }
 
-        # ───── un-merged reads (deduped) ─────────────────────────────
-        ${BWA} mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} \
-            -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
-        | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \
-        | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
-        ${SAMTOOLS} fixmate -@ ${cpu} ${sample_id}_unmerged_alignment_sorted.bam tmp.bam
-        ${SAMTOOLS} sort    -@ ${cpu} tmp.bam -o tmp.srt.bam
-        ${SAMTOOLS} markdup -r tmp.srt.bam ${sample_id}_unmerged_alignment_dedup.bam
-        rm tmp.bam tmp.srt.bam
+        # ───── merged reads (+ dedup) ────────────────────────────────
+        if has_reads ${merged_fq}; then
+            ${BWA} mem ${indexfiles[0]} ${merged_fq} -t ${cpu} \\
+                -R '@RG\\\\tID:${sample_id}_merged\\\\tSM:${sample_id}' \\
+            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \\
+            | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
+
+            ${SAMTOOLS} fixmate -@ ${cpu} ${sample_id}_merged_alignment_sorted.bam tmp_merged.bam
+            ${SAMTOOLS} sort    -@ ${cpu} tmp_merged.bam -o tmp_merged.srt.bam
+            ${SAMTOOLS} markdup -r -@ ${cpu} tmp_merged.srt.bam ${sample_id}_merged_alignment_dedup.bam
+            rm -f tmp_merged.bam tmp_merged.srt.bam
+        else
+            echo "[INFO] No merged reads for ${sample_id} — creating empty BAMs"
+            empty_bam ${sample_id}_merged_alignment_sorted.bam
+            empty_bam ${sample_id}_merged_alignment_dedup.bam
+        fi
+
+        # ───── un-merged reads (+ dedup) ─────────────────────────────
+        if has_reads ${unmerged_fq}; then
+            ${BWA} mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} \\
+                -R '@RG\\\\tID:${sample_id}_unmerged\\\\tSM:${sample_id}' \\
+            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \\
+            | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
+
+            ${SAMTOOLS} fixmate -@ ${cpu} ${sample_id}_unmerged_alignment_sorted.bam tmp_unmerged.bam
+            ${SAMTOOLS} sort    -@ ${cpu} tmp_unmerged.bam -o tmp_unmerged.srt.bam
+            ${SAMTOOLS} markdup -r -@ ${cpu} tmp_unmerged.srt.bam ${sample_id}_unmerged_alignment_dedup.bam
+            rm -f tmp_unmerged.bam tmp_unmerged.srt.bam
+        else
+            echo "[INFO] No unmerged reads for ${sample_id} — creating empty BAMs"
+            empty_bam ${sample_id}_unmerged_alignment_sorted.bam
+            empty_bam ${sample_id}_unmerged_alignment_dedup.bam
+        fi
     """
     else
         error "Invalid --deduped flag: ${deduped}. Use Y or N."
@@ -281,21 +305,15 @@ process bwa_rm_contaminant_merged_fq {
     publishDir "${params.output}/HostRemoval", mode: 'copy',
         saveAs: { fn ->
             if (fn.endsWith('.fastq.gz'))
-                "NonHostFastq/$fn"          // keep only the de-contaminated FASTQs
+                "NonHostFastq/$fn"
             else
                 null
         }
 
-    /* ───────── inputs ────────────────────────────────────────────────
-     *  indexfiles[0]  – bwa index prefix (6 files in the same dir)
-     *  merged_fq      – FLASH-merged reads      (sample.extendedFrags.fastq.gz)
-     *  unmerged_fq    – FLASH-unmerged reads    (sample.notCombined.fastq.gz)
-     */
     input:
         path  indexfiles
         tuple val(sample_id), path(merged_fq), path(unmerged_fq)
 
-    /* ───────── outputs ─────────────────────────────────────────────── */
     output:
         tuple val(sample_id), path("${sample_id}.merged.non.host.fastq.gz"),   emit: nonhost_merged
         path("${sample_id}.merged.samtools.idxstats"),                         emit: host_rm_stats_merged
@@ -307,30 +325,47 @@ process bwa_rm_contaminant_merged_fq {
     """
     set -euo pipefail
 
+    # ── helper: true if the gzipped FASTQ contains at least one read ──
+    has_reads() { [ "\$(zcat "\$1" 2>/dev/null | head -c 1 | wc -c)" -gt 0 ]; }
+
     # ───────────────────────── merged reads ────────────────────────────
-    ${BWA} mem ${indexfiles[0]} ${merged_fq} -t ${task.cpus} \
-        | ${SAMTOOLS} sort -@ ${task.cpus} -o ${sample_id}.merged.host.sorted.bam
+    if has_reads ${merged_fq}; then
+        ${BWA} mem ${indexfiles[0]} ${merged_fq} -t ${threads} \\
+            | ${SAMTOOLS} sort -@ ${threads} -o ${sample_id}.merged.host.sorted.bam
 
-    ${SAMTOOLS} index   ${sample_id}.merged.host.sorted.bam
-    ${SAMTOOLS} idxstats ${sample_id}.merged.host.sorted.bam \
-        > ${sample_id}.merged.samtools.idxstats
+        ${SAMTOOLS} index   ${sample_id}.merged.host.sorted.bam
+        ${SAMTOOLS} idxstats ${sample_id}.merged.host.sorted.bam \\
+            > ${sample_id}.merged.samtools.idxstats
 
-    ${SAMTOOLS} view -b -f 4 ${sample_id}.merged.host.sorted.bam \
-      | ${SAMTOOLS} fastq -@ ${task.cpus} -c 6 - | pigz -p ${task.cpus} -c > ${sample_id}.merged.non.host.fastq.gz
-
+        ${SAMTOOLS} view -b -f 4 ${sample_id}.merged.host.sorted.bam \\
+          | ${SAMTOOLS} fastq -@ ${threads} -c 6 - \\
+          | pigz -p ${threads} -c > ${sample_id}.merged.non.host.fastq.gz
+    else
+        echo "[INFO] No merged reads for ${sample_id} — writing empty outputs"
+        echo -n | gzip > ${sample_id}.merged.non.host.fastq.gz
+        printf "*\\t0\\t0\\t0\\n" > ${sample_id}.merged.samtools.idxstats
+    fi
 
     # ──────────────────────── un-merged reads ──────────────────────────
-    ${BWA} mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpus} \
-        | ${SAMTOOLS} sort -@ ${task.cpus} -o ${sample_id}.unmerged.host.sorted.bam
+    if has_reads ${unmerged_fq}; then
+        ${BWA} mem ${indexfiles[0]} ${unmerged_fq} -t ${threads} \\
+            | ${SAMTOOLS} sort -@ ${threads} -o ${sample_id}.unmerged.host.sorted.bam
 
-    ${SAMTOOLS} index   ${sample_id}.unmerged.host.sorted.bam
-    ${SAMTOOLS} idxstats ${sample_id}.unmerged.host.sorted.bam \
-        > ${sample_id}.unmerged.samtools.idxstats
+        ${SAMTOOLS} index   ${sample_id}.unmerged.host.sorted.bam
+        ${SAMTOOLS} idxstats ${sample_id}.unmerged.host.sorted.bam \\
+            > ${sample_id}.unmerged.samtools.idxstats
 
-    ${SAMTOOLS} view -b -f 4 ${sample_id}.unmerged.host.sorted.bam \
-      | ${SAMTOOLS} fastq -@ ${task.cpus} -c 6 - | pigz -p ${task.cpus} -c > ${sample_id}.unmerged.non.host.fastq.gz
+        ${SAMTOOLS} view -b -f 4 ${sample_id}.unmerged.host.sorted.bam \\
+          | ${SAMTOOLS} fastq -@ ${threads} -c 6 - \\
+          | pigz -p ${threads} -c > ${sample_id}.unmerged.non.host.fastq.gz
+    else
+        echo "[INFO] No unmerged reads for ${sample_id} — writing empty outputs"
+        echo -n | gzip > ${sample_id}.unmerged.non.host.fastq.gz
+        printf "*\\t0\\t0\\t0\\n" > ${sample_id}.unmerged.samtools.idxstats
+    fi
     """
 }
+
 
 process bwa_rm_contaminant_se {
     tag { sample_id }
@@ -394,7 +429,7 @@ process samtools_merge_bams {
     publishDir "${params.output}/Alignment/BAM_files/Combined", mode: 'copy'
 
     input:
-        tuple val(sample_id), path(bam_list)  // list‑of‑two BAMs
+        tuple val(sample_id), path(bam_list)
 
     output:
         tuple val(sample_id), path("${sample_id}_combined.bam"), emit: combo_bam
@@ -402,10 +437,24 @@ process samtools_merge_bams {
     script:
     def cpu = task.cpus ?: 4
     """
-    ${SAMTOOLS} merge -@ ${cpu} ${sample_id}_combined.unsorted.bam ${bam_list.join(' ')}
+    set -euo pipefail
 
-    ${SAMTOOLS} sort  -@ ${cpu} -o ${sample_id}_combined.bam  ${sample_id}_combined.unsorted.bam
+    # Count total alignments across all input BAMs
+    total=0
+    for bam in ${bam_list.join(' ')}; do
+        n=\$(${SAMTOOLS} view -c "\$bam" 2>/dev/null || echo 0)
+        total=\$((total + n))
+    done
 
-    ${SAMTOOLS} index ${sample_id}_combined.bam
+    if [ "\$total" -gt 0 ]; then
+        ${SAMTOOLS} merge -@ ${cpu} ${sample_id}_combined.unsorted.bam ${bam_list.join(' ')}
+        ${SAMTOOLS} sort  -@ ${cpu} -o ${sample_id}_combined.bam ${sample_id}_combined.unsorted.bam
+        ${SAMTOOLS} index ${sample_id}_combined.bam
+        rm -f ${sample_id}_combined.unsorted.bam
+    else
+        echo "[INFO] All input BAMs for ${sample_id} are empty — creating empty combined BAM"
+        printf '@HD\\tVN:1.6\\tSO:coordinate\\n' | ${SAMTOOLS} view -bS -o ${sample_id}_combined.bam -
+        ${SAMTOOLS} index ${sample_id}_combined.bam
+    fi
     """
 }

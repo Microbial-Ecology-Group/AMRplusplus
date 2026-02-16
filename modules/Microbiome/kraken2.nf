@@ -68,8 +68,6 @@ process runkraken {
 process runkraken_merged {
 
     tag   { sample_id }
-    // robust to null | String | List
-    // make sure to test this functionality
     label (
         (
           (params.kraken_options instanceof List)
@@ -82,13 +80,13 @@ process runkraken_merged {
 
     publishDir "${params.output}/MicrobiomeAnalysis", mode: 'copy',
         saveAs: { fn ->
-            if      (fn.endsWith('.kraken.raw'))   "Kraken/standard/$fn"
-            else if (fn.endsWith('.kraken.report'))"Kraken/standard_report/$fn"
-            else if (fn.endsWith('.fastq.gz'))     "Kraken/extracted_reads/$fn"
+            if      (fn.endsWith('.kraken.raw'))    "Kraken/standard/$fn"
+            else if (fn.endsWith('.kraken.report')) "Kraken/standard_report/$fn"
+            else if (fn.endsWith('.fastq.gz'))      "Kraken/extracted_reads/$fn"
         }
 
     input:
-        tuple val(sample_id), path(merged), path(unmerged)   // now BOTH are single files
+        tuple val(sample_id), path(merged), path(unmerged)
         val krakendb
 
     output:
@@ -101,23 +99,43 @@ process runkraken_merged {
     script:
     def opts = (params.kraken_options instanceof List) ? params.kraken_options.join(' ') : (params.kraken_options ?: '')
     """
-    # ── merged file ─────────────────────────────────────────────
-    ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${kraken_confidence} \
-               --threads ${task.cpus} \
-               --report ${sample_id}.merged.kraken.report \
-               ${merged} \
-               > ${sample_id}.merged.kraken.raw
+    set -euo pipefail
 
-    # ── unmerged (now interleaved single) ───────────────────────
-    ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${kraken_confidence} \
-               --interleaved\
-               --threads ${task.cpus} \
-               --report ${sample_id}.unmerged.kraken.report \
-               ${unmerged} \
-               > ${sample_id}.unmerged.kraken.raw
+    # ── helpers ────────────────────────────────────────────────────
+    has_reads() { [ "\$(zcat "\$1" 2>/dev/null | head -c 1 | wc -c)" -gt 0 ]; }
 
+    # Produce a valid empty Kraken2 report (just the unclassified line)
+    empty_kraken() {
+        touch "\$1"                           # empty .raw
+        printf "100.00\\t0\\t0\\tU\\t0\\tunclassified\\n" > "\$2"  # minimal .report
+    }
+
+    # ── merged reads ───────────────────────────────────────────────
+    if has_reads ${merged}; then
+        ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${kraken_confidence} \\
+                   --threads ${threads} \\
+                   --report ${sample_id}.merged.kraken.report \\
+                   ${merged} \\
+                   > ${sample_id}.merged.kraken.raw
+    else
+        echo "[INFO] No merged reads for ${sample_id} — writing empty Kraken output"
+        empty_kraken ${sample_id}.merged.kraken.raw ${sample_id}.merged.kraken.report
+    fi
+
+    # ── unmerged reads ─────────────────────────────────────────────
+    if has_reads ${unmerged}; then
+        ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${kraken_confidence} \\
+                   --threads ${threads} \\
+                   --report ${sample_id}.unmerged.kraken.report \\
+                   ${unmerged} \\
+                   > ${sample_id}.unmerged.kraken.raw
+    else
+        echo "[INFO] No unmerged reads for ${sample_id} — writing empty Kraken output"
+        empty_kraken ${sample_id}.unmerged.kraken.raw ${sample_id}.unmerged.kraken.report
+    fi
     """
 }
+
 
 process runkraken_se {
     tag { sample_id }

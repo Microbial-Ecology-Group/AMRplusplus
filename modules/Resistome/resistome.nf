@@ -83,22 +83,33 @@ process runresistome {
         tuple val(sample_id), path("${sample_id}*.tsv"), emit: resistome_tsv
         path("${sample_id}.${prefix}.gene.tsv"), emit: resistome_counts
 
-    
-    
+    script:
     """
-    samtools view -h ${bam} > ${sample_id}.sam
-    
-    $resistome -ref_fp ${amr} \
-      -annot_fp ${annotation} \
-      -sam_fp ${sample_id}.sam \
-      -gene_fp ${sample_id}.${prefix}.gene.tsv \
-      -group_fp ${sample_id}.${prefix}.group.tsv \
-      -mech_fp ${sample_id}.${prefix}.mechanism.tsv \
-      -class_fp ${sample_id}.${prefix}.class.tsv \
-      -type_fp ${sample_id}.${prefix}.type.tsv \
-      -t ${threshold}
+    set -euo pipefail
 
-    rm ${sample_id}.sam
+    # Check if BAM has any alignments
+    aln_count=\$(${SAMTOOLS} view -c ${bam} 2>/dev/null || echo 0)
+
+    if [ "\$aln_count" -gt 0 ]; then
+        ${SAMTOOLS} view -h ${bam} > ${sample_id}.sam
+
+        $resistome -ref_fp ${amr} \\
+          -annot_fp ${annotation} \\
+          -sam_fp ${sample_id}.sam \\
+          -gene_fp ${sample_id}.${prefix}.gene.tsv \\
+          -group_fp ${sample_id}.${prefix}.group.tsv \\
+          -mech_fp ${sample_id}.${prefix}.mechanism.tsv \\
+          -class_fp ${sample_id}.${prefix}.class.tsv \\
+          -type_fp ${sample_id}.${prefix}.type.tsv \\
+          -t ${threshold}
+
+        rm ${sample_id}.sam
+    else
+        echo "[INFO] No alignments in BAM for ${sample_id} — writing empty resistome counts"
+        for level in gene group mechanism class type; do
+            printf "Header\\t0\\n" > ${sample_id}.${prefix}.\${level}.tsv
+        done
+    fi
     """
 }
 
@@ -146,27 +157,40 @@ process runrarefaction {
     output:
         path("*.tsv"), emit: rarefaction
 
+    script:
     """
-    samtools view -h ${bam} > ${sample_id}.sam
+    set -euo pipefail
 
-    $rarefaction \
-      -ref_fp ${amr} \
-      -sam_fp ${sample_id}.sam \
-      -annot_fp ${annotation} \
-      -gene_fp ${sample_id}.gene.tsv \
-      -group_fp ${sample_id}.group.tsv \
-      -mech_fp ${sample_id}.mech.tsv \
-      -class_fp ${sample_id}.class.tsv \
-      -type_fp ${sample_id}.type.tsv \
-      -min ${min} \
-      -max ${max} \
-      -skip ${skip} \
-      -samples ${samples} \
-      -t ${threshold}
+    aln_count=\$(${SAMTOOLS} view -c ${bam} 2>/dev/null || echo 0)
 
-    rm ${sample_id}.sam
+    if [ "\$aln_count" -gt 0 ]; then
+        ${SAMTOOLS} view -h ${bam} > ${sample_id}.sam
+
+        $rarefaction \\
+          -ref_fp ${amr} \\
+          -sam_fp ${sample_id}.sam \\
+          -annot_fp ${annotation} \\
+          -gene_fp ${sample_id}.gene.tsv \\
+          -group_fp ${sample_id}.group.tsv \\
+          -mech_fp ${sample_id}.mech.tsv \\
+          -class_fp ${sample_id}.class.tsv \\
+          -type_fp ${sample_id}.type.tsv \\
+          -min ${min} \\
+          -max ${max} \\
+          -skip ${skip} \\
+          -samples ${samples} \\
+          -t ${threshold}
+
+        rm ${sample_id}.sam
+    else
+        echo "[INFO] No alignments in BAM for ${sample_id} — writing empty rarefaction counts"
+        for level in gene group mech class type; do
+            printf "0\\t0\\n" > ${sample_id}.\${level}.tsv
+        done
+    fi
     """
 }
+
 
 process plotrarefaction {
     tag "Plot rarefaction results"
