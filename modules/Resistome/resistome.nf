@@ -220,7 +220,7 @@ process plotrarefaction {
 }
 
 
-process runsnp {
+process old_runsnp {
     tag {sample_id}
     label "snp_ignore"
 
@@ -254,7 +254,7 @@ process runsnp {
     """
 }
 
-process dev_runsnp {
+process runsnp {
     tag {sample_id}
     label "snp_ignore"
 
