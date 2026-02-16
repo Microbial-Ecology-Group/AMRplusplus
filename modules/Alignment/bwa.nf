@@ -128,9 +128,9 @@ process bwa_merged_align {
 
         # ───── merged reads ──────────────────────────────────────────
         if has_reads ${merged_fq}; then
-            ${BWA} mem ${indexfiles[0]} ${merged_fq} -t ${cpu} \\
-                -R '@RG\\\\tID:${sample_id}_merged\\\\tSM:${sample_id}' \\
-            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \\
+            ${BWA} mem ${indexfiles[0]} ${merged_fq} -t ${cpu} \
+                -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
+            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \
             | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
         else
             echo "[INFO] No merged reads for ${sample_id} — creating empty BAM"
@@ -139,9 +139,9 @@ process bwa_merged_align {
 
         # ───── un-merged reads ───────────────────────────────────────
         if has_reads ${unmerged_fq}; then
-            ${BWA} mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} \\
-                -R '@RG\\\\tID:${sample_id}_unmerged\\\\tSM:${sample_id}' \\
-            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \\
+            ${BWA} mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} \
+                -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
+            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \
             | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
         else
             echo "[INFO] No unmerged reads for ${sample_id} — creating empty BAM"
@@ -157,9 +157,9 @@ process bwa_merged_align {
 
         # ───── merged reads (+ dedup) ────────────────────────────────
         if has_reads ${merged_fq}; then
-            ${BWA} mem ${indexfiles[0]} ${merged_fq} -t ${cpu} \\
-                -R '@RG\\\\tID:${sample_id}_merged\\\\tSM:${sample_id}' \\
-            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \\
+            ${BWA} mem ${indexfiles[0]} ${merged_fq} -t ${cpu} \
+                -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
+            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \
             | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
 
             ${SAMTOOLS} fixmate -@ ${cpu} ${sample_id}_merged_alignment_sorted.bam tmp_merged.bam
@@ -174,9 +174,9 @@ process bwa_merged_align {
 
         # ───── un-merged reads (+ dedup) ─────────────────────────────
         if has_reads ${unmerged_fq}; then
-            ${BWA} mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} \\
-                -R '@RG\\\\tID:${sample_id}_unmerged\\\\tSM:${sample_id}' \\
-            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \\
+            ${BWA} mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} \
+                -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
+            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \
             | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
 
             ${SAMTOOLS} fixmate -@ ${cpu} ${sample_id}_unmerged_alignment_sorted.bam tmp_unmerged.bam
