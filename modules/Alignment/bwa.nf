@@ -76,7 +76,7 @@ process bwa_align {
         rm ${pair_id}_alignment.sam
         ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
         rm ${pair_id}_alignment.bam
-        ${SAMTOOLS} fixmate -@ ${threads} ${pair_id}_alignment_sorted.bam ${pair_id}_alignment_sorted_fix.bam
+        ${SAMTOOLS} fixmate -@ ${threads} -m ${pair_id}_alignment_sorted.bam ${pair_id}_alignment_sorted_fix.bam
         ${SAMTOOLS} sort -@ ${threads} ${pair_id}_alignment_sorted_fix.bam -o ${pair_id}_alignment_sorted_fix.sorted.bam
         rm ${pair_id}_alignment_sorted_fix.bam
         ${SAMTOOLS} markdup -r ${pair_id}_alignment_sorted_fix.sorted.bam ${pair_id}_alignment_dedup.bam
@@ -162,7 +162,7 @@ process bwa_merged_align {
             | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \
             | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
 
-            ${SAMTOOLS} fixmate -@ ${cpu} ${sample_id}_merged_alignment_sorted.bam tmp_merged.bam
+            ${SAMTOOLS} fixmate -@ ${cpu} -m ${sample_id}_merged_alignment_sorted.bam tmp_merged.bam
             ${SAMTOOLS} sort    -@ ${cpu} tmp_merged.bam -o tmp_merged.srt.bam
             ${SAMTOOLS} markdup -r -@ ${cpu} tmp_merged.srt.bam ${sample_id}_merged_alignment_dedup.bam
             rm -f tmp_merged.bam tmp_merged.srt.bam
@@ -179,7 +179,7 @@ process bwa_merged_align {
             | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \
             | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
 
-            ${SAMTOOLS} fixmate -@ ${cpu} ${sample_id}_unmerged_alignment_sorted.bam tmp_unmerged.bam
+            ${SAMTOOLS} fixmate -@ ${cpu} -m ${sample_id}_unmerged_alignment_sorted.bam tmp_unmerged.bam
             ${SAMTOOLS} sort    -@ ${cpu} tmp_unmerged.bam -o tmp_unmerged.srt.bam
             ${SAMTOOLS} markdup -r -@ ${cpu} tmp_unmerged.srt.bam ${sample_id}_unmerged_alignment_dedup.bam
             rm -f tmp_unmerged.bam tmp_unmerged.srt.bam
