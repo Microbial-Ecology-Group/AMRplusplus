@@ -32,7 +32,6 @@ workflow FASTQ_TRIM_WF {
         
 }
 
-
 // Single-end trimming
 workflow FASTQ_TRIM_SE_WF {
   take: read_se_ch

@@ -223,7 +223,7 @@ include { FASTQ_TRIM_SE_WF } from './subworkflows/fastq_QC_trimming.nf'
 include { FASTQ_RM_HOST_SE_WF   } from './subworkflows/fastq_host_removal.nf'
 include { FASTQ_RESISTOME_SE_WF } from './subworkflows/fastq_resistome.nf'
 include { FASTQ_KRAKEN_SE_WF    } from './subworkflows/fastq_microbiome.nf'
-
+include { FASTQ_DEDUP_SE_WF } from './subworkflows/fastq_deduplicate.nf'
 
 // Load subworkflows
 include { FASTQ_QC_WF } from './subworkflows/fastq_information.nf'
@@ -366,7 +366,7 @@ workflow {
             "Running FastQC analysis on single-end reads.")
         Channel
             .fromPath(params.reads)
-            .map { f -> tuple(f.baseName, f) }
+            .map { f -> tuple(f.simpleName, f) }
             .set { read_se_ch }
         FASTQ_QC_SE_WF( read_se_ch )
     }
@@ -375,16 +375,25 @@ workflow {
             "Running Trimmomatic on single-end reads.")
         Channel
             .fromPath(params.reads)
-            .map { f -> tuple(f.baseName, f) }
+            .map { f -> tuple(f.simpleName, f) }
             .set { read_se_ch }
         FASTQ_TRIM_SE_WF( read_se_ch )
+    }
+    else if(params.pipeline == "se_dedup") {
+        logPipelineStart("Single-End QC Evaluation",
+            "Running read deduplication on single-end reads.")
+        Channel
+            .fromPath(params.reads)
+            .map { f -> tuple(f.simpleName, f) }
+            .set { read_se_ch }
+        FASTQ_DEDUP_SE_WF( read_se_ch )
     }
     else if(params.pipeline == "se_rm_host") {
         logPipelineStart("Single-End Host Removal",
             "Removing host reads from single-end data.\n    Host genome: ${params.host}")
         Channel
             .fromPath(params.reads)
-            .map { f -> tuple(f.baseName, f) }
+            .map { f -> tuple(f.simpleName, f) }
             .set { read_se_ch }
         FASTQ_RM_HOST_SE_WF( params.host, read_se_ch )
     }
@@ -393,7 +402,7 @@ workflow {
             "Performing resistome analysis on single-end reads.")
         Channel
             .fromPath(params.reads)
-            .map { f -> tuple(f.baseName, f) }
+            .map { f -> tuple(f.simpleName, f) }
             .set { read_se_ch }
         FASTQ_RESISTOME_SE_WF( read_se_ch , params.amr, params.annotation )
     }
@@ -402,7 +411,7 @@ workflow {
             "Running Kraken2 on single-end reads.\n    Database: ${params.kraken_db}")
         Channel
             .fromPath(params.reads)
-            .map { f -> tuple(f.baseName, f) }
+            .map { f -> tuple(f.simpleName, f) }
             .set { read_se_ch }
         FASTQ_KRAKEN_SE_WF( read_se_ch )
     }
