@@ -35,6 +35,7 @@ log.info """\
  Pipeline type        : ${pipelineType}
  Input (${inputParam.padRight(12)}) : ${inputPath}
  Output folder        : ${params.output}
+ Started at           : ${now}
  ===================================
 """
 
@@ -225,7 +226,7 @@ include { FASTQ_RESISTOME_SE_WF } from './subworkflows/fastq_resistome.nf'
 include { FASTQ_KRAKEN_SE_WF    } from './subworkflows/fastq_microbiome.nf'
 include { FASTQ_DEDUP_SE_WF } from './subworkflows/fastq_deduplicate.nf'
 
-// Load subworkflows
+// Load PE subworkflows
 include { FASTQ_QC_WF } from './subworkflows/fastq_information.nf'
 include { FASTQ_TRIM_WF } from './subworkflows/fastq_QC_trimming.nf'
 include { FASTQ_ALIGN_WF } from './subworkflows/fastq_align.nf'
@@ -233,6 +234,7 @@ include { FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf'
 include { FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
 include { FASTQ_KRAKEN_WF } from './subworkflows/fastq_microbiome.nf'
 include { FASTQ_QIIME2_WF } from './subworkflows/fastq_16S_qiime2.nf'
+include { FASTQ_DEDUP_PE_WF } from './subworkflows/fastq_deduplicate.nf'
 
 // Load BAM subworkflows
 include { BAM_RESISTOME_WF } from './subworkflows/bam_resistome.nf'
@@ -321,6 +323,11 @@ workflow {
         logPipelineStart("Trimming & QC",
             "Running Trimmomatic for adapter removal and quality trimming.\n    Generates trimmed reads and QC reports.")
         FASTQ_TRIM_WF( fastq_files )
+    }
+    else if(params.pipeline == "dedup") {
+        logPipelineStart("Deduplication",
+            "Running seqKit for read deduplication.")
+        FASTQ_DEDUP_PE_WF( fastq_files )
     }
     else if(params.pipeline == "rm_host") {
         logPipelineStart("Host Removal",
@@ -423,29 +430,35 @@ workflow {
         logPipelineStart("Read Merging",
             "Merging paired-end reads with FLASH.\n    Generates merged and unmerged read files.")
         FASTQ_MERGE_WF( fastq_files )
+    } 
+    else if(params.pipeline == "merge_reads") {
+        logPipelineStart("Read Merging",
+            "Merging paired-end reads with FLASH.\n    Generates merged and unmerged read files.")
+        Channel
+          .fromFilePairs( params.merged_reads, glob: true )
+          .ifEmpty { error "No FASTQ files match: ${params.merged_reads}" }
+          .map { sample_id, files ->
+            def merged   = files.find { it.name.contains('merged')   }
+            def unmerged = files.find { it.name.contains('unmerged') }
+            assert merged && unmerged : "Sample $sample_id missing one of merged/unmerged"
+            tuple( sample_id, merged, unmerged )
+          }
+          .set { to_dedup_ch }
+        FASTQ_DEDUP_MERGED_WF( to_dedup_ch )
     }  
     else if(params.pipeline == "merged_rm_host") {
         logPipelineStart("Merged Reads Host Removal",
             "Removing host reads from merged paired-end data.\n    Host genome: ${params.host}")
         Channel
-            .fromPath( params.merged_reads, glob:true )
-            .ifEmpty { error "No FASTQs match: ${params.merged_reads}" }
-            .map { f ->
-                def m = (f.name =~ /(.+?).(extendedFrags|notCombined)\.fastq\.gz$/)
-                if( !m ) error "Unrecognised FLASH name: ${f.name}"
-                def sid   = m[0][1]
-                def rtype = m[0][2]
-                tuple( sid, tuple(rtype, f) )
-            }
-            .groupTuple()
-            .map { sid, list ->
-                def merged_fq   = list.find { it[0] == 'extendedFrags' }?.getAt(1)
-                def unmerged_fq = list.find { it[0] == 'notCombined'   }?.getAt(1)
-                if( !merged_fq || !unmerged_fq )
-                    error "Sample ${sid} is missing merged or unmerged FASTQ"
-                tuple( sid, merged_fq, unmerged_fq )
-            }
-            .set { to_host_rm_ch }
+          .fromFilePairs( params.merged_reads, glob: true )
+          .ifEmpty { error "No FASTQ files match: ${params.merged_reads}" }
+          .map { sample_id, files ->
+            def merged   = files.find { it.name.contains('merged')   }
+            def unmerged = files.find { it.name.contains('unmerged') }
+            assert merged && unmerged : "Sample $sample_id missing one of merged/unmerged"
+            tuple( sample_id, merged, unmerged )
+          }
+          .set { to_host_rm_ch }
         MERGED_FASTQ_RM_HOST_WF(params.host, to_host_rm_ch)
     }  
     else if(params.pipeline == "merged_resistome") {
@@ -542,6 +555,7 @@ workflow.onComplete {
     Success         : ${workflow.success}
     Work directory  : ${workflow.workDir}
     Output directory: ${params.output}
+    Exit status     : ${workflow.exitStatus}
     ===============================================================================
     """
 }

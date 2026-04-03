@@ -189,8 +189,8 @@ process krakenresults {
         path(kraken_reports)
 
     output:
-        path("kraken_analytic_matrix.conf_${kraken_confidence}.csv")
-	path("unclassifieds_kraken_analytic_matrix.conf_${kraken_confidence}.csv")
+        path("kraken_analytic_matrix.conf_${kraken_confidence}.csv"),              emit: kraken_matrix
+        path("unclassifieds_kraken_analytic_matrix.conf_${kraken_confidence}.csv"), emit: kraken_unclassified
 
     """
     ${PYTHON3} $baseDir/bin/kraken2_long_to_wide.py -i ${kraken_reports} -o kraken_analytic_matrix.conf_${kraken_confidence}.csv
