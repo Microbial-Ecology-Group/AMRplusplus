@@ -13,6 +13,7 @@ nextflow.enable.dsl=2
 def pipelineType = "Paired-end"
 def inputParam = "--reads"
 def inputPath = params.reads
+def now = new java.util.Date().format("yyyy-MM-dd HH:mm:ss")
 
 if (params.pipeline?.startsWith("se_") || params.pipeline == "se_AMR") {
     pipelineType = "Single-end"
