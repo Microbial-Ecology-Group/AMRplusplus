@@ -1,5 +1,5 @@
 // Load modules
-include { DeduplicateReadsSeqkit} from '../modules/QC/dedup'
+include { SE_DeduplicateReadsSeqkit} from '../modules/QC/dedup'
 include { PE_DeduplicateReadsSeqkit} from '../modules/QC/dedup'
 include { PE_DeduplicateMergedReadsSeqkit} from '../modules/QC/dedup'
 
@@ -9,10 +9,10 @@ include { PE_DeduplicateMergedReadsSeqkit} from '../modules/QC/dedup'
 workflow FASTQ_DEDUP_SE_WF {
   take: read_se_ch
   main:
-    DeduplicateReadsSeqkit(read_se_ch)
+    SE_DeduplicateReadsSeqkit(read_se_ch)
 
   emit:
-    deduped_reads = DeduplicateReadsSeqkit.out.dedup_fq
+    deduped_reads = SE_DeduplicateReadsSeqkit.out.dedup_fq
 
 }
 
