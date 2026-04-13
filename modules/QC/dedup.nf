@@ -1,27 +1,3 @@
-process SE_DeduplicateReadsSeqkit {
-    tag   { sample_id }
-    label "medium"
-    publishDir "${params.output}/Deduped_reads",
-               mode:'copy', pattern:'*.fastq.gz'
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
-
-    input:
-        tuple val(sample_id), path(input_fq)
-
-    output:
-        tuple val(sample_id), path("${sample_id}.dedup.fastq.gz"), emit: dedup_fq
-        path("${sample_id}.dedupe_seqkit.stats.log"),              emit: dedupe_stats
-
-    script:
-    """
-    seqkit rmdup --threads ${task.cpus} --by-seq \
-        -o ${sample_id}.dedup.fastq.gz \
-        ${input_fq} \
-        > ${sample_id}.dedupe_seqkit.stats.log 2>&1
-    """
-}
-
 process PE_DeduplicateReadsSeqkit {
     tag   { sample_id }
     label "medium"
@@ -31,29 +7,31 @@ process PE_DeduplicateReadsSeqkit {
     maxRetries 3
 
     input:
-        tuple val(sample_id), path(r1), path(r2)
+        tuple val(sample_id), path(reads)
 
     output:
         tuple val(sample_id),
-              path("deduped_files/${sample_id}_R1.dedup.fastq.gz"),
-              path("deduped_files/${sample_id}_R2.dedup.fastq.gz"), emit: dedup_pe_fq
-        path("${sample_id}.dedupe_seqkit.stats.log"),               emit: dedupe_stats
+              path("${sample_id}_R1.dedup.fastq.gz"),
+              path("${sample_id}_R2.dedup.fastq.gz"), emit: dedup_pe_fq
+        path("${sample_id}.dedupe_seqkit.stats.log"),  emit: dedupe_stats
 
     script:
     """
-    mkdir -p deduped_files
-
+    # Deduplicate R1
     seqkit rmdup \
-        --threads ${task.cpus} \
-        --by-seq \
-        -1 ${r1} \
-        -2 ${r2} \
-        --out-dir deduped_files \
-        > ${sample_id}.dedupe_seqkit.stats.log 2>&1
+        -j ${task.cpus} \
+        -s \
+        -o ${sample_id}_R1.dedup.fastq.gz \
+        ${reads[0]} \
+        >  ${sample_id}.dedupe_seqkit.stats.log 2>&1
 
-    # seqkit rmdup names outputs after the inputs — rename to convention
-    mv deduped_files/${r1.baseName}.* deduped_files/${sample_id}_R1.dedup.fastq.gz || true
-    mv deduped_files/${r2.baseName}.* deduped_files/${sample_id}_R2.dedup.fastq.gz || true
+    # Deduplicate R2 independently
+    seqkit rmdup \
+        -j ${task.cpus} \
+        -s \
+        -o ${sample_id}_R2.dedup.fastq.gz \
+        ${reads[1]} \
+        >> ${sample_id}.dedupe_seqkit.stats.log 2>&1
     """
 }
 
@@ -67,7 +45,7 @@ process PE_DeduplicateMergedReadsSeqkit {
     maxRetries 3
 
     input:
-        tuple val(sample_id), path(merged_fq), path(unmerged_fq)
+        tuple val(sample_id), path(reads)   // reads[0]=merged, reads[1]=unmerged
 
     output:
         tuple val(sample_id),
@@ -77,20 +55,48 @@ process PE_DeduplicateMergedReadsSeqkit {
 
     script:
     """
-    # Merged reads: fully SE in nature, deduplicate independently
+    # Deduplicate merged reads
     seqkit rmdup \
-        --threads ${task.cpus} \
-        --by-seq \
+        -j ${task.cpus} \
+        -s \
         -o ${sample_id}.merged.dedup.fastq.gz \
-        ${merged_fq} \
+        ${reads[0]} \
         >  ${sample_id}.dedupe_seqkit.stats.log 2>&1
 
-    # Unmerged reads: also SE in nature
+    # Deduplicate unmerged reads
     seqkit rmdup \
-        --threads ${task.cpus} \
-        --by-seq \
+        -j ${task.cpus} \
+        -s \
         -o ${sample_id}.unmerged.dedup.fastq.gz \
-        ${unmerged_fq} \
+        ${reads[1]} \
         >> ${sample_id}.dedupe_seqkit.stats.log 2>&1
+    """
+}
+
+
+process SE_DeduplicateReadsSeqkit {
+    tag   { sample_id }
+    label "medium"
+    publishDir "${params.output}/Deduped_reads",
+               mode: 'copy', pattern: '*.fastq.gz'
+    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
+    maxRetries 3
+
+    input:
+        tuple val(sample_id), path(read)
+
+    output:
+        tuple val(sample_id),
+              path("${sample_id}.dedup.fastq.gz"),     emit: dedup_fq
+        path("${sample_id}.dedupe_seqkit.stats.log"),  emit: dedupe_stats
+
+    script:
+    """
+    seqkit rmdup \
+        -j ${task.cpus} \
+        -s \
+        -o ${sample_id}.dedup.fastq.gz \
+        ${read} \
+        > ${sample_id}.dedupe_seqkit.stats.log 2>&1
     """
 }

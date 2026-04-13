@@ -81,6 +81,7 @@ def helpMessage = """\
 
     eval_qc                 Run FastQC quality assessment
     trim_qc                 Run trimming and quality control (Trimmomatic)
+    dedup                   Run read de-duplication with SeqKit
     rm_host                 Remove host reads (BWA alignment to host genome)
     resistome               Perform resistome analysis (alignment + counting)
     align                   Perform alignment to MEGARes database only
@@ -94,6 +95,7 @@ def helpMessage = """\
 
     se_eval_qc              FastQC for single-end reads
     se_trim_qc              Trimming for single-end reads
+    se_dedup                Run read de-duplication with SeqKit
     se_rm_host              Host removal for single-end reads
     se_resistome            Resistome analysis for single-end reads
     se_kraken               Kraken analysis for single-end reads

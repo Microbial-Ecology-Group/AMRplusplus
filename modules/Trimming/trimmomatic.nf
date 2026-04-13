@@ -59,7 +59,7 @@ process runqc_se {
   tag { sample_id }
   label "small"
 
-  publishDir "${params.output}/QC_trimming_SE", mode: 'copy', pattern: '*.fastq.gz',
+  publishDir "${params.output}/QC_trimming/Single", mode: 'copy', pattern: '*.fastq.gz',
     saveAs: { fn -> fn }
 
   input:

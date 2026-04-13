@@ -1,362 +1,348 @@
-# Tutorial to run AMR++ in steps
+# Paired-End Analysis: Step-by-Step Tutorial
 
-The tutorial below takes you through the process of installing AMR++ and analyzing your data in steps, instead of running the entire pipeline. This can be useful if you wish to only perform certain components or your dataset size is extremely large and you need to reduce the size of the temporary files that are created in the working directory. 
+This tutorial walks through a complete paired-end AMR++ analysis, running each step independently. This approach is recommended for large datasets because it lets you delete the `work/` directory between steps to manage storage, and makes it easier to troubleshoot individual steps.
 
-It's important to note that nextflow populates the "work" directory with temporary files that allow for nextflow to "-resume" a failed run and pick up where it left off. Therefore, running AMR++ in steps allows for the removal of the "work" directory between every run. 
+> **Before you start:** Make sure you have run the demo at least once from a login node (`nextflow run main_AMR++.nf -profile local --pipeline demo`). This installs the SNP confirmation software and verifies your environment. See [Getting Started](GettingStarted.md) for details.
 
-# Table of Contents
-- [Tutorial to run AMR++ in steps](#tutorial-to-run-amr-in-steps)
-- [Table of Contents](#table-of-contents)
-- [Load conda environment](#load-conda-environment)
-    - [Check conda installation](#check-conda-installation)
-      - [Using server modules](#using-server-modules)
-      - [Using miniconda](#using-miniconda)
-    - [Install AMR++ environment](#install-amr-environment)
-- [Run first Demo](#run-first-demo)
-  - [How did AMR++ know what parameters to run:](#how-did-amr-know-what-parameters-to-run)
-- [AMR++ components](#amr-components)
-- [Run the eval\_qc pipeline](#run-the-eval_qc-pipeline)
-  - [Run first pipeline, eval\_qc](#run-first-pipeline-eval_qc)
-  - [Explore QC results](#explore-qc-results)
-- [Run trim\_qc pipeline](#run-trim_qc-pipeline)
-  - [trim\_qc command](#trim_qc-command)
-    - [Download trimmomatic.stats file and open on excel](#download-trimmomaticstats-file-and-open-on-excel)
-    - [Now, we'll talk about removing contaminant host DNA](#now-well-talk-about-removing-contaminant-host-dna)
-- [Run host removal pipeline](#run-host-removal-pipeline)
-  - [rm\_host command](#rm_host-command)
-    - [Evaluate rm\_host results](#evaluate-rm_host-results)
-- [Run resistome pipeline](#run-resistome-pipeline)
-  - [resistome commmand](#resistome-commmand)
-  - [Evalute resistome results](#evalute-resistome-results)
-- [Run kraken pipeline](#run-kraken-pipeline)
-  - [kraken command](#kraken-command)
-  - [Inspect kraken results](#inspect-kraken-results)
-- [Effect of changing important parameters](#effect-of-changing-important-parameters)
-  - [Resistome](#resistome)
-  - [Kraken](#kraken)
+## Table of Contents
 
+- [Setup](#setup)
+  - [Load the Conda Environment](#load-the-conda-environment)
+  - [Confirm Tools Are Available](#confirm-tools-are-available)
+- [Step 1: Quality Assessment (eval_qc)](#step-1-quality-assessment-eval_qc)
+- [Step 2: Quality Trimming (trim_qc)](#step-2-quality-trimming-trim_qc)
+- [Step 2.5 (Optional): Read Deduplication (dedup)](#step-25-optional-read-deduplication-dedup)
+- [Step 3: Host Read Removal (rm_host)](#step-3-host-read-removal-rm_host)
+- [Step 4: Resistome Analysis (resistome)](#step-4-resistome-analysis-resistome)
+- [Step 5 (Optional): Microbiome Analysis (kraken)](#step-5-optional-microbiome-analysis-kraken)
+- [Managing the Work Directory](#managing-the-work-directory)
+- [Effect of Key Parameters](#effect-of-key-parameters)
 
-# Load conda environment
-First, we have to have Anaconda or "conda" available for use. Then, we can install or load the conda environment, AMR++_env, which contains all the tools we need.
+---
 
-### Check conda installation
-Try just running conda to check if it works for you:
+## Setup
+
+### Load the Conda Environment
+
+AMR++ requires a set of bioinformatic tools that are bundled into a conda environment. You only need to create the environment once.
+
 ```bash
-conda --h
+# If you haven't installed the conda environment yet
+conda env create -f envs/AMR++_env.yaml
+
+# Activate it before each session
+conda activate AMR++_env
 ```
 
-#### Using server modules
-
-If it says `bash: conda: command not found...`, you have a few options to setup conda to work with your environment. In our university computing environment, modules are added that allow for easy access to other tools. We can run the following command:
+If your HPC uses modules to provide conda, load it first:
 
 ```bash
 module load Anaconda3/2024.02-1
-```
-
-This should load conda for you, but if it's the first time you ever do this, you'll have to run these two commands:
-```bash
-conda init
-
-source ~/.bashrc
-```
-
-#### Using miniconda
-
-If you don't have acess to conda, we recommend downloading [miniconda](https://docs.anaconda.com/miniconda/install/). This works the same as "conda" but comes in a smaller package for easier installation. 
-
-Here are the basic commands for installation:
-```bash
-mkdir -p ~/miniconda3
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
-bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
-rm ~/miniconda3/miniconda.sh
-```
-After installing, close and reopen your terminal application or refresh it by running the following command:
-
-```bash
-source ~/miniconda3/bin/activate
-conda init --all
-```
-
-### Install AMR++ environment
-
-Now, you should have conda installed and can install the AMR++ environment.
-
-We'll need to download the code for [AMR++ from github](https://github.com/Microbial-Ecology-Group/AMRplusplus/tree/master) using the "git" command. 
-
-```bash
-git clone https://github.com/Microbial-Ecology-Group/AMRplusplus.git
-```
-
-Let's navigate into the AMRplusplus directory and check the contents
-
-```bash
-cd AMRplusplus/
-
-ls
-```
-We have a recipe to create the conda environment in the "envs" directory. 
-
-```bash
-conda env create -f envs/AMR++_env.yaml
-# This can take 5-10 mins (or more) depending on your internet speed, computing resources, etc. 
-
-# Once it's completed, activate the environment
 conda activate AMR++_env
-
-# You now have access to all the AMR++ software dependencies (locally)
-samtools --help
 ```
 
+### Confirm Tools Are Available
 
-# Run first Demo
-
-We'll run the demonstration which will create output in the "test_results" directory. 
-
-We can run the demo with this simple command:
 ```bash
-nextflow run main_AMR++.nf
+nextflow -version
+bwa 2>&1 | head -3
+samtools --version | head -1
+trimmomatic -version
 ```
 
-Note, we don't have to specify what `--profile` to use because it defaults to using the "local" profile and just looking in your regular $PATH, whis is now modified by the conda environment, AMR++_env.
+If any of these fail, review the [installation document](installation.md) or check that your conda environment is activated.
 
-## How did AMR++ know what parameters to run:
+---
 
-AMR++ has default parameters that are listed in the `params.config` file. We can then either change the values in the file directly, or add those flags to the command you're using directly. Also, note that there are variables with a single dash "-" and others with two dashes "--". The single dashes are internal to nextflow and include parameters/flags/variables like "-profile" and "-resume". The profile flag will not change if you're using conda as instructed above, and the "-resume" flag can be added to commands when the initial run failed for some reason and you want to try picking up where it left off. Otherwise, the majority of important variables will be denoted by two dashes "--". We'll go over all the parameters used by AMR++ which we'll either change in the command or by modifying the `params.config` file.  
+## Step 1: Quality Assessment (eval_qc)
 
-Nextflow prioritizes:
-1. whatever flags you include in the command
-2. The default paramaters in `params.config`
-3. Other variable calls within AMR++
+**What it does:** Runs FastQC on all input reads and generates a MultiQC summary report so you can assess read quality before trimming.
 
-We'll practice changing various variables below. 
+**Input:** Raw paired-end FASTQ files  
+**Output:** `AMR++_results/QC_analysis/FastQC/` and `AMR++_results/QC_analysis/MultiQC_stats/multiqc_report.html`
 
-First, let's look at the defaults:
 ```bash
-less params.config 
+nextflow run main_AMR++.nf \
+    -profile local \
+    --pipeline eval_qc \
+    --reads "data/raw/*_R{1,2}.fastq.gz" \
+    --output AMR++_results
 ```
 
-For example, you can see which `--reads` are being analyzed by default and their location. We'll talk about each set of relevant variables as we go along.  
-
-# AMR++ components
-
-If the demo above completed succesfully, we are now ready run each component of the AMR++ pipeline by changing the `--pipeline` flag. Here is the list of pipelines included in AMR++. 
-
-    Available pipelines:
-        - demo: Run a demonstration of AMR++
-        - standard_AMR: Run the standard AMR++ pipeline
-        - fast_AMR: Run the fast AMR++ pipeline without host removal.
-        - standard_AMR_wKraken: Run the standard AMR++ pipeline with Kraken
-    Available pipeline subworkflows:
-        - eval_qc: Run FastQC analysis
-        - trim_qc: Run trimming and quality control
-        - rm_host: Remove host reads
-        - resistome: Perform resistome analysis
-        - align: Perform alignment to MEGARes database
-        - kraken: Perform Kraken analysis
-        - qiime2: Perform QIIME 2 analysis
-        - bam_resistome: Perform resistome analysis on BAM files
-
-    To run a specific pipeline/subworkflow, use the "--pipeline" option followed by the pipeline name:
-        nextflow run main_AMR++.nf --pipeline <pipeline_name> [other_options]
-
-# Run the eval_qc pipeline
-
-Input files for `--pipeline eval_qc`:
-* sample reads (`--reads`) (by default `--reads` = ${baseDir}/data/raw/*_R{1,2}.fastq.gz)
-
-Output files:
-* FastQC results for each sample
-* MultiQC report with aggregated results
-
-## Run first pipeline, eval_qc
-
-For this subworkflow, we'll just specify the "--pipeline" flag and add the "--output" flag to name the output folder. 
-
+**Explore the results:**
 ```bash
-nextflow run main_AMR++.nf --pipeline eval_qc --output AMR++_results 
-```
-
-
-## Explore QC results
-```bash
-ls AMR++_results/
-ls AMR++_results/QC_analysis/
 ls AMR++_results/QC_analysis/FastQC/
-ls AMR++_results/QC_analysis/FastQC/*
+# Download and open multiqc_report.html in a browser to review quality across all samples
 ```
 
-Now, let's look at the multiQC results which aggregates all these files into a single report.
-
-# Run trim_qc pipeline
-
-Input files for trim_qc:
-* sample reads (`--reads` = ${baseDir}/data/raw/*_R{1,2}.fastq.gz)
-
-Relevant default parameters:
-* `--adapters` = "${baseDir}/data/adapters/nextera.fa"
-* `--leading` = 3
-* `--trailing` = 3
-* `--slidingwindow` = "4:15"
-* `--minlen = 36`
-
-Output files:
-* Trimmed reads
-
-## trim_qc command
+**When done:** Review the MultiQC report. Look for adapter contamination, low-quality tails, or unusual GC content — these inform your trimming parameters in Step 2.
 
 ```bash
-nextflow run main_AMR++.nf --pipeline trim_qc --output AMR++_results
+# Safe to delete the work directory after confirming output
+rm -rf work/
 ```
 
+---
 
-### Download trimmomatic.stats file and open on excel
-```bash
-ls AMR++_results/QC_trimming/
+## Step 2: Quality Trimming (trim_qc)
 
-ls AMR++_results/Results/Stats/
-```
+**What it does:** Runs Trimmomatic to remove adapter sequences and low-quality bases from reads.
 
-Don't forget to delete the "work" directory.
+**Input:** Raw paired-end FASTQ files  
+**Output:**
+- `AMR++_results/QC_trimming/Paired/` — trimmed paired reads (`*.1P.fastq.gz`, `*.2P.fastq.gz`)
+- `AMR++_results/QC_trimming/Unpaired/` — reads whose pair was discarded
+- `AMR++_results/Results/Stats/trimmomatic.stats` — read counts before/after trimming
 
-```bash
-rm -r work/
-```
+**Default trimming parameters** (adjust in `params.config` or on the command line as needed):
 
-### Now, we'll talk about removing contaminant host DNA
-
-
----------------------
-
-# Run host removal pipeline
-
-
-Input files for `--pipeline rm_host` (need to change):
-* QC trimmed reads (by default `--reads` = ${baseDir}/data/raw/*_R{1,2}.fastq.gz)
-
-Relevant default parameters:
-* `--host` = "${baseDir}/data/host/chr21.fasta.gz"
-
-Output files:
-* Non-host reads
-
-
-## rm_host command
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `--adapters` | nextera.fa | Adapter sequences to remove |
+| `--leading` | 3 | Minimum quality for leading bases |
+| `--trailing` | 3 | Minimum quality for trailing bases |
+| `--slidingwindow` | 4:15 | Window size : required average quality |
+| `--minlen` | 36 | Minimum read length after trimming |
 
 ```bash
-nextflow run main_AMR++.nf --pipeline rm_host --output AMR++_results --reads "AMR++_results/QC_trimming/Paired/*{1,2}P.fastq.gz"
+nextflow run main_AMR++.nf \
+    -profile local \
+    --pipeline trim_qc \
+    --reads "data/raw/*_R{1,2}.fastq.gz" \
+    --output AMR++_results
 ```
 
-### Evaluate rm_host results
+**Inspect results:**
+```bash
+ls AMR++_results/QC_trimming/Paired/
+cat AMR++_results/Results/Stats/trimmomatic.stats
+```
+
+```bash
+rm -rf work/
+```
+
+---
+
+## Step 2.5 (Optional): Read Deduplication (dedup)
+
+**What it does:** Uses seqkit to remove exact duplicate reads by sequence. We recommend this step for **target-enriched sequencing data** (e.g., probe-based capture), where PCR duplicates are more prevalent. For standard shotgun metagenomics, this step is typically skipped.
+
+**Input:** QC-trimmed paired reads  
+**Output:** `AMR++_results/Deduped_reads/` — deduplicated reads (`*_R1.dedup.fastq.gz`, `*_R2.dedup.fastq.gz`)
+
+> **Note:** Deduplication runs on R1 and R2 independently. A read pair is removed if R1 is an exact duplicate of another R1. See the [Analysis Recommendations](Analysis_recommendations.md) for more context.
+
+```bash
+nextflow run main_AMR++.nf \
+    -profile local \
+    --pipeline dedup \
+    --reads "AMR++_results/QC_trimming/Paired/*{1,2}P.fastq.gz" \
+    --output AMR++_results
+```
+
+**Inspect results:**
+```bash
+ls AMR++_results/Deduped_reads/
+```
+
+```bash
+rm -rf work/
+```
+
+---
+
+## Step 3: Host Read Removal (rm_host)
+
+**What it does:** Aligns reads against the host genome using BWA. Reads that map to the host are discarded; unmapped reads are kept for downstream analysis.
+
+**Input:** QC-trimmed (or deduped) paired reads  
+**Output:**
+- `AMR++_results/HostRemoval/NonHostFastq/` — non-host reads (`*.non.host.R1.fastq.gz`, `*.non.host.R2.fastq.gz`)
+- `AMR++_results/Results/Stats/host.removal.stats` — read counts before/after removal
+
+**Parameters to set:**
+
+| Parameter | Description |
+|-----------|-------------|
+| `--host` | Path to your host genome FASTA. For bovine on Grace HPRC: `/scratch/group/big_scratch/SHARED_resources/host_genome/GCF_002263795.3_ARS-UCD2.0_genomic.fna` |
+| `--reads` | Point to trimmed reads (or deduped reads if you ran Step 2.5) |
+
+```bash
+# Using QC-trimmed reads
+nextflow run main_AMR++.nf \
+    -profile local \
+    --pipeline rm_host \
+    --reads "AMR++_results/QC_trimming/Paired/*{1,2}P.fastq.gz" \
+    --host /path/to/host_genome.fasta \
+    --output AMR++_results
+
+# OR using deduped reads (if you ran Step 2.5)
+nextflow run main_AMR++.nf \
+    -profile local \
+    --pipeline rm_host \
+    --reads "AMR++_results/Deduped_reads/*R{1,2}.dedup.fastq.gz" \
+    --host /path/to/host_genome.fasta \
+    --output AMR++_results
+```
+
+**Inspect results:**
 ```bash
 ls AMR++_results/HostRemoval/NonHostFastq/
-ls AMR++_results/Results/Stats/
+cat AMR++_results/Results/Stats/host.removal.stats
 ```
 
-Don't forget to delete the "work" directory.
-
 ```bash
-rm -r work/
-```
---------------------
-
-
-# Run resistome pipeline
-
-Input files for `--pipeline resistome`:
-* `--reads`
-* `--amr` = "${baseDir}/data/amr/megares_database_v3.00.fasta"
-* `--annotation` = "${baseDir}/data/amr/megares_annotations_v3.00.csv"
-
-Relevant default parameters:
-* `--threshold` = 80
-* `--min` = 5
-* `--max` = 100
-* `--skip` = 5
-* `--samples` = 1
-
-Optional parameters:
-* `--snp` = "N"
-* `--deduped` = "N"
-
-Output files:
-* Resistome analytic count matrix 
-* Rarefaction analysis and plot
-
-## resistome commmand
-
-```bash
-nextflow run main_AMR++.nf --pipeline resistome --output AMR++_results --reads "AMR++_results/HostRemoval/NonHostFastq/*R{1,2}.fastq.gz"
+rm -rf work/
 ```
 
-## Evalute resistome results
+---
+
+## Step 4: Resistome Analysis (resistome)
+
+**What it does:** Aligns reads to the MEGARes antimicrobial resistance gene database using BWA. Generates count matrices at multiple annotation levels (Type, Class, Mechanism, Group, Gene), with optional SNP confirmation and deduplication of alignments.
+
+**Input:** Non-host FASTQ files from Step 3  
+**Output:**
+- `AMR++_results/Results/AMR_analytic_matrix.csv` — standard count matrix
+- `AMR++_results/Results/SNPconfirmed_AMR_analytic_matrix.csv` — SNP-confirmed counts (if `--snp Y`)
+- `AMR++_results/Results/dedup_AMR_analytic_matrix.csv` — deduplicated counts (if `--deduped Y`)
+- `AMR++_results/ResistomeAnalysis/ResistomeCounts/` — per-sample count files
+
+**Key parameters:**
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `--threshold` | 0 | Gene fraction threshold. We recommend 0 and aggregating to Group level for analysis |
+| `--snp` | N | Set to `Y` to enable SNP confirmation for relevant genes |
+| `--deduped` | N | Set to `Y` to also output deduplicated alignment counts |
+
 ```bash
-ls AMR++_results/ResistomeAnalysis/
-ls AMR++_results/ResistomeAnalysis/Rarefaction/Figures/
+nextflow run main_AMR++.nf \
+    -profile local \
+    --pipeline resistome \
+    --reads "AMR++_results/HostRemoval/NonHostFastq/*R{1,2}.fastq.gz" \
+    --snp Y \
+    --deduped Y \
+    --output AMR++_results
+```
+
+**Inspect results:**
+```bash
 ls AMR++_results/Results/
+head AMR++_results/Results/AMR_analytic_matrix.csv
+wc -l AMR++_results/Results/AM*  # compare row counts across output matrices
 ```
-
-
-----
-# Run kraken pipeline
-
-Input files for `--pipeline rm_host`:
-* QC trimmed, nonhost sample reads (by default `--reads` = ${baseDir}/data/raw/*_R{1,2}.fastq.gz) 
-* `--kraken_db` = null
-
-Relevant default parameters:
-* `--kraken_confidence` = 0.0
-
-Output files:
-* Kraken raw output
-* Kraken classification reports
-* Aggregated kraken results for all samples
-
-## kraken command
-
-```bash 
-nextflow run main_AMR++.nf --pipeline kraken --output AMR++_results --reads "AMR++_results/HostRemoval/NonHostFastq/*R{1,2}.fastq.gz" --kraken_db "/scratch/group/vero_research/databases/kraken2/PlusPF_8/"
-```
-
-## Inspect kraken results
 
 ```bash
-ls 
+rm -rf work/
 ```
-Don't forget to delete the "work" directory.
+
+---
+
+## Step 5 (Optional): Microbiome Analysis (kraken)
+
+**What it does:** Classifies non-host reads taxonomically using Kraken2 and generates a wide-format count matrix across all samples.
+
+**Input:** Non-host FASTQ files from Step 3  
+**Output:**
+- `AMR++_results/MicrobiomeAnalysis/Kraken/` — per-sample raw and report files
+- `AMR++_results/Results/kraken_analytic_matrix.csv` — aggregated taxonomic matrix
+
+**Parameters to set:**
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `--kraken_db` | null | Path to your Kraken2 database directory |
+| `--kraken_confidence` | 0.0 | Classification confidence threshold (0–1). Higher values = fewer but more confident classifications |
+
+> **Memory note:** Kraken2 loads the entire database into RAM by default. For a large database (e.g., core_nt, ~200+ GB), ensure you are running with a SLURM `xlarge` label or equivalent memory allocation. See [Running with SLURM](Running_with_SLURM.md).
 
 ```bash
-rm -r work/
+nextflow run main_AMR++.nf \
+    -profile local \
+    --pipeline kraken \
+    --reads "AMR++_results/HostRemoval/NonHostFastq/*R{1,2}.fastq.gz" \
+    --kraken_db /path/to/kraken_db \
+    --output AMR++_results
 ```
 
-----
-# Effect of changing important parameters
+**Inspect results:**
+```bash
+head AMR++_results/Results/kraken_analytic_matrix.conf_0.0.csv
+head AMR++_results/Results/unclassifieds_kraken_analytic_matrix.conf_0.0.csv
+```
 
-Finally, let's explore how changing some of these parameters could affect our results. The two main examples are the `--threshold` flag which controls the gene fraction threshold in the resistome analysis, and the `--kraken_confidence` flag which controls how kraken classifies reads. 
+**Effect of confidence threshold:**
+```bash
+# Compare classification rates at different confidence levels
+nextflow run main_AMR++.nf \
+    -profile local \
+    --pipeline kraken \
+    --reads "AMR++_results/HostRemoval/NonHostFastq/*R{1,2}.fastq.gz" \
+    --kraken_db /path/to/kraken_db \
+    --kraken_confidence 0.5 \
+    --output AMR++_results
 
-
-## Resistome 
-
-We can rename the original reistome output AMR_analytic_matrix.csv to AMR_analytic_matrix_thresh80.csv to store the default results. Then, we can run the analysis again using a lower threshold. 
+head AMR++_results/Results/unclassifieds_kraken_analytic_matrix.conf_0.5.csv
+```
 
 ```bash
-mv AMR++_results/Results/AMR_analytic_matrix.csv AMR++_results/Results/AMR_analytic_matrix_thresh80.csv
-
-nextflow run main_AMR++.nf --pipeline resistome --output AMR++_results --reads "AMR++_results/HostRemoval/NonHostFastq/*R{1,2}.fastq.gz" --threshold 30
-
-wc -l AMR++_results/Results/AM*
+rm -rf work/
 ```
 
-Notice the increase in taxa identified with the lower threshold.
+---
 
+## Managing the Work Directory
 
-## Kraken
-Here, we can change the kraken_confidence score and run the kraken classification again. 
+As mentioned above, the `work/` directory stores all intermediate files and enables `-resume`. Here is a practical strategy for managing it:
 
 ```bash
-nextflow run main_AMR++.nf --pipeline kraken --output AMR++_results --reads "AMR++_results/HostRemoval/NonHostFastq/*R{1,2}.fastq.gz" --kraken_db "/scratch/group/vero_research/databases/kraken2/PlusPF_8/" --kraken_confidence 1
+# Check how large the work directory has grown
+du -sh work/
 
-head AMR++_results/Results/unclassifieds_kraken_analytic_matrix.conf_*
+# Delete it safely after a step completes successfully
+rm -rf work/
+
+# Redirect to a scratch drive with more space
+nextflow run main_AMR++.nf -profile local --pipeline trim_qc \
+    --reads "data/raw/*_R{1,2}.fastq.gz" \
+    -w /scratch/$USER/nf_work_trim
 ```
 
-Notice the major change in results, with a confidence of 1 leading to 100% unclassified reads.
+If a step fails partway through, use `-resume` to pick up where it left off (the work directory must still exist):
+
+```bash
+nextflow run main_AMR++.nf -profile local --pipeline rm_host \
+    --reads "AMR++_results/QC_trimming/Paired/*{1,2}P.fastq.gz" \
+    --host /path/to/host_genome.fasta \
+    --output AMR++_results \
+    -resume
+```
+
+---
+
+## Effect of Key Parameters
+
+### Gene Fraction Threshold
+
+The `--threshold` parameter controls the minimum fraction of a gene that must be covered by alignments for it to be counted. The default is 0 (count all alignments). We recommend keeping this at 0 and instead aggregating your count matrix to the **Group** level during statistical analysis to account for cross-mapping between closely related genes.
+
+```bash
+# Compare results at different thresholds
+nextflow run main_AMR++.nf --pipeline resistome \
+    --reads "AMR++_results/HostRemoval/NonHostFastq/*R{1,2}.fastq.gz" \
+    --threshold 80 --output AMR++_thresh80_results
+
+wc -l AMR++_results/Results/AMR_analytic_matrix.csv
+wc -l AMR++_thresh80_results/Results/AMR_analytic_matrix.csv
+```
+
+### Kraken Confidence
+
+```bash
+# A confidence of 1.0 will classify almost nothing — useful to see extreme
+head AMR++_results/Results/unclassifieds_kraken_analytic_matrix.conf_1.0.csv
+```
+
+See [Analysis Recommendations](Analysis_recommendations.md) for guidance on interpreting these results.
