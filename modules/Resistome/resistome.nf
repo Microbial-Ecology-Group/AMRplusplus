@@ -284,11 +284,11 @@ process runsnp {
         mv ${bam} ${sample_id}.bam
     fi
 
-    python3 SNP_Verification.py -c config.ini -t ${threads} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all --count_matrix_final ${sample_id}_SNPconfirmed_${prefix}_matrix.csv
+    python3 SNP_Verification.py -c config.ini -t ${threads} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all
 
     python3 $baseDir/bin/extract_snp_column.py \
       --sample-id "${sample_id}" \
-      --matrix ${sample_id}.${prefix}_SNPs/${sample_id}_SNPconfirmed_${prefix}_matrix.csv \
+      --matrix ${sample_id}.${prefix}_SNPs/"${sample_id}.${prefix}_SNPs${snp_count_matrix}" \
       --out-tsv "${sample_id}.SNP_confirmed_gene.tsv"
     """
 }
