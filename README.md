@@ -32,6 +32,7 @@ Brief overview:
 More Information
 ----------------
 
+- [Getting Started](docs/GettingStarted.md)
 - [Installation](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/installation.md)
 - [Usage](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/usage.md)
   - [Choosing the right pipeline](docs/choosing_pipeline.md)
@@ -116,7 +117,9 @@ Here are some tutorials to run each analysis step by step:
 
 - [Paired-end analysis step-by-step](docs/Step_by_step_tutorial.md)
 - [Single-end analysis step-by-step](docs/SingleEnd_read_tutorial.md)
-- [Merged-read analysis step-by-step](docs/Merged_read_tutorial.md) 
+- [Merged-read analysis step-by-step](docs/Merged_read_tutorial.md)
+
+> **Tip:** Always run the demo first (`--pipeline demo`) before your first analysis. See [Getting Started](docs/GettingStarted.md) for an explanation of the work directory, SLURM setup, and conda vs local profiles.
 
 
 # Optional flags
