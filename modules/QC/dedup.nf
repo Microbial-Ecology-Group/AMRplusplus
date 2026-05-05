@@ -1,3 +1,5 @@
+clumpify_mem_gb = params.clumpify_mem_gb
+
 process PE_DeduplicateReadsSeqkit {
     tag   { sample_id }
     label "medium"
@@ -119,8 +121,10 @@ process PE_DeduplicateReadsClumpify {
         path("${sample_id}.dedupe_clumpify.stats.log"), emit: dedupe_stats
 
     script:
-    // Reserve ~75% of allocated memory for the JVM heap
-    def jvm_mem = (task.memory.toGiga() * 0.75).intValue()
+    // Reserve ~75% of allocated memory for the JVM heap, use "clumpify_mem_gb" variable 
+    // or default to 8gb
+    def mem_gb = task.memory ? (task.memory.toGiga() * 0.75).intValue() 
+                         : (params.clumpify_mem_gb ?: 8)
     """
     clumpify.sh \
         -Xmx${jvm_mem}g \
@@ -154,7 +158,10 @@ process PE_DeduplicateMergedReadsClumpify {
         path("${sample_id}.dedupe_clumpify.stats.log"),      emit: dedupe_stats
 
     script:
-    def jvm_mem = (task.memory.toGiga() * 0.75).intValue()
+    // Reserve ~75% of allocated memory for the JVM heap, use "clumpify_mem_gb" variable 
+    // or default to 8gb
+    def mem_gb = task.memory ? (task.memory.toGiga() * 0.75).intValue() 
+                         : (params.clumpify_mem_gb ?: 8)
     """
     # Merged reads: SE-like, deduplicate independently
     clumpify.sh \
@@ -196,7 +203,10 @@ process SE_DeduplicateReadsClumpify {
         path("${sample_id}.dedupe_clumpify.stats.log"),      emit: dedupe_stats
 
     script:
-    def jvm_mem = (task.memory.toGiga() * 0.75).intValue()
+    // Reserve ~75% of allocated memory for the JVM heap, use "clumpify_mem_gb" variable 
+    // or default to 8gb
+    def mem_gb = task.memory ? (task.memory.toGiga() * 0.75).intValue() 
+                         : (params.clumpify_mem_gb ?: 8)
     """
     clumpify.sh \
         -Xmx${jvm_mem}g \
