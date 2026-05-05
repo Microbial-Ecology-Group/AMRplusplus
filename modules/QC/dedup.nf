@@ -123,7 +123,7 @@ process PE_DeduplicateReadsClumpify {
     script:
     // Reserve ~75% of allocated memory for the JVM heap, use "clumpify_mem_gb" variable 
     // or default to 8gb
-    def mem_gb = task.memory ? (task.memory.toGiga() * 0.75).intValue() 
+    def jvm_mem = task.memory ? (task.memory.toGiga() * 0.75).intValue() 
                          : (params.clumpify_mem_gb ?: 8)
     """
     clumpify.sh \
@@ -160,7 +160,7 @@ process PE_DeduplicateMergedReadsClumpify {
     script:
     // Reserve ~75% of allocated memory for the JVM heap, use "clumpify_mem_gb" variable 
     // or default to 8gb
-    def mem_gb = task.memory ? (task.memory.toGiga() * 0.75).intValue() 
+    def jvm_mem = task.memory ? (task.memory.toGiga() * 0.75).intValue() 
                          : (params.clumpify_mem_gb ?: 8)
     """
     # Merged reads: SE-like, deduplicate independently
@@ -205,7 +205,7 @@ process SE_DeduplicateReadsClumpify {
     script:
     // Reserve ~75% of allocated memory for the JVM heap, use "clumpify_mem_gb" variable 
     // or default to 8gb
-    def mem_gb = task.memory ? (task.memory.toGiga() * 0.75).intValue() 
+    def jvm_mem = task.memory ? (task.memory.toGiga() * 0.75).intValue() 
                          : (params.clumpify_mem_gb ?: 8)
     """
     clumpify.sh \

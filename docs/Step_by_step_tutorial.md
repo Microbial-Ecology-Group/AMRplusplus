@@ -126,12 +126,12 @@ rm -rf work/
 
 ## Step 2.5 (Optional): Read Deduplication (dedup)
 
-**What it does:** Uses seqkit to remove exact duplicate reads by sequence. We recommend this step for **target-enriched sequencing data** (e.g., probe-based capture), where PCR duplicates are more prevalent. For standard shotgun metagenomics, this step is typically skipped.
+**What it does:** Uses bbmap's clumpify to remove exact duplicate reads by sequence. We recommend this step for **target-enriched sequencing data** (e.g., probe-based capture), where PCR duplicates are more prevalent. For standard shotgun metagenomics, this step is typically skipped.
 
 **Input:** QC-trimmed paired reads  
 **Output:** `AMR++_results/Deduped_reads/` — deduplicated reads (`*_R1.dedup.fastq.gz`, `*_R2.dedup.fastq.gz`)
 
-> **Note:** Deduplication runs on R1 and R2 independently. A read pair is removed if R1 is an exact duplicate of another R1. See the [Analysis Recommendations](Analysis_recommendations.md) for more context.
+> **Note:** Deduplication runs on R1 and R2 together. A read pair is removed if R1 and R1 is an exact duplicate of another R1 + R2 pair. See the [Analysis Recommendations](Analysis_recommendations.md) for more context.
 
 ```bash
 nextflow run main_AMR++.nf \

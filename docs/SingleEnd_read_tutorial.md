@@ -130,7 +130,7 @@ rm -rf work/
 
 ## Step 2.5 (Optional): Read Deduplication (se_dedup)
 
-**What it does:** Uses seqkit to remove exact duplicate reads by sequence. Recommended for **target-enriched sequencing data** (probe-based capture) where PCR duplicates are common.
+**What it does:** Uses bbmap's clumpify to remove exact duplicate reads by sequence. Recommended for **target-enriched sequencing data** (probe-based capture) where PCR duplicates are common.
 
 **Input:** QC-trimmed single-end reads  
 **Output:** `SE_AMR++_results/Deduped_reads/` — deduplicated reads (`*.dedup.fastq.gz`)

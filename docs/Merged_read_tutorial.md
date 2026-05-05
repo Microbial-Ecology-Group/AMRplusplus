@@ -2,7 +2,7 @@
 
 This tutorial covers the AMR++ workflow for paired-end reads that are merged using FLASH before analysis. The merged-read approach is useful for amplicon or short-insert libraries where a significant proportion of R1 and R2 reads overlap and can be joined into a single longer fragment. Both the merged (overlapping) and unmerged (non-overlapping) reads are carried through the pipeline separately and combined at the results stage.
 
-> **Before you start:** Make sure you have run the demo at least once from a login node (`nextflow run main_AMR++.nf -profile local --pipeline demo`). This installs the SNP confirmation software and verifies your environment. Your conda environment must also include FLASH and seqKit — if you installed the AMR++ environment from `envs/AMR++_env.yaml`, these are already included. See [Getting Started](GettingStarted.md) for details.
+> **Before you start:** Make sure you have run the demo at least once from a login node (`nextflow run main_AMR++.nf -profile local --pipeline demo`). This installs the SNP confirmation software and verifies your environment. Your conda environment must also include FLASH and bbmap's clumpify — if you installed the AMR++ environment from `envs/AMR++_env.yaml`, these are already included. See [Getting Started](GettingStarted.md) for details.
 
 ## Table of Contents
 
@@ -38,10 +38,10 @@ module load Anaconda3/2024.02-1
 conda activate AMR++_env
 ```
 
-Confirm that FLASH and seqKit are available:
+Confirm that FLASH and bbmap's clumpify are available:
 ```bash
 flash --version
-seqkit version
+bbmap's clumpify version
 nextflow -version
 ```
 
@@ -122,7 +122,7 @@ rm -rf work/
 
 ## Step 2.5 (Optional): Read Deduplication (dedup)
 
-**What it does:** Uses seqkit to remove exact duplicate reads by sequence. Recommended for **target-enriched sequencing data**. This step is run on the trimmed paired-end reads *before* merging.
+**What it does:** Uses bbmap's clumpify to remove exact duplicate reads by sequence. Recommended for **target-enriched sequencing data**. This step is run on the trimmed paired-end reads *before* merging.
 
 **Input:** QC-trimmed paired reads  
 **Output:** `Merged_AMR++_results/Deduped_reads/`
