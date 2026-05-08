@@ -288,7 +288,7 @@ process runsnp {
 
     python3 $baseDir/bin/extract_snp_column.py \
       --sample-id "${sample_id}" \
-      --matrix ${sample_id}.${prefix}_SNPs/"${sample_id}.${prefix}_SNPs${snp_count_matrix}" \
+      --matrix ${sample_id}.${prefix}_SNPs/"${sample_id}.${prefix}_SNPs_${snp_count_matrix}" \
       --out-tsv "${sample_id}.SNP_confirmed_gene.tsv"
     """
 }
