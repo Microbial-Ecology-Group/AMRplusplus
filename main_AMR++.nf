@@ -214,10 +214,10 @@ include { STANDARD_AMRplusplus_wKraken } from './subworkflows/AMR++_standard_wKr
 // Load merged read workflows
 include { STANDARD_merged_AMRplusplus } from './subworkflows/AMR++_merged_standard.nf'
 include { STANDARD_merged_AMRplusplus_wKraken } from './subworkflows/AMR++_merged_standard_wKraken.nf'
-include { FASTQ_MERGE_WF } from "$baseDir/subworkflows/fastq_merging.nf"
-include { MERGED_FASTQ_RM_HOST_WF } from "$baseDir/subworkflows/fastq_host_removal.nf" 
-include { MERGED_FASTQ_RESISTOME_WF } from "$baseDir/subworkflows/fastq_resistome.nf"
-include { MERGED_FASTQ_KRAKEN_WF } from "$baseDir/subworkflows/fastq_microbiome.nf"
+include { FASTQ_MERGE_WF } from './subworkflows/fastq_merging.nf'
+include { MERGED_FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf' 
+include { MERGED_FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
+include { MERGED_FASTQ_KRAKEN_WF } from './subworkflows/fastq_microbiome.nf'
 
 // Load SE read workflows
 include { SE_AMRplusplus } from './subworkflows/AMR++_SE_standard.nf'
