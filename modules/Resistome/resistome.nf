@@ -68,10 +68,10 @@ process runresistome {
     set -euo pipefail
 
     # Check if BAM has any alignments
-    aln_count=\$(${SAMTOOLS} view -c ${bam} 2>/dev/null || echo 0)
+    aln_count=\$(\$SAMTOOLS view -c ${bam} 2>/dev/null || echo 0)
 
     if [ "\$aln_count" -gt 0 ]; then
-        ${SAMTOOLS} view -h ${bam} > ${sample_id}.sam
+        \$SAMTOOLS view -h ${bam} > ${sample_id}.sam
 
         $resistome -ref_fp ${amr} \\
           -annot_fp ${annotation} \\
@@ -108,7 +108,7 @@ process resistomeresults {
         path("${params.prefix}_analytic_matrix.csv"), emit: snp_count_matrix, optional: true
     script:
     """
-    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ${params.prefix}_analytic_matrix.csv
+    ${\$PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ${params.prefix}_analytic_matrix.csv
     """
 }
 
@@ -135,10 +135,10 @@ process runrarefaction {
     """
     set -euo pipefail
 
-    aln_count=\$(${SAMTOOLS} view -c ${bam} 2>/dev/null || echo 0)
+    aln_count=(\$SAMTOOLS view -c ${bam} 2>/dev/null || echo 0)
 
     if [ "\$aln_count" -gt 0 ]; then
-        ${SAMTOOLS} view -h ${bam} > ${sample_id}.sam
+        \$SAMTOOLS view -h ${bam} > ${sample_id}.sam
 
         $rarefaction \\
           -ref_fp ${amr} \\
@@ -217,9 +217,9 @@ process old_runsnp {
         mv ${bam} ${sample_id}.bam
     fi
 
-    python3 SNP_Verification.py -c config.ini -t ${task.cpus} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all
+    \$PYTHON3 SNP_Verification.py -c config.ini -t ${task.cpus} -a true -i ${sample_id}.bam -o ${sample_id}.${params.prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all
 
-    python3 $baseDir/bin/extract_snp_column.py \
+    \$PYTHON3 $baseDir/bin/extract_snp_column.py \
       --sample-id "${sample_id}" \
       --matrix "${sample_id}.${params.prefix}_SNPs${snp_count_matrix}" \
       --out-tsv "${sample_id}.SNP_confirmed_gene.tsv"
@@ -242,9 +242,9 @@ process runsnp {
 
     output:
         path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
-        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_SNPs_resistant_reads.txt") , optional: true
-        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_snp_coverage_stats.csv")
-        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_snp_verification_summary.csv")
+        path("${sample_id}.${params.prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_SNPs_resistant_reads.txt") , optional: true
+        path("${sample_id}.${params.prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_snp_coverage_stats.csv")
+        path("${sample_id}.${params.prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_snp_verification_summary.csv")
     script:
     """
     cp -rsa $baseDir/bin/AmrPlusPlus_SNP/* .
@@ -254,11 +254,11 @@ process runsnp {
         mv ${bam} ${sample_id}.bam
     fi
 
-    python3 SNP_Verification.py -c config.ini -t ${task.cpus} -a true -i ${sample_id}.bam -o ${sample_id}.${params.prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all
+    \$PYTHON3 SNP_Verification.py -c config.ini -t ${task.cpus} -a true -i ${sample_id}.bam -o ${sample_id}.${params.prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all
 
-    python3 $baseDir/bin/extract_snp_column.py \
+    \$PYTHON3 $baseDir/bin/extract_snp_column.py \
       --sample-id "${sample_id}" \
-      --matrix ${sample_id}.${prefix}_SNPs/"${sample_id}.${params.prefix}_SNPs_${snp_count_matrix}" \
+      --matrix ${sample_id}.${params.prefix}_SNPs/"${sample_id}.${params.prefix}_SNPs_${snp_count_matrix}" \
       --out-tsv "${sample_id}.SNP_confirmed_gene.tsv"
     """
 }
@@ -278,7 +278,7 @@ process snpresults {
 
     script:
     """
-    ${PYTHON3} $baseDir/bin/snp_long_to_wide.py -i ${snp_counts} -o SNPconfirmed_${prefix}_analytic_matrix.csv
+    ${\$PYTHON3} $baseDir/bin/snp_long_to_wide.py -i ${snp_counts} -o SNPconfirmed_${prefix}_analytic_matrix.csv
     """
 }
 

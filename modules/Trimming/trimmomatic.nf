@@ -1,5 +1,3 @@
-include {adapter_error} from './modules/nf-functions.nf'
-
 process runqc {
     tag { sample_id }
     label "micro_long"
@@ -20,7 +18,7 @@ process runqc {
         path("${sample_id}.trimmomatic.stats.log"), emit: trimmomatic_stats
    script:
     """
-     ${TRIMMOMATIC} \
+     \$TRIMMOMATIC \
       PE \
       -threads ${task.cpus} \
       ${reads[0]} ${reads[1]} ${sample_id}.1P.fastq.gz ${sample_id}.1U.fastq.gz ${sample_id}.2P.fastq.gz ${sample_id}.2U.fastq.gz \
@@ -52,7 +50,7 @@ process runqc_se {
 
   script:
   """
-  ${TRIMMOMATIC} \
+  \$TRIMMOMATIC \
     SE \
     -threads ${task.cpus} \
     -summary ${sample_id}.trimmomatic.summary.txt \
@@ -85,7 +83,7 @@ process QCstats {
 
    script:
     """
-    ${PYTHON3} $baseDir/bin/trimmomatic_stats.py -i ${stats} -o trimmomatic.stats
+    \$PYTHON3 $baseDir/bin/trimmomatic_stats.py -i ${stats} -o trimmomatic.stats
     """
 }
 

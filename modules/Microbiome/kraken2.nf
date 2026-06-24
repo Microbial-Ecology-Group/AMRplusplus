@@ -48,7 +48,7 @@ process runkraken {
     script:
     def opts = (params.kraken_options instanceof List) ? params.kraken_options.join(' ') : (params.kraken_options ?: '')
      """
-     ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${params.kraken_confidence} --paired ${reads[0]} ${reads[1]} --threads ${task.cpus} --report ${sample_id}.conf_${params.kraken_confidence}.kraken.report > ${sample_id}.conf_${params.kraken_confidence}.kraken.raw
+     \$KRAKEN2 --db ${krakendb} ${opts} --confidence ${params.kraken_confidence} --paired ${reads[0]} ${reads[1]} --threads ${task.cpus} --report ${sample_id}.conf_${params.kraken_confidence}.kraken.report > ${sample_id}.conf_${params.kraken_confidence}.kraken.raw
 
      cut -f 2,3  ${sample_id}.conf_${params.kraken_confidence}.kraken.raw > ${sample_id}.conf_${params.kraken_confidence}.kraken.krona
     """
@@ -100,7 +100,7 @@ process runkraken_merged {
 
     # ── merged reads ───────────────────────────────────────────────
     if has_reads ${merged}; then
-        ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${params.kraken_confidence} \\
+        \$KRAKEN2 --db ${krakendb} ${opts} --confidence ${params.kraken_confidence} \\
                    --threads ${task.cpus} \\
                    --report ${sample_id}.merged.kraken.report \\
                    ${merged} \\
@@ -112,7 +112,7 @@ process runkraken_merged {
 
     # ── unmerged reads ─────────────────────────────────────────────
     if has_reads ${unmerged}; then
-        ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${params.kraken_confidence} \\
+        \$KRAKEN2 --db ${krakendb} ${opts} --confidence ${params.kraken_confidence} \\
                    --threads ${task.cpus} \\
                    --report ${sample_id}.unmerged.kraken.report \\
                    ${unmerged} \\
@@ -154,7 +154,7 @@ process runkraken_se {
     script:
     def opts = (params.kraken_options instanceof List) ? params.kraken_options.join(' ') : (params.kraken_options ?: '')
     """
-    ${KRAKEN2} --db ${krakendb} ${opts} \
+    \$KRAKEN2 --db ${krakendb} ${opts} \
                --confidence ${params.kraken_confidence} \
                --threads ${task.cpus} \
                --report ${sample_id}.conf_${params.kraken_confidence}.kraken.report \
@@ -178,7 +178,7 @@ process krakenresults {
     
     script:
     """
-    ${PYTHON3} $baseDir/bin/kraken2_long_to_wide.py -i ${kraken_reports} -o kraken_analytic_matrix.conf_${params.kraken_confidence}.csv
+    \$PYTHON3 $baseDir/bin/kraken2_long_to_wide.py -i ${kraken_reports} -o kraken_analytic_matrix.conf_${params.kraken_confidence}.csv
     """
 }
 
