@@ -68,7 +68,7 @@ process runresistome {
     set -euo pipefail
 
     # Check if BAM has any alignments
-    aln_count=\$(\$SAMTOOLS view -c ${bam} 2>/dev/null || echo 0)
+    aln_count=(\$SAMTOOLS view -c ${bam} 2>/dev/null || echo 0)
 
     if [ "\$aln_count" -gt 0 ]; then
         \$SAMTOOLS view -h ${bam} > ${sample_id}.sam
@@ -108,7 +108,7 @@ process resistomeresults {
         path("${params.prefix}_analytic_matrix.csv"), emit: snp_count_matrix, optional: true
     script:
     """
-    ${\$PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ${params.prefix}_analytic_matrix.csv
+    \$PYTHON3 $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ${params.prefix}_analytic_matrix.csv
     """
 }
 
@@ -278,7 +278,7 @@ process snpresults {
 
     script:
     """
-    ${\$PYTHON3} $baseDir/bin/snp_long_to_wide.py -i ${snp_counts} -o SNPconfirmed_${prefix}_analytic_matrix.csv
+    \$PYTHON3 $baseDir/bin/snp_long_to_wide.py -i ${snp_counts} -o SNPconfirmed_${prefix}_analytic_matrix.csv
     """
 }
 

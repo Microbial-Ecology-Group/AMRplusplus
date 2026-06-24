@@ -24,7 +24,7 @@ workflow FASTQ_RESISTOME_WF {
         } else {
             resistomeanalyzer   = file("${baseDir}/bin/resistome")
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
-            amrsnp              = file("${baseDir}/bin/AmrPlusPlus_SNP/*")
+            amrsnp              = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
         }
 
         /* ------------ (2) AMR INDEX --------------------------------------- */
@@ -87,7 +87,7 @@ workflow MERGED_FASTQ_RESISTOME_WF {
         } else {
             resistomeanalyzer   = file("${baseDir}/bin/resistome")
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
-            amrsnp              = file("${baseDir}/bin/AmrPlusPlus_SNP/*")
+            amrsnp              = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
         }
 
         /* ------------ (2) AMR INDEX ------------------------------------- */
@@ -159,7 +159,7 @@ workflow FASTQ_RESISTOME_SE_WF {
         } else {
             resistomeanalyzer   = file("${baseDir}/bin/resistome")
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
-            amrsnp              = file("${baseDir}/bin/AmrPlusPlus_SNP/*")
+            amrsnp              = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
         }
 
         /* ------------ (2) AMR INDEX --------------------------------------- */

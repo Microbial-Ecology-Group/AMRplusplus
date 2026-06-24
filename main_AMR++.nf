@@ -585,7 +585,7 @@ workflow {
     //  the top level is itself a statement and is rejected by the strict
     //  parser for the same reason as everything else above.
     // =========================================================================
-    workflow.onComplete {
+    workflow.onComplete = {
         log.info """
     ===============================================================================
                             Pipeline Complete
