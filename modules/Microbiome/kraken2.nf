@@ -3,9 +3,6 @@ process dlkraken {
     tag { "downloading_kraken_db"}
     label "micro"
 
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
-
     publishDir "$baseDir/data/kraken_db/", mode: 'copy'
 
     output:
@@ -30,9 +27,6 @@ process runkraken {
            ? 'large'
            : 'xlarge'
     )
-
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     publishDir "${params.output}/MicrobiomeAnalysis", mode: 'copy',
         saveAs: { filename ->
@@ -60,7 +54,6 @@ process runkraken {
 }
 
 process runkraken_merged {
-
     tag   { sample_id }
     label (
         (
@@ -130,7 +123,6 @@ process runkraken_merged {
     """
 }
 
-
 process runkraken_se {
     tag { sample_id }
     label (
@@ -173,9 +165,6 @@ process runkraken_se {
 process krakenresults {
     tag { }
     label "micro"
-
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     publishDir "${params.output}/Results/", mode: 'copy'
 

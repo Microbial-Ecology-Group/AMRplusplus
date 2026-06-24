@@ -1,17 +1,8 @@
 include {adapter_error} from './modules/nf-functions.nf'
 
-if( params.adapters ) {
-    adapters = file(params.adapters)
-    if( !adapters.exists() ) return adapter_error(adapters)
-}
-
-
 process runqc {
     tag { sample_id }
     label "micro_long"
-
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     publishDir "${params.output}/QC_trimming", mode: 'copy', pattern: '*.fastq.gz',
         saveAs: { filename ->
@@ -78,9 +69,6 @@ process runqc_se {
 process QCstats {
     tag "Make QC summary file"
     label "small"
-
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     publishDir "${params.output}/Results", mode: 'copy',
         saveAs: { filename ->

@@ -3,9 +3,6 @@ process Qiime2Import {
     tag { }
     label "small"
 
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
-
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
     input:
@@ -28,9 +25,6 @@ process Qiime2Dada2 {
     tag { }
     label "medium"
 
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
-
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
     input:
@@ -51,9 +45,6 @@ process Qiime2Dada2 {
 process Qiime2Classify {
     tag { }
     label "medium"
-
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 

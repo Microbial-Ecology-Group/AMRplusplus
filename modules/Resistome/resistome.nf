@@ -1,17 +1,8 @@
 // Resistome
 
-if( params.annotation ) {
-    annotation = file(params.annotation)
-    if( !annotation.exists() ) return annotation_error(annotation)
-}
-
-
 process build_dependencies {
     tag "Download SNP dependencies"
     label "nano"
-
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     publishDir "${baseDir}/bin/", mode: "copy"
 
@@ -20,6 +11,7 @@ process build_dependencies {
         path("resistome"), emit: resistomeanalyzer
         path("AmrPlusPlus_SNP/*"), emit: amrsnp
 
+    script:
     """
     # Uncomment these sections once the v2 rarefactionanalyzer and resistomeanalyzer repositories are updated, remove cp lines
     #git clone https://github.com/cdeanj/rarefactionanalyzer.git
@@ -54,9 +46,6 @@ process build_dependencies {
 process runresistome {
     tag { sample_id }
     label "medium"
-
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
         saveAs: { filename ->
@@ -107,9 +96,6 @@ process runresistome {
 process resistomeresults {
     tag "Make AMR count matrix"
     label "small"
-
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
     
     publishDir "${params.output}/Results", mode: "copy"
 
@@ -120,7 +106,7 @@ process resistomeresults {
     output:
         path("${params.prefix}_analytic_matrix.csv"), emit: raw_count_matrix
         path("${params.prefix}_analytic_matrix.csv"), emit: snp_count_matrix, optional: true
-
+    script:
     """
     ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ${params.prefix}_analytic_matrix.csv
     """
@@ -129,9 +115,6 @@ process resistomeresults {
 process runrarefaction {
     tag { sample_id }
     label "small"
-
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
         saveAs: { filename ->
@@ -187,9 +170,6 @@ process plotrarefaction {
     tag "Plot rarefaction results"
     label "micro"
 
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
-
     publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
         saveAs: { filename ->
             if(filename.indexOf(".png") > 0) "Rarefaction/Figures/$filename"
@@ -203,6 +183,7 @@ process plotrarefaction {
     output:
         path("*.png"), emit: plots
 
+    script:
     """
     mkdir -p data/
     mv *.tsv data/
@@ -220,14 +201,14 @@ process old_runsnp {
                 if(filename.indexOf(".tsv") > 0) "SNP_verification_counts/$filename"
                 else "SNP_detailed_output/$filename"
             }
-    errorStrategy = 'ignore'
+
     input:
         tuple val(sample_id), path(bam)
         path(snp_count_matrix)
 
     output:
         path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
-
+    script:
     """
     cp -rsa $baseDir/bin/AmrPlusPlus_SNP/* .
 
@@ -254,7 +235,7 @@ process runsnp {
                 if(filename.indexOf(".tsv") > 0) "SNP_verification_counts/$filename"
                 else "SNP_detailed_output/$filename"
             }
-    errorStrategy = 'ignore'
+
     input:
         tuple val(sample_id), path(bam)
         path(snp_count_matrix)
@@ -264,7 +245,7 @@ process runsnp {
         path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_SNPs_resistant_reads.txt") , optional: true
         path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_snp_coverage_stats.csv")
         path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_snp_verification_summary.csv")
-
+    script:
     """
     cp -rsa $baseDir/bin/AmrPlusPlus_SNP/* .
 
@@ -285,13 +266,8 @@ process runsnp {
 process snpresults {
     tag "Make SNP-confirmed matrix"
     label "micro"
-
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
     
     publishDir "${params.output}/Results", mode: "copy"
-
-    errorStrategy = 'ignore'
 
     input:
         path(snp_counts)
@@ -300,10 +276,9 @@ process snpresults {
     output:
         path("*_analytic_matrix.csv"), emit: snp_matrix
 
+    script:
     """
-
     ${PYTHON3} $baseDir/bin/snp_long_to_wide.py -i ${snp_counts} -o SNPconfirmed_${prefix}_analytic_matrix.csv
-
     """
 }
 

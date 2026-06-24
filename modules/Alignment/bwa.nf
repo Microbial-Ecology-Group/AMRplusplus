@@ -1,22 +1,9 @@
 include { reference_error ; amr_error ; annotation_error } from './modules/nf-functions.nf'
 
 
-if( params.amr ) {
-    amr = file(params.amr)
-    if( !amr.exists() ) return amr_error(amr)
-}
-if( params.annotation ) {
-    annotation = file(params.annotation)
-    if( !annotation.exists() ) return annotation_error(annotation)
-}
-
-
 process index {
     tag "Creating bwa index"
     label "micro"
-
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     publishDir "${params.output}/Alignment/BWA_Index", mode: "copy"
 
@@ -37,9 +24,6 @@ process index {
 process bwa_align {
     tag "$pair_id"
     label "small"
-
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     publishDir "${params.output}/Alignment/BAM_files", mode: "copy",
         saveAs: { filename ->
@@ -83,12 +67,8 @@ process bwa_align {
 }
 
 process bwa_merged_align {
-
     tag   { sample_id }
     label "small"
-
-    maxRetries 3
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
 
     publishDir "${params.output}/Alignment/BAM_files", mode: 'copy',
         saveAs: { fn ->
@@ -253,9 +233,6 @@ process samtools_dedup_se {
 process bwa_rm_contaminant_fq {
     tag { pair_id }
     label "medium"
-
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3 
  
     publishDir "${params.output}/HostRemoval", mode: "copy",
         saveAs: { filename ->
@@ -271,6 +248,7 @@ process bwa_rm_contaminant_fq {
     tuple val(pair_id), path("${pair_id}.non.host.R*.fastq.gz"), emit: nonhost_reads
     path("${pair_id}.samtools.idxstats"), emit: host_rm_stats
     
+    script:
     """
     ${BWA} mem ${indexfiles[0]} ${reads[0]} ${reads[1]} -t ${task.cpus} > ${pair_id}.host.sam
     ${SAMTOOLS} view -bS ${pair_id}.host.sam | ${SAMTOOLS} sort -@ ${task.cpus} -o ${pair_id}.host.sorted.bam
@@ -294,9 +272,6 @@ process bwa_rm_contaminant_merged_fq {
 
     tag   { sample_id }
     label "medium"
-
-    maxRetries 3
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
 
     publishDir "${params.output}/HostRemoval", mode: 'copy',
         saveAs: { fn ->
@@ -399,9 +374,6 @@ process HostRemovalStats {
     tag { sample_id }
     label "micro"
 
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3 
-
     publishDir "${params.output}/Results", mode: "copy",
         saveAs: { filename ->
             if(filename.indexOf(".stats") > 0) "Stats/$filename"
@@ -413,6 +385,7 @@ process HostRemovalStats {
     output:
         path("host.removal.stats"), emit: combo_host_rm_stats
 
+    script:
     """
     ${PYTHON3} $baseDir/bin/samtools_idxstats.py -i ${host_rm_stats} -o host.removal.stats
     """
