@@ -188,7 +188,7 @@ workflow FASTQ_RESISTOME_SE_WF {
             ? samtools_dedup_se.out.dedup_bam \
             : bwa_align_se.out.bwa_bam
 
-        runresistome   ( bam_for_resistome, amr, annotation, file("${baseDir}/bin/resistome") )
+        runresistome   ( bam_for_resistome, amr, annotation, resistomeanalyzer )
         resistomeresults( runresistome.out.resistome_counts.collect(), "AMR" )
         
         if (params.rarefaction == "Y") {
