@@ -1,5 +1,3 @@
-threads = params.threads
-
 /*
  * Merge overlapping PE reads with FLASH
  * ------------------------------------------------------------
