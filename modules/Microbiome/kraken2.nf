@@ -8,6 +8,7 @@ process dlkraken {
     output:
         path("k2_minusb_20250714/"), emit: kraken_db
 
+    script:
     """
         wget https://genome-idx.s3.amazonaws.com/kraken/k2_minusb_20250714.tar.gz
         mkdir -p k2_minusb_20250714
@@ -174,7 +175,8 @@ process krakenresults {
     output:
         path("kraken_analytic_matrix.conf_${params.kraken_confidence}.csv"),              emit: kraken_matrix
         path("unclassifieds_kraken_analytic_matrix.conf_${params.kraken_confidence}.csv"), emit: kraken_unclassified
-
+    
+    script:
     """
     ${PYTHON3} $baseDir/bin/kraken2_long_to_wide.py -i ${kraken_reports} -o kraken_analytic_matrix.conf_${params.kraken_confidence}.csv
     """

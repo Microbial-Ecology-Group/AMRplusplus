@@ -18,7 +18,7 @@ process runqc {
         tuple val(sample_id), path("${sample_id}*P.fastq.gz"), emit: paired_fastq
         tuple val(sample_id), path("${sample_id}*U.fastq.gz"), emit: unpaired_fastq
         path("${sample_id}.trimmomatic.stats.log"), emit: trimmomatic_stats
-
+   script:
     """
      ${TRIMMOMATIC} \
       PE \
@@ -50,6 +50,7 @@ process runqc_se {
     path("${sample_id}.trimmomatic.stats.log"),                              emit: trimmomatic_stats    // keep if you still want the stderr log
     path("${sample_id}.trimmomatic.summary.txt"),                            emit: trimmomatic_summary  // NEW: uniform summary
 
+  script:
   """
   ${TRIMMOMATIC} \
     SE \
@@ -82,26 +83,28 @@ process QCstats {
     output:
         path("trimmomatic.stats"), emit: combo_trim_stats
 
+   script:
     """
     ${PYTHON3} $baseDir/bin/trimmomatic_stats.py -i ${stats} -o trimmomatic.stats
     """
 }
 
 process QCstats_SE {
-  tag "Make QC summary file (SE)"
-  label "small"
+    tag "Make QC summary file (SE)"
+    label "small"
 
-  publishDir "${params.output}/Results", mode: 'copy',
-    saveAs: { fn -> fn.endsWith(".stats") ? "Stats/$fn" : null }
+    publishDir "${params.output}/Results", mode: 'copy',
+       saveAs: { fn -> fn.endsWith(".stats") ? "Stats/$fn" : null }
 
-  input:
-    file(summaries)
+    input:
+      file(summaries)
 
-  output:
-    path("trimmomatic.stats"), emit: combo_trim_stats
+    output:
+      path("trimmomatic.stats"), emit: combo_trim_stats
 
-  """
+    script:
+    """
 
-  """
+    """
 }
 
