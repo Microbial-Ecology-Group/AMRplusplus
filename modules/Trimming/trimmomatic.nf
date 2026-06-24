@@ -1,4 +1,4 @@
-include {adapter_error} from "$baseDir/modules/nf-functions.nf"
+include {adapter_error} from './modules/nf-functions.nf'
 
 if( params.adapters ) {
     adapters = file(params.adapters)

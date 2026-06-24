@@ -1,8 +1,8 @@
-include { FASTQ_QC_SE_WF } from "$baseDir/subworkflows/fastq_information.nf"
-include { FASTQ_TRIM_SE_WF } from "$baseDir/subworkflows/fastq_QC_trimming.nf"
-include { FASTQ_RM_HOST_SE_WF   } from "$baseDir/subworkflows/fastq_host_removal.nf"
-include { FASTQ_RESISTOME_SE_WF } from "$baseDir/subworkflows/fastq_resistome.nf"
-include { FASTQ_KRAKEN_SE_WF    } from "$baseDir/subworkflows/fastq_microbiome.nf"
+include { FASTQ_QC_SE_WF } from './subworkflows/fastq_information.nf'
+include { FASTQ_TRIM_SE_WF } from './subworkflows/fastq_QC_trimming.nf'
+include { FASTQ_RM_HOST_SE_WF   } from './subworkflows/fastq_host_removal.nf'
+include { FASTQ_RESISTOME_SE_WF } from './subworkflows/fastq_resistome.nf'
+include { FASTQ_KRAKEN_SE_WF    } from './subworkflows/fastq_microbiome.nf'
 
 workflow SE_AMRplusplus_wKraken {
     take: 

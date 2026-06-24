@@ -1,4 +1,4 @@
-include { reference_error ; amr_error ; annotation_error } from "$baseDir/modules/nf-functions.nf"
+include { reference_error ; amr_error ; annotation_error } from './modules/nf-functions.nf'
 
 
 if( params.amr ) {

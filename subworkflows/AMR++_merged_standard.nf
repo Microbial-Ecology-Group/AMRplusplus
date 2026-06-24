@@ -1,8 +1,8 @@
-include { FASTQ_QC_WF } from "$baseDir/subworkflows/fastq_information.nf"
-include { FASTQ_TRIM_WF } from "$baseDir/subworkflows/fastq_QC_trimming.nf"
-include { FASTQ_MERGE_WF } from "$baseDir/subworkflows/fastq_merging.nf"
-include { MERGED_FASTQ_RM_HOST_WF } from "$baseDir/subworkflows/fastq_host_removal.nf" 
-include { MERGED_FASTQ_RESISTOME_WF } from "$baseDir/subworkflows/fastq_resistome.nf"
+include { FASTQ_QC_WF } from './subworkflows/fastq_information.nf'
+include { FASTQ_TRIM_WF } from './subworkflows/fastq_QC_trimming.nf'
+include { FASTQ_MERGE_WF } from './subworkflows/fastq_merging.nf'
+include { MERGED_FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf'
+include { MERGED_FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
 
 workflow STANDARD_merged_AMRplusplus {
     take: 
