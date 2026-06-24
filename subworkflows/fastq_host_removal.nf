@@ -5,9 +5,6 @@ include { SeqkitReadCounts } from '../modules/QC/merge'
 include { bwa_rm_contaminant_se } from '../modules/Alignment/bwa'
 
 
-
-import java.nio.file.Paths
-
 //  Host removal for paired reads
 workflow FASTQ_RM_HOST_WF {
     take: 
@@ -15,24 +12,22 @@ workflow FASTQ_RM_HOST_WF {
         read_pairs_ch
     main:
         // Define reference_index variable
-        if (params.host_index == null) {
-            index(hostfasta)
-            reference_index_files = index.out
-        } else {
+        if (params.host_index) {
             reference_index_files = Channel
-                .fromPath(Paths.get(params.host_index))
-                .map { file(it.toString()) }
-                .filter { file(it).exists() }
+                .fromPath(params.host_index, glob: true)
+                .ifEmpty { error "No files match --host_index '${params.host_index}'" }
                 .toList()
                 .map { files ->
                     if (files.size() < 6) {
                         error "Expected 6 host index files, found ${files.size()}. Please provide all 6 files, including the host fasta file. Remember to use * in your path."
-                    } else {
-                        files.sort()
                     }
+                    files.sort()
                 }
-         }    
-        bwa_rm_contaminant_fq(reference_index_files, read_pairs_ch )
+        } else {
+            index(hostfasta)
+            reference_index_ch = index.out
+        }   
+        bwa_rm_contaminant_fq(reference_index_ch, read_pairs_ch )
         HostRemovalStats(bwa_rm_contaminant_fq.out.host_rm_stats.collect())
     emit:
         nonhost_reads = bwa_rm_contaminant_fq.out.nonhost_reads  
@@ -45,15 +40,21 @@ workflow MERGED_FASTQ_RM_HOST_WF {
 
     main:
         /* 1 ─ build / load BWA index -------------------------------------- */
-        def reference_index_ch =
-            params.host_index
-            ? Channel.fromPath( params.host_index , glob:true )
-                    .ifEmpty { error "No files match --host_index '${params.host_index}'" }
-                    .toList()
-                    .map { it.sort() }               // bundle 6 index files
-            : { index( hostfasta ); index.out }()     // call in a closure
-
-
+        if (params.host_index) {
+            reference_index_ch = Channel
+                .fromPath(params.host_index, glob: true)
+                .ifEmpty { error "No files match --host_index '${params.host_index}'" }
+                .toList()
+                .map { files ->
+                    if (files.size() < 6) {
+                        error "Expected 6 host index files, found ${files.size()}. Please provide all 6 files, including the host fasta file. Remember to use * in your path."
+                    }
+                    files.sort()
+                }
+        } else {
+            index(hostfasta)
+            reference_index_ch = index.out
+        }
         /* 2 ─ host-removal -------------------------------------------------- */
         bwa_rm_contaminant_merged_fq( reference_index_ch , merged_reads_ch )
         
@@ -84,14 +85,22 @@ workflow FASTQ_RM_HOST_SE_WF {
         se_reads_ch   // tuple(sample_id, read.fastq[.gz])
 
     main:
-        def host_index_ch = params.host_index
-            ? Channel.fromPath(params.host_index, glob:true)
-                     .ifEmpty { error "No files match --host_index '${params.host_index}'" }
-                     .toList()
-                     .map { it.sort() }
-            : { index(hostfasta); index.out }()
-
-        bwa_rm_contaminant_se( host_index_ch, se_reads_ch )
+        if (params.host_index) {
+            host_index_ch = Channel
+                .fromPath(params.host_index, glob: true)
+                .ifEmpty { error "No files match --host_index '${params.host_index}'" }
+                .toList()
+                .map { files ->
+                    if (files.size() < 6) {
+                        error "Expected 6 host index files, found ${files.size()}. Please provide all 6 files, including the host fasta file. Remember to use * in your path."
+                    }
+                    files.sort()
+                }
+        } else {
+            index(hostfasta)
+            host_index_ch = index.out
+        }
+        bwa_rm_contaminant_se( reference_index_ch, se_reads_ch )
         HostRemovalStats( bwa_rm_contaminant_se.out.host_rm_stats.collect() )
 
     emit:

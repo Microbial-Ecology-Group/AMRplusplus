@@ -112,6 +112,7 @@ def helpMessage() {
     se_eval_qc              FastQC for single-end reads
     se_trim_qc              Trimming for single-end reads
     se_rm_host              Host removal for single-end reads
+    se_align                Perform alignment to MEGARes database for single-end reads
     se_resistome            Resistome analysis for single-end reads
     se_kraken               Kraken analysis for single-end reads
 
@@ -122,6 +123,7 @@ def helpMessage() {
 
     merge_reads             Merge paired-end reads with FLASH
     merged_rm_host          Host removal for merged reads
+    merged_align            Perform alignment to MEGARes database only for merged reads
     merged_resistome        Resistome analysis for merged reads
     merged_kraken           Kraken analysis for merged reads
 
@@ -226,7 +228,8 @@ include { STANDARD_AMRplusplus_wKraken } from './subworkflows/AMR++_standard_wKr
 include { STANDARD_merged_AMRplusplus } from './subworkflows/AMR++_merged_standard.nf'
 include { STANDARD_merged_AMRplusplus_wKraken } from './subworkflows/AMR++_merged_standard_wKraken.nf'
 include { FASTQ_MERGE_WF } from './subworkflows/fastq_merging.nf'
-include { MERGED_FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf' 
+include { MERGED_FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf'
+include { MERGED_FASTQ_ALIGN_WF } from './subworkflows/fastq_align.nf' 
 include { MERGED_FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
 include { MERGED_FASTQ_KRAKEN_WF } from './subworkflows/fastq_microbiome.nf'
 
@@ -236,6 +239,7 @@ include { SE_AMRplusplus_wKraken } from './subworkflows/AMR++_SE_standard_wKrake
 include { FASTQ_QC_SE_WF } from './subworkflows/fastq_information.nf'
 include { FASTQ_TRIM_SE_WF } from './subworkflows/fastq_QC_trimming.nf'
 include { FASTQ_RM_HOST_SE_WF   } from './subworkflows/fastq_host_removal.nf'
+include { SE_FASTQ_ALIGN_WF } from './subworkflows/fastq_align.nf'
 include { FASTQ_RESISTOME_SE_WF } from './subworkflows/fastq_resistome.nf'
 include { FASTQ_KRAKEN_SE_WF    } from './subworkflows/fastq_microbiome.nf'
 
@@ -420,6 +424,15 @@ workflow {
             .set { read_se_ch }
         FASTQ_RM_HOST_SE_WF( params.host, read_se_ch )
     }
+    else if(params.pipeline == "se_align") {
+        logPipelineStart("Alignment Only",
+            "Aligning reads to MEGARes database with BWA.\n    Generates BAM files for downstream analysis.")
+        Channel
+            .fromPath(params.reads)
+            .map { f -> tuple(f.simpleName, f) }
+            .set { read_se_ch }
+        SE_FASTQ_ALIGN_WF( read_se_ch, params.amr)
+    }  
     else if(params.pipeline == "se_resistome") {
         logPipelineStart("Single-End Resistome",
             "Performing resistome analysis on single-end reads.")
@@ -470,6 +483,21 @@ workflow {
             }
             .set { to_host_rm_ch }
         MERGED_FASTQ_RM_HOST_WF(params.host, to_host_rm_ch)
+    }  
+    else if(params.pipeline == "merged_align") {
+        logPipelineStart("Alignment Only",
+            "Aligning reads to MEGARes database with BWA.\n    Generates BAM files for downstream analysis.")
+        Channel
+          .fromFilePairs( params.merged_reads, glob: true )
+          .ifEmpty { error "No FASTQ files match: ${params.merged_reads}" }
+          .map { sample_id, files ->
+            def merged   = files.find { it.name.contains('merged')   }
+            def unmerged = files.find { it.name.contains('unmerged') }
+            assert merged && unmerged : "Sample $sample_id missing one of merged/unmerged"
+            tuple( sample_id, merged, unmerged )
+          }
+          .set { to_align_ch }
+        MERGED_FASTQ_ALIGN_WF( to_align_ch, params.amr)
     }  
     else if(params.pipeline == "merged_resistome") {
         logPipelineStart("Merged Reads Resistome",
