@@ -1,9 +1,3 @@
-p_trim_left_f = params.p_trim_left_f
-p_trim_left_r = params.p_trim_left_r
-p_trunc_len_f = params.p_trunc_len_f
-p_trunc_len_r = params.p_trunc_len_r
-
-threads = params.threads
 
 process Qiime2Import {
     tag { }
@@ -47,7 +41,7 @@ process Qiime2Dada2 {
         path("rep-seqs.qza"), emit: rep_seqs
 
     """
-    ${QIIME} dada2 denoise-paired --i-demultiplexed-seqs ${demux} --o-table dada-table.qza --o-representative-sequences rep-seqs.qza --p-trim-left-f ${p_trim_left_f} --p-trim-left-r ${p_trim_left_r} --p-trunc-len-f ${p_trunc_len_f} --p-trunc-len-r ${p_trunc_len_r} --p-n-threads ${threads} --verbose --o-denoising-stats denoise_stats 
+    ${QIIME} dada2 denoise-paired --i-demultiplexed-seqs ${demux} --o-table dada-table.qza --o-representative-sequences rep-seqs.qza --p-trim-left-f ${params.p_trim_left_f} --p-trim-left-r ${params.p_trim_left_r} --p-trunc-len-f ${params.p_trunc_len_f} --p-trunc-len-r ${params.p_trunc_len_r} --p-n-threads ${task.cpus} --verbose --o-denoising-stats denoise_stats 
 
     """
 }

@@ -1,9 +1,3 @@
-params.taxlevel = "S" //level to estimate abundance at [options: D,P,C,O,F,G,S] (default: S)
-params.readlen = 150
-
-threads = params.threads
-kraken_confidence = params.kraken_confidence
-kraken_options = params.kraken_options
 
 process dlkraken {
     tag { "downloading_kraken_db"}
@@ -42,8 +36,8 @@ process runkraken {
 
     publishDir "${params.output}/MicrobiomeAnalysis", mode: 'copy',
         saveAs: { filename ->
-            if(filename.indexOf(".conf_${kraken_confidence}.kraken.raw") > 0) "Kraken/Raw_output_conf_${kraken_confidence}/$filename"
-            else if(filename.indexOf(".conf_${kraken_confidence}.kraken.report") > 0) "Kraken/Report_conf_${kraken_confidence}/$filename"
+            if(filename.indexOf(".conf_${params.kraken_confidence}.kraken.raw") > 0) "Kraken/Raw_output_conf_${params.kraken_confidence}/$filename"
+            else if(filename.indexOf(".conf_${params.kraken_confidence}.kraken.report") > 0) "Kraken/Report_conf_${params.kraken_confidence}/$filename"
             else {}
         }
 
@@ -53,15 +47,15 @@ process runkraken {
 
 
    output:
-      tuple val(sample_id), path("${sample_id}.conf_${kraken_confidence}.kraken.raw"), emit: kraken_raw
-      path("${sample_id}.conf_${kraken_confidence}.kraken.report"), emit: kraken_report
+      tuple val(sample_id), path("${sample_id}.conf_${params.kraken_confidence}.kraken.raw"), emit: kraken_raw
+      path("${sample_id}.conf_${params.kraken_confidence}.kraken.report"), emit: kraken_report
 
     script:
     def opts = (params.kraken_options instanceof List) ? params.kraken_options.join(' ') : (params.kraken_options ?: '')
      """
-     ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${kraken_confidence} --paired ${reads[0]} ${reads[1]} --threads ${threads} --report ${sample_id}.conf_${kraken_confidence}.kraken.report > ${sample_id}.conf_${kraken_confidence}.kraken.raw
+     ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${params.kraken_confidence} --paired ${reads[0]} ${reads[1]} --threads ${task.cpus} --report ${sample_id}.conf_${params.kraken_confidence}.kraken.report > ${sample_id}.conf_${params.kraken_confidence}.kraken.raw
 
-     cut -f 2,3  ${sample_id}.conf_${kraken_confidence}.kraken.raw > ${sample_id}.conf_${kraken_confidence}.kraken.krona
+     cut -f 2,3  ${sample_id}.conf_${params.kraken_confidence}.kraken.raw > ${sample_id}.conf_${params.kraken_confidence}.kraken.krona
     """
 }
 
@@ -112,8 +106,8 @@ process runkraken_merged {
 
     # ── merged reads ───────────────────────────────────────────────
     if has_reads ${merged}; then
-        ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${kraken_confidence} \\
-                   --threads ${threads} \\
+        ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${params.kraken_confidence} \\
+                   --threads ${task.cpus} \\
                    --report ${sample_id}.merged.kraken.report \\
                    ${merged} \\
                    > ${sample_id}.merged.kraken.raw
@@ -124,8 +118,8 @@ process runkraken_merged {
 
     # ── unmerged reads ─────────────────────────────────────────────
     if has_reads ${unmerged}; then
-        ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${kraken_confidence} \\
-                   --threads ${threads} \\
+        ${KRAKEN2} --db ${krakendb} ${opts} --confidence ${params.kraken_confidence} \\
+                   --threads ${task.cpus} \\
                    --report ${sample_id}.unmerged.kraken.report \\
                    ${unmerged} \\
                    > ${sample_id}.unmerged.kraken.raw
@@ -189,36 +183,11 @@ process krakenresults {
         path(kraken_reports)
 
     output:
-        path("kraken_analytic_matrix.conf_${kraken_confidence}.csv"),              emit: kraken_matrix
-        path("unclassifieds_kraken_analytic_matrix.conf_${kraken_confidence}.csv"), emit: kraken_unclassified
+        path("kraken_analytic_matrix.conf_${params.kraken_confidence}.csv"),              emit: kraken_matrix
+        path("unclassifieds_kraken_analytic_matrix.conf_${params.kraken_confidence}.csv"), emit: kraken_unclassified
 
     """
-    ${PYTHON3} $baseDir/bin/kraken2_long_to_wide.py -i ${kraken_reports} -o kraken_analytic_matrix.conf_${kraken_confidence}.csv
+    ${PYTHON3} $baseDir/bin/kraken2_long_to_wide.py -i ${kraken_reports} -o kraken_analytic_matrix.conf_${params.kraken_confidence}.csv
     """
 }
 
-
-process runbracken {
-    label "micro"
-    
-    input:
-       tuple val(sample_id), path(krakenout)
-       tuple val(sample_id), path(krakenout_filtered)
-       path(krakendb)
-
-    """
-    bracken \
-        -d ${krakendb} \
-        -r ${params.readlen} \
-        -i ${krakenout} \
-        -l ${params.taxlevel} \
-        -o ${sample_id}_bracken.tsv
-
-    bracken \
-        -d ${krakendb} \
-        -r ${params.readlen}\
-        -i ${krakenout_filtered} \
-        -l ${params.taxlevel} \
-        -o ${sample_id}_bracken_filtered.tsv
-        """
-}

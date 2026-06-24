@@ -5,17 +5,6 @@ if( params.annotation ) {
     if( !annotation.exists() ) return annotation_error(annotation)
 }
 
-threshold = params.threshold
-threads = params.threads
-
-
-min = params.min
-max = params.max
-skip = params.skip
-samples = params.samples
-
-deduped = params.deduped
-prefix = params.prefix
 
 process build_dependencies {
     tag "Download SNP dependencies"
@@ -83,7 +72,7 @@ process runresistome {
 
     output:
         tuple val(sample_id), path("${sample_id}*.tsv"), emit: resistome_tsv
-        path("${sample_id}.${prefix}.gene.tsv"), emit: resistome_counts
+        path("${sample_id}.${params.prefix}.gene.tsv"), emit: resistome_counts
 
     script:
     """
@@ -98,18 +87,18 @@ process runresistome {
         $resistome -ref_fp ${amr} \\
           -annot_fp ${annotation} \\
           -sam_fp ${sample_id}.sam \\
-          -gene_fp ${sample_id}.${prefix}.gene.tsv \\
-          -group_fp ${sample_id}.${prefix}.group.tsv \\
-          -mech_fp ${sample_id}.${prefix}.mechanism.tsv \\
-          -class_fp ${sample_id}.${prefix}.class.tsv \\
-          -type_fp ${sample_id}.${prefix}.type.tsv \\
-          -t ${threshold}
+          -gene_fp ${sample_id}.${params.prefix}.gene.tsv \\
+          -group_fp ${sample_id}.${params.prefix}.group.tsv \\
+          -mech_fp ${sample_id}.${params.prefix}.mechanism.tsv \\
+          -class_fp ${sample_id}.${params.prefix}.class.tsv \\
+          -type_fp ${sample_id}.${params.prefix}.type.tsv \\
+          -t ${params.threshold}
 
         rm ${sample_id}.sam
     else
         echo "[INFO] No alignments in BAM for ${sample_id} — writing empty resistome counts"
         for level in gene group mechanism class type; do
-            printf "Header\\t0\\n" > ${sample_id}.${prefix}.\${level}.tsv
+            printf "Header\\t0\\n" > ${sample_id}.${params.prefix}.\${level}.tsv
         done
     fi
     """
@@ -129,11 +118,11 @@ process resistomeresults {
         val  prefix
 
     output:
-        path("${prefix}_analytic_matrix.csv"), emit: raw_count_matrix
-        path("${prefix}_analytic_matrix.csv"), emit: snp_count_matrix, optional: true
+        path("${params.prefix}_analytic_matrix.csv"), emit: raw_count_matrix
+        path("${params.prefix}_analytic_matrix.csv"), emit: snp_count_matrix, optional: true
 
     """
-    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ${prefix}_analytic_matrix.csv
+    ${PYTHON3} $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ${params.prefix}_analytic_matrix.csv
     """
 }
 
@@ -177,11 +166,11 @@ process runrarefaction {
           -mech_fp ${sample_id}.mech.tsv \\
           -class_fp ${sample_id}.class.tsv \\
           -type_fp ${sample_id}.type.tsv \\
-          -min ${min} \\
-          -max ${max} \\
-          -skip ${skip} \\
-          -samples ${samples} \\
-          -t ${threshold}
+          -min ${params.min} \\
+          -max ${params.max} \\
+          -skip ${params.skip} \\
+          -samples ${params.samples} \\
+          -t ${params.threshold}
 
         rm ${sample_id}.sam
     else
@@ -247,11 +236,11 @@ process old_runsnp {
         mv ${bam} ${sample_id}.bam
     fi
 
-    python3 SNP_Verification.py -c config.ini -t ${threads} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all
+    python3 SNP_Verification.py -c config.ini -t ${task.cpus} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all
 
     python3 $baseDir/bin/extract_snp_column.py \
       --sample-id "${sample_id}" \
-      --matrix "${sample_id}.${prefix}_SNPs${snp_count_matrix}" \
+      --matrix "${sample_id}.${params.prefix}_SNPs${snp_count_matrix}" \
       --out-tsv "${sample_id}.SNP_confirmed_gene.tsv"
     """
 }
@@ -272,9 +261,9 @@ process runsnp {
 
     output:
         path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
-        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${prefix}_SNPs_SNPs_resistant_reads.txt") , optional: true
-        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${prefix}_SNPs_snp_coverage_stats.csv")
-        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${prefix}_SNPs_snp_verification_summary.csv")
+        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_SNPs_resistant_reads.txt") , optional: true
+        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_snp_coverage_stats.csv")
+        path("${sample_id}.${prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_snp_verification_summary.csv")
 
     """
     cp -rsa $baseDir/bin/AmrPlusPlus_SNP/* .
@@ -284,11 +273,11 @@ process runsnp {
         mv ${bam} ${sample_id}.bam
     fi
 
-    python3 SNP_Verification.py -c config.ini -t ${threads} -a true -i ${sample_id}.bam -o ${sample_id}.${prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all
+    python3 SNP_Verification.py -c config.ini -t ${task.cpus} -a true -i ${sample_id}.bam -o ${sample_id}.${params.prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all
 
     python3 $baseDir/bin/extract_snp_column.py \
       --sample-id "${sample_id}" \
-      --matrix ${sample_id}.${prefix}_SNPs/"${sample_id}.${prefix}_SNPs_${snp_count_matrix}" \
+      --matrix ${sample_id}.${prefix}_SNPs/"${sample_id}.${params.prefix}_SNPs_${snp_count_matrix}" \
       --out-tsv "${sample_id}.SNP_confirmed_gene.tsv"
     """
 }

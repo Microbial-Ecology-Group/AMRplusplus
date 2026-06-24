@@ -11,10 +11,6 @@ if( params.annotation ) {
 }
 
 
-threads = params.threads
-samtools_flag = params.samtools_flag
-deduped = params.deduped
-
 process index {
     tag "Creating bwa index"
     label "micro"
@@ -61,29 +57,29 @@ process bwa_align {
         tuple val(pair_id), path("${pair_id}_alignment_dedup.bam"), emit: bwa_dedup_bam, optional: true
 
     script:
-    if( deduped == "N")
+    if( ${params.deduped} == "N")
         """
-        ${BWA} mem ${indexfiles[0]} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
-        ${SAMTOOLS} view -@ ${threads} -S -b ${samtools_flag} ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
+        ${BWA} mem ${indexfiles[0]} ${reads} -t ${task.cpus} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
+        ${SAMTOOLS} view -@ ${task.cpus} -S -b ${params.samtools_flag} ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
         rm ${pair_id}_alignment.sam
-        ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
+        ${SAMTOOLS} sort -@ ${task.cpus} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
         rm ${pair_id}_alignment.bam
         """
-    else if( deduped == "Y")
+    else if( ${params.deduped} == "Y")
         """
-        ${BWA} mem ${indexfiles[0]} ${reads} -t ${threads} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
-        ${SAMTOOLS} view -@ ${threads} -S -b ${samtools_flag} ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
+        ${BWA} mem ${indexfiles[0]} ${reads} -t ${task.cpus} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
+        ${SAMTOOLS} view -@ ${task.cpus} -S -b ${params.samtools_flag} ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
         rm ${pair_id}_alignment.sam
-        ${SAMTOOLS} sort -@ ${threads} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
+        ${SAMTOOLS} sort -@ ${task.cpus} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
         rm ${pair_id}_alignment.bam
-        ${SAMTOOLS} fixmate -@ ${threads} -m ${pair_id}_alignment_sorted.bam ${pair_id}_alignment_sorted_fix.bam
-        ${SAMTOOLS} sort -@ ${threads} ${pair_id}_alignment_sorted_fix.bam -o ${pair_id}_alignment_sorted_fix.sorted.bam
+        ${SAMTOOLS} fixmate -@ ${task.cpus} -m ${pair_id}_alignment_sorted.bam ${pair_id}_alignment_sorted_fix.bam
+        ${SAMTOOLS} sort -@ ${task.cpus} ${pair_id}_alignment_sorted_fix.bam -o ${pair_id}_alignment_sorted_fix.sorted.bam
         rm ${pair_id}_alignment_sorted_fix.bam
         ${SAMTOOLS} markdup -r ${pair_id}_alignment_sorted_fix.sorted.bam ${pair_id}_alignment_dedup.bam
         rm ${pair_id}_alignment_sorted_fix.sorted.bam
         """
     else
-        error "Invalid deduplication flag --deduped: ${deduped}. Please use --deduped Y for deduplicated counts, or avoid using this flag altogether to skip this error."
+        error "Invalid deduplication flag --deduped: ${params.deduped}. Please use --deduped Y for deduplicated counts, or avoid using this flag altogether to skip this error."
 }
 
 process bwa_merged_align {
@@ -119,7 +115,7 @@ process bwa_merged_align {
 
     script:
     def cpu = task.cpus ?: threads
-    if (deduped == 'N') """
+    if (${params.deduped} == 'N') """
         set -euo pipefail
 
         # ── helpers ──────────────────────────────────────────────────
@@ -130,7 +126,7 @@ process bwa_merged_align {
         if has_reads ${merged_fq}; then
             ${BWA} mem ${indexfiles[0]} ${merged_fq} -t ${cpu} \
                 -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
-            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \
+            | ${SAMTOOLS} view -@ ${cpu} -b ${params.samtools_flag} - \
             | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
         else
             echo "[INFO] No merged reads for ${sample_id} — creating empty BAM"
@@ -141,14 +137,14 @@ process bwa_merged_align {
         if has_reads ${unmerged_fq}; then
             ${BWA} mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} \
                 -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
-            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \
+            | ${SAMTOOLS} view -@ ${cpu} -b ${params.samtools_flag} - \
             | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
         else
             echo "[INFO] No unmerged reads for ${sample_id} — creating empty BAM"
             empty_bam ${sample_id}_unmerged_alignment_sorted.bam
         fi
     """
-    else if (deduped == 'Y') """
+    else if (${params.deduped} == 'Y') """
         set -euo pipefail
 
         # ── helpers ──────────────────────────────────────────────────
@@ -159,7 +155,7 @@ process bwa_merged_align {
         if has_reads ${merged_fq}; then
             ${BWA} mem ${indexfiles[0]} ${merged_fq} -t ${cpu} \
                 -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
-            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \
+            | ${SAMTOOLS} view -@ ${cpu} -b ${params.samtools_flag} - \
             | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
 
             ${SAMTOOLS} fixmate -@ ${cpu} -m ${sample_id}_merged_alignment_sorted.bam tmp_merged.bam
@@ -176,7 +172,7 @@ process bwa_merged_align {
         if has_reads ${unmerged_fq}; then
             ${BWA} mem ${indexfiles[0]} ${unmerged_fq} -t ${cpu} \
                 -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
-            | ${SAMTOOLS} view -@ ${cpu} -b ${samtools_flag} - \
+            | ${SAMTOOLS} view -@ ${cpu} -b ${params.samtools_flag} - \
             | ${SAMTOOLS} sort -@ ${cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
 
             ${SAMTOOLS} fixmate -@ ${cpu} -m ${sample_id}_unmerged_alignment_sorted.bam tmp_unmerged.bam
@@ -190,7 +186,7 @@ process bwa_merged_align {
         fi
     """
     else
-        error "Invalid --deduped flag: ${deduped}. Use Y or N."
+        error "Invalid --deduped flag: ${params.deduped}. Use Y or N."
 }
 
 
@@ -216,7 +212,7 @@ process bwa_align_se {
 
     ${BWA} mem ${indexfiles[0]} ${read} -t ${task.cpus} \
         -R '@RG\\tID:${sample_id}\\tSM:${sample_id}' \
-    | ${SAMTOOLS} view -@ ${task.cpus} -b ${samtools_flag} - \
+    | ${SAMTOOLS} view -@ ${task.cpus} -b ${params.samtools_flag} - \
     | ${SAMTOOLS} sort -@ ${task.cpus} -o ${sample_id}_alignment_sorted.bam -
 
     ${SAMTOOLS} index ${sample_id}_alignment_sorted.bam
@@ -276,14 +272,14 @@ process bwa_rm_contaminant_fq {
     path("${pair_id}.samtools.idxstats"), emit: host_rm_stats
     
     """
-    ${BWA} mem ${indexfiles[0]} ${reads[0]} ${reads[1]} -t ${threads} > ${pair_id}.host.sam
-    ${SAMTOOLS} view -bS ${pair_id}.host.sam | ${SAMTOOLS} sort -@ ${threads} -o ${pair_id}.host.sorted.bam
+    ${BWA} mem ${indexfiles[0]} ${reads[0]} ${reads[1]} -t ${task.cpus} > ${pair_id}.host.sam
+    ${SAMTOOLS} view -bS ${pair_id}.host.sam | ${SAMTOOLS} sort -@ ${task.cpus} -o ${pair_id}.host.sorted.bam
     rm ${pair_id}.host.sam
     ${SAMTOOLS} index ${pair_id}.host.sorted.bam && ${SAMTOOLS} idxstats ${pair_id}.host.sorted.bam > ${pair_id}.samtools.idxstats
     ${SAMTOOLS} view -h -f 12 -b ${pair_id}.host.sorted.bam -o ${pair_id}.host.sorted.removed.bam
-    ${SAMTOOLS} sort -n -@ ${threads} ${pair_id}.host.sorted.removed.bam -o ${pair_id}.host.resorted.removed.bam
+    ${SAMTOOLS} sort -n -@ ${task.cpus} ${pair_id}.host.sorted.removed.bam -o ${pair_id}.host.resorted.removed.bam
     ${SAMTOOLS}  \
-       fastq -@ ${threads} -c 6  \
+       fastq -@ ${task.cpus} -c 6  \
       ${pair_id}.host.resorted.removed.bam \
       -1 ${pair_id}.non.host.R1.fastq.gz \
       -2 ${pair_id}.non.host.R2.fastq.gz \
@@ -330,16 +326,16 @@ process bwa_rm_contaminant_merged_fq {
 
     # ───────────────────────── merged reads ────────────────────────────
     if has_reads ${merged_fq}; then
-        ${BWA} mem ${indexfiles[0]} ${merged_fq} -t ${threads} \\
-            | ${SAMTOOLS} sort -@ ${threads} -o ${sample_id}.merged.host.sorted.bam
+        ${BWA} mem ${indexfiles[0]} ${merged_fq} -t ${task.cpus} \\
+            | ${SAMTOOLS} sort -@ ${task.cpus} -o ${sample_id}.merged.host.sorted.bam
 
         ${SAMTOOLS} index   ${sample_id}.merged.host.sorted.bam
         ${SAMTOOLS} idxstats ${sample_id}.merged.host.sorted.bam \\
             > ${sample_id}.merged.samtools.idxstats
 
         ${SAMTOOLS} view -b -f 4 ${sample_id}.merged.host.sorted.bam \\
-          | ${SAMTOOLS} fastq -@ ${threads} -c 6 - \\
-          | pigz -p ${threads} -c > ${sample_id}.merged.non.host.fastq.gz
+          | ${SAMTOOLS} fastq -@ ${task.cpus} -c 6 - \\
+          | pigz -p ${task.cpus} -c > ${sample_id}.merged.non.host.fastq.gz
     else
         echo "[INFO] No merged reads for ${sample_id} — writing empty outputs"
         echo -n | gzip > ${sample_id}.merged.non.host.fastq.gz
@@ -348,16 +344,16 @@ process bwa_rm_contaminant_merged_fq {
 
     # ──────────────────────── un-merged reads ──────────────────────────
     if has_reads ${unmerged_fq}; then
-        ${BWA} mem ${indexfiles[0]} ${unmerged_fq} -t ${threads} \\
-            | ${SAMTOOLS} sort -@ ${threads} -o ${sample_id}.unmerged.host.sorted.bam
+        ${BWA} mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpus} \\
+            | ${SAMTOOLS} sort -@ ${task.cpus} -o ${sample_id}.unmerged.host.sorted.bam
 
         ${SAMTOOLS} index   ${sample_id}.unmerged.host.sorted.bam
         ${SAMTOOLS} idxstats ${sample_id}.unmerged.host.sorted.bam \\
             > ${sample_id}.unmerged.samtools.idxstats
 
         ${SAMTOOLS} view -b -f 4 ${sample_id}.unmerged.host.sorted.bam \\
-          | ${SAMTOOLS} fastq -@ ${threads} -c 6 - \\
-          | pigz -p ${threads} -c > ${sample_id}.unmerged.non.host.fastq.gz
+          | ${SAMTOOLS} fastq -@ ${task.cpus} -c 6 - \\
+          | pigz -p ${task.cpus} -c > ${sample_id}.unmerged.non.host.fastq.gz
     else
         echo "[INFO] No unmerged reads for ${sample_id} — writing empty outputs"
         echo -n | gzip > ${sample_id}.unmerged.non.host.fastq.gz

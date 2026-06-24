@@ -1,5 +1,3 @@
-clumpify_mem_gb = params.clumpify_mem_gb
-
 process PE_DeduplicateReadsSeqkit {
     tag   { sample_id }
     label "medium"
