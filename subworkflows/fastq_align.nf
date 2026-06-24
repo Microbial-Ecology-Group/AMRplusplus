@@ -6,7 +6,6 @@ workflow FASTQ_ALIGN_WF {
     take: 
         read_pairs_ch
         amr
-        annotation
 
     main:
         /* ------------ (1) DEPENDENCIES ---------------------------------- */
@@ -48,7 +47,6 @@ workflow MERGED_FASTQ_ALIGN_WF {
     take:
         merged_reads_ch      // tuple(id, merged_fq, unmerged_fq)
         amr
-        annotation
 
     main:
         /* ------------ (1) DEPENDENCIES ---------------------------------- */
@@ -95,7 +93,6 @@ workflow SE_FASTQ_ALIGN_WF {
     take:
         se_nonhost_ch
         amr
-        annotation
 
     main:
         /* ------------ (1) DEPENDENCIES ---------------------------------- */

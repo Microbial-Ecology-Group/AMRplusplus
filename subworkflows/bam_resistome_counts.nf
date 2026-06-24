@@ -21,7 +21,7 @@ workflow BAM_RESISTOME_COUNTS_WF {
         }
         // Run resistome analyzer and count matrix creation
         runresistome(bam_ch,amr, annotation, resistomeanalyzer )
-        resistomeresults(runresistome.out.resistome_counts.collect())
+        resistomeresults(runresistome.out.resistome_counts.collect(), "AMR")
         // Add SNP confirmation
         if (params.snp == "Y") {
             runsnp(bam_ch, resistomeresults.out.snp_count_matrix)
