@@ -68,7 +68,7 @@ process runresistome {
     set -euo pipefail
 
     # Check if BAM has any alignments
-    aln_count=(\$SAMTOOLS view -c ${bam} 2>/dev/null || echo 0)
+    aln_count=\$(\$SAMTOOLS view -c ${bam} 2>/dev/null || echo 0)
 
     if [ "\$aln_count" -gt 0 ]; then
         \$SAMTOOLS view -h ${bam} > ${sample_id}.sam
@@ -135,7 +135,7 @@ process runrarefaction {
     """
     set -euo pipefail
 
-    aln_count=(\$SAMTOOLS view -c ${bam} 2>/dev/null || echo 0)
+    aln_count=\$(\$SAMTOOLS view -c ${bam} 2>/dev/null || echo 0)
 
     if [ "\$aln_count" -gt 0 ]; then
         \$SAMTOOLS view -h ${bam} > ${sample_id}.sam
