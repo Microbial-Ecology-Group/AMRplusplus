@@ -10,9 +10,6 @@ process MergeReadsFlash {
     tag   { sample_id }
     label "small"
 
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
-
     publishDir "${params.output}/Flash_reads", mode: 'copy', pattern: '*.fastq.gz',
         saveAs: { fn -> fn }                       // keep original FLASH filenames
 

@@ -3,8 +3,6 @@ process PE_DeduplicateReadsSeqkit {
     label "medium"
     publishDir "${params.output}/Deduped_reads",
                mode: 'copy', pattern: '*.fastq.gz'
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     input:
         tuple val(sample_id), path(reads)
@@ -41,8 +39,6 @@ process PE_DeduplicateMergedReadsSeqkit {
     label "medium"
     publishDir "${params.output}/Deduped_reads",
                mode: 'copy', pattern: '*.fastq.gz'
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     input:
         tuple val(sample_id), path(reads)   // reads[0]=merged, reads[1]=unmerged
@@ -79,8 +75,6 @@ process SE_DeduplicateReadsSeqkit {
     label "medium"
     publishDir "${params.output}/Deduped_reads",
                mode: 'copy', pattern: '*.fastq.gz'
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     input:
         tuple val(sample_id), path(read)
@@ -106,8 +100,6 @@ process PE_DeduplicateReadsClumpify {
     label "medium"
     publishDir "${params.output}/Deduped_reads",
                mode: 'copy', pattern: '*.fastq.gz'
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     input:
         tuple val(sample_id), path(reads)
@@ -143,8 +135,6 @@ process PE_DeduplicateMergedReadsClumpify {
     label "medium"
     publishDir "${params.output}/Deduped_reads",
                mode: 'copy', pattern: '*.fastq.gz'
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     input:
         tuple val(sample_id), path(reads)   // reads[0]=merged, reads[1]=unmerged
@@ -189,8 +179,6 @@ process SE_DeduplicateReadsClumpify {
     label "medium"
     publishDir "${params.output}/Deduped_reads",
                mode: 'copy', pattern: '*.fastq.gz'
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     input:
         tuple val(sample_id), path(read)

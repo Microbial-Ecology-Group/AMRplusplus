@@ -86,7 +86,7 @@ workflow FASTQ_RM_HOST_SE_WF {
 
     main:
         if (params.host_index) {
-            host_index_ch = Channel
+            reference_index_ch = Channel
                 .fromPath(params.host_index, glob: true)
                 .ifEmpty { error "No files match --host_index '${params.host_index}'" }
                 .toList()
@@ -98,7 +98,7 @@ workflow FASTQ_RM_HOST_SE_WF {
                 }
         } else {
             index(hostfasta)
-            host_index_ch = index.out
+            reference_index_ch = index.out
         }
         bwa_rm_contaminant_se( reference_index_ch, se_reads_ch )
         HostRemovalStats( bwa_rm_contaminant_se.out.host_rm_stats.collect() )

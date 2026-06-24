@@ -65,9 +65,6 @@ process Qiime2Filter {
     tag { }
     label "medium"
 
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
-
     publishDir "${params.output}/Qiime2Results", mode: "copy"
 
     input:
@@ -90,9 +87,6 @@ process Qiime2Filter {
 process Qiime2Tree {
     tag { }
     label "medium"
-
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
 
     publishDir "${params.output}/Qiime2Results/Tree", mode: "copy"
 
@@ -117,9 +111,6 @@ process Qiime2Export {
     tag { }
     label "medium"
 
-    errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'terminate' }
-    maxRetries 3
-    
     publishDir "${params.output}/Qiime2Results/Exported", mode: "copy"
 
     input:

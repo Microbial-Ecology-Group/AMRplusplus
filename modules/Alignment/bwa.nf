@@ -1,6 +1,3 @@
-include { reference_error ; amr_error ; annotation_error } from './modules/nf-functions.nf'
-
-
 process index {
     tag "Creating bwa index"
     label "micro"
@@ -41,7 +38,7 @@ process bwa_align {
         tuple val(pair_id), path("${pair_id}_alignment_dedup.bam"), emit: bwa_dedup_bam, optional: true
 
     script:
-    if( ${params.deduped} == "N")
+    if( params.deduped == "N")
         """
         ${BWA} mem ${indexfiles[0]} ${reads} -t ${task.cpus} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
         ${SAMTOOLS} view -@ ${task.cpus} -S -b ${params.samtools_flag} ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
@@ -49,7 +46,7 @@ process bwa_align {
         ${SAMTOOLS} sort -@ ${task.cpus} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
         rm ${pair_id}_alignment.bam
         """
-    else if( ${params.deduped} == "Y")
+    else if( params.deduped == "Y")
         """
         ${BWA} mem ${indexfiles[0]} ${reads} -t ${task.cpus} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
         ${SAMTOOLS} view -@ ${task.cpus} -S -b ${params.samtools_flag} ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
@@ -95,7 +92,7 @@ process bwa_merged_align {
 
     script:
     def cpu = task.cpus ?: threads
-    if (${params.deduped} == 'N') """
+    if (params.deduped == 'N') """
         set -euo pipefail
 
         # ── helpers ──────────────────────────────────────────────────
@@ -124,7 +121,7 @@ process bwa_merged_align {
             empty_bam ${sample_id}_unmerged_alignment_sorted.bam
         fi
     """
-    else if (${params.deduped} == 'Y') """
+    else if (params.deduped == 'Y') """
         set -euo pipefail
 
         # ── helpers ──────────────────────────────────────────────────

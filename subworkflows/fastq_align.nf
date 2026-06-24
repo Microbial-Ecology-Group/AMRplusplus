@@ -1,6 +1,6 @@
 // Load modules
 include { index ; bwa_align ; bwa_merged_align ;bwa_align_se ; samtools_dedup_se ; samtools_merge_bams ;  samtools_merge_bams as  samtools_merge_bams_dedup } from '../modules/Alignment/bwa'
-
+include { build_dependencies } from '../modules/Resistome/resistome'
 
 workflow FASTQ_ALIGN_WF {
     take: 
