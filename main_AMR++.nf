@@ -228,6 +228,7 @@ include { STANDARD_AMRplusplus_wKraken } from './subworkflows/AMR++_standard_wKr
 include { STANDARD_merged_AMRplusplus } from './subworkflows/AMR++_merged_standard.nf'
 include { STANDARD_merged_AMRplusplus_wKraken } from './subworkflows/AMR++_merged_standard_wKraken.nf'
 include { FASTQ_MERGE_WF } from './subworkflows/fastq_merging.nf'
+include { FASTQ_DEDUP_MERGED_WF } from './subworkflows/fastq_deduplicate.nf'
 include { MERGED_FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf'
 include { MERGED_FASTQ_ALIGN_WF } from './subworkflows/fastq_align.nf' 
 include { MERGED_FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
@@ -238,11 +239,11 @@ include { SE_AMRplusplus } from './subworkflows/AMR++_SE_standard.nf'
 include { SE_AMRplusplus_wKraken } from './subworkflows/AMR++_SE_standard_wKraken.nf'
 include { FASTQ_QC_SE_WF } from './subworkflows/fastq_information.nf'
 include { FASTQ_TRIM_SE_WF } from './subworkflows/fastq_QC_trimming.nf'
+include { FASTQ_DEDUP_SE_WF } from './subworkflows/fastq_deduplicate.nf'
 include { FASTQ_RM_HOST_SE_WF   } from './subworkflows/fastq_host_removal.nf'
 include { SE_FASTQ_ALIGN_WF } from './subworkflows/fastq_align.nf'
 include { FASTQ_RESISTOME_SE_WF } from './subworkflows/fastq_resistome.nf'
 include { FASTQ_KRAKEN_SE_WF    } from './subworkflows/fastq_microbiome.nf'
-
 
 // Load subworkflows
 include { FASTQ_QC_WF } from './subworkflows/fastq_information.nf'
@@ -252,6 +253,7 @@ include { FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf'
 include { FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
 include { FASTQ_KRAKEN_WF } from './subworkflows/fastq_microbiome.nf'
 include { FASTQ_QIIME2_WF } from './subworkflows/fastq_16S_qiime2.nf'
+include { FASTQ_DEDUP_PE_WF } from './subworkflows/fastq_deduplicate.nf'
 
 // Load BAM subworkflows
 include { BAM_RESISTOME_WF } from './subworkflows/bam_resistome.nf'
@@ -358,6 +360,11 @@ workflow {
             "Running Trimmomatic for adapter removal and quality trimming.\n    Generates trimmed reads and QC reports.")
         FASTQ_TRIM_WF( fastq_files )
     }
+    else if(params.pipeline == "dedup") {
+        logPipelineStart("Deduplication",
+            "Deduplicating paired end reads.\n    Generates deduped fastq reads.")
+        FASTQ_DEDUP_PE_WF( fastq_files )
+    }
     else if(params.pipeline == "rm_host") {
         logPipelineStart("Host Removal",
             "Removing host-derived reads using BWA alignment.\n    Host genome: ${params.host}")
@@ -414,6 +421,11 @@ workflow {
             .map { f -> tuple(f.simpleName, f) }
             .set { read_se_ch }
         FASTQ_TRIM_SE_WF( read_se_ch )
+    }
+    else if(params.pipeline == "se_dedup") {
+        logPipelineStart("Deduplication",
+            "Deduplicating single end reads.\n    Generates deduped single-end fastq reads.")
+        FASTQ_DEDUP_SE_WF( fastq_files )
     }
     else if(params.pipeline == "se_rm_host") {
         logPipelineStart("Single-End Host Removal",
