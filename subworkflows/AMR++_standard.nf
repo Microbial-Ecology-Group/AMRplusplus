@@ -2,6 +2,7 @@ include { FASTQ_QC_WF } from './fastq_information.nf'
 include { FASTQ_TRIM_WF } from './fastq_QC_trimming.nf'
 include { FASTQ_RM_HOST_WF } from './fastq_host_removal.nf' 
 include { FASTQ_RESISTOME_WF } from './fastq_resistome.nf'
+include { FASTQ_DEDUP_PE_WF } from './fastq_deduplicate.nf'
 
 workflow STANDARD_AMRplusplus {
     take: 

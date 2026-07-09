@@ -199,26 +199,51 @@ process coverage_threshold_sweep {
     """
 }
 
+process combine_sweep_results {
+    tag "combine_sweep"
+    label "small"
+    publishDir "${params.output}/CoverageSweep/Combined", mode: "copy"
+
+    input:
+        // every per-sample CSV, staged flat into the task workdir
+        path(all_csvs)
+
+    output:
+        path("combined/combined_*.csv"), emit: combined
+
+    script:
+    """
+    set -euo pipefail
+    # combine_sweep_results.py scans a directory for the per-sample sweep CSVs and
+    # injects a sample_id column (the BAM basename) into each row. All staged CSVs
+    # are already in the task workdir ('.'), so scan that directly.
+    \$PYTHON3 $baseDir/bin/combine_sweep_results.py . --out-dir combined
+    """
+}
+
 process plot_sweep_dropoff {
     tag "sweep_summary"
     label "small"
     publishDir "${params.output}/CoverageSweep/Summary", mode: "copy"
 
     input:
-        path(sweep_csvs)
+        path(combined_dir_csvs)   // the combined_*.csv files
 
     output:
-        path("*.pdf"), optional: true
-        path("*.png"), optional: true
-        path("*.tsv"), optional: true
-        path("*.csv"), optional: true
+        path("figures/*"), optional: true
+        path("*.png"),     optional: true
+        path("*.csv"),     optional: true
 
     script:
     """
     set -euo pipefail
-    \$RSCRIPT $baseDir/bin/plot_sweep_dropoff.R ${sweep_csvs.join(' ')}
+    # plot_sweep_dropoff.R reads combined_gene_detail.csv / combined_results.csv /
+    # combined_length_quantiles.csv from its input directory ('.') and writes to
+    # ./figures by default.
+    \$RSCRIPT $baseDir/bin/plot_sweep_dropoff.R . figures
     """
 }
+
 
 
 process resistomeresults {
@@ -360,8 +385,10 @@ process runsnp {
 
     publishDir "${params.output}/ResistomeAnalysis/SNP_verification", mode: "copy",
             saveAs: { filename ->
-                if(filename.indexOf(".tsv") > 0) "SNP_verification_counts/$filename"
-                else "SNP_detailed_output/$filename"
+                if(filename.indexOf(".tsv") > 0)                       "SNP_verification_counts/$filename"
+                else if(filename.indexOf("snp_coverage_stats") > 0)    "SNP_coverage_stats/$filename"
+                else if(filename.indexOf("snp_verification_summary") > 0) "SNP_summary/$filename"
+                else                                                   "SNP_detailed_output/$filename"
             }
 
     input:
@@ -370,24 +397,46 @@ process runsnp {
 
     output:
         path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
-        path("${sample_id}.${params.prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_SNPs_resistant_reads.txt") , optional: true
-        path("${sample_id}.${params.prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_snp_coverage_stats.csv")
-        path("${sample_id}.${params.prefix}_SNPs/${sample_id}/${sample_id}.${params.prefix}_SNPs_snp_verification_summary.csv")
+        path("${sample_id}.${params.prefix}_SNPs_snp_coverage_stats.csv"),       optional: true, emit: coverage_stats
+        path("${sample_id}.${params.prefix}_SNPs_snp_verification_summary.csv"), optional: true, emit: summary
+        path("${sample_id}.${params.prefix}_SNPs_resistant_reads.csv"),          optional: true
+
     script:
     """
     cp -rsa $baseDir/bin/AmrPlusPlus_SNP/* .
 
-    # change name to stay consistent with count matrix name, but only if the names don't match
+    # Rename BAM to a clean, dot-free stem so the tool's sample subfolder is predictable.
     if [ "${bam}" != "${sample_id}.bam" ]; then
         mv ${bam} ${sample_id}.bam
     fi
 
-    \$PYTHON3 SNP_Verification.py -c config.ini -t ${task.cpus} -a true -i ${sample_id}.bam -o ${sample_id}.${params.prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all
+    \$PYTHON3 SNP_Verification.py -c config.ini -t ${task.cpus} -a true \\
+        -i ${sample_id}.bam -o ${sample_id}.${params.prefix}_SNPs \\
+        --count_matrix ${snp_count_matrix} --detailed_output=all
 
-    \$PYTHON3 $baseDir/bin/extract_snp_column.py \
-      --sample-id "${sample_id}" \
-      --matrix ${sample_id}.${params.prefix}_SNPs/"${sample_id}.${params.prefix}_SNPs_${snp_count_matrix}" \
+    # The tool derives its sample subfolder from the FIRST dot-token of the bam name.
+    # Since we renamed the bam to ${sample_id}.bam, that token is everything before the
+    # first '.' in "${sample_id}". Compute it so paths are correct even if sample_id has dots.
+    SNP_SUBDIR=\$(echo "${sample_id}" | cut -d. -f1)
+    SNP_OUT="${sample_id}.${params.prefix}_SNPs"
+
+    # Confirmed matrix -> per-sample confirmed-gene TSV
+    \$PYTHON3 $baseDir/bin/extract_snp_column.py \\
+      --sample-id "${sample_id}" \\
+      --matrix "\${SNP_OUT}/\${SNP_OUT}_${snp_count_matrix}" \\
       --out-tsv "${sample_id}.SNP_confirmed_gene.tsv"
+
+    # Surface the coverage-stats + summary CSVs into the task workdir so publishDir
+    # (and the optional emits above) can capture them by their flat names.
+    if [ -f "\${SNP_OUT}/\${SNP_SUBDIR}/\${SNP_OUT}_snp_coverage_stats.csv" ]; then
+        cp "\${SNP_OUT}/\${SNP_SUBDIR}/\${SNP_OUT}_snp_coverage_stats.csv" .
+    fi
+    if [ -f "\${SNP_OUT}/\${SNP_SUBDIR}/\${SNP_OUT}_snp_verification_summary.csv" ]; then
+        cp "\${SNP_OUT}/\${SNP_SUBDIR}/\${SNP_OUT}_snp_verification_summary.csv" .
+    fi
+    if [ -f "\${SNP_OUT}/\${SNP_SUBDIR}/\${SNP_OUT}_resistant_reads.csv" ]; then
+        cp "\${SNP_OUT}/\${SNP_SUBDIR}/\${SNP_OUT}_resistant_reads.csv" .
+    fi
     """
 }
 
@@ -411,3 +460,35 @@ process snpresults {
 }
 
 
+process snp_coverage_summary {
+    tag "Combine SNP coverage stats"
+    label "micro"
+
+    publishDir "${params.output}/Results", mode: "copy"
+
+    input:
+        path(coverage_csvs)
+        val  prefix
+
+    output:
+        path("SNP_coverage_stats_${prefix}.csv"), emit: coverage_summary
+
+    script:
+    """
+    set -euo pipefail
+    out="SNP_coverage_stats_${prefix}.csv"
+    first=1
+    for f in ${coverage_csvs}; do
+        [ -s "\$f" ] || continue
+        if [ \$first -eq 1 ]; then
+            head -1 "\$f" > "\$out"
+            first=0
+        fi
+        tail -n +2 "\$f" >> "\$out"
+    done
+    # Guarantee the output exists even if no sample produced coverage stats
+    if [ \$first -eq 1 ]; then
+        echo "sample_name,gene_name,gene_type,original_amrplusplus_count,total_reads_analyzed,reads_covering_snp_position,reads_with_snp_confirmed,percentage,original_code_would_set,new_count_percentage_based,snp_confirmed" > "\$out"
+    fi
+    """
+}

@@ -1,5 +1,5 @@
 // resistome
-include {coverage_threshold_sweep ; combine_sweep_results ; plot_sweep_dropoff ; plotrarefaction ; runresistome_analyzer ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults ; coverage_threshold_sweep ; plot_sweep_dropoff } from '../modules/Resistome/resistome'
+include {snp_coverage_summary;coverage_threshold_sweep ; combine_sweep_results ; plot_sweep_dropoff ; plotrarefaction ; runresistome_analyzer ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults  } from '../modules/Resistome/resistome'
 
 
 workflow BAM_RESISTOME_WF {
@@ -31,6 +31,7 @@ workflow BAM_RESISTOME_WF {
         if (params.snp == "Y") {
             runsnp(bam_ch, resistomeresults.out.snp_count_matrix)
             snpresults(runsnp.out.snp_counts.collect(), "AMR")
+            snp_coverage_summary(runsnp.out.coverage_stats.collect(), "AMR") 
         }
 }
 

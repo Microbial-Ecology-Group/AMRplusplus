@@ -3,6 +3,7 @@ include { FASTQ_TRIM_SE_WF } from './fastq_QC_trimming.nf'
 include { FASTQ_RM_HOST_SE_WF   } from './fastq_host_removal.nf'
 include { FASTQ_RESISTOME_SE_WF } from './fastq_resistome.nf'
 include { FASTQ_KRAKEN_SE_WF    } from './fastq_microbiome.nf'
+include { FASTQ_DEDUP_SE_WF } from './fastq_deduplicate.nf'
 
 workflow SE_AMRplusplus {
     take: 

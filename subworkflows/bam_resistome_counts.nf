@@ -1,5 +1,5 @@
 // resistome counts and snp verification
-include {plotrarefaction ; runresistome_analyzer ; runsnp ; resistomeresults ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
+include {snp_coverage_summary; plotrarefaction ; runresistome_analyzer ; runsnp ; resistomeresults ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
 
 
 workflow BAM_RESISTOME_COUNTS_WF {
@@ -24,6 +24,7 @@ workflow BAM_RESISTOME_COUNTS_WF {
         if (params.snp == "Y") {
             runsnp(bam_ch, resistomeresults.out.snp_count_matrix)
             snpresults(runsnp.out.snp_counts.collect(), "AMR")
+            snp_coverage_summary(runsnp.out.coverage_stats.collect(), "AMR") 
         }
 }
 

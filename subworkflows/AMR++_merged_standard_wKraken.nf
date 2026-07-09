@@ -4,7 +4,7 @@ include { FASTQ_MERGE_WF } from './fastq_merging.nf'
 include { MERGED_FASTQ_RM_HOST_WF } from './fastq_host_removal.nf' 
 include { MERGED_FASTQ_RESISTOME_WF } from './fastq_resistome.nf'
 include { MERGED_FASTQ_KRAKEN_WF } from './fastq_microbiome.nf'
-
+include { FASTQ_DEDUP_PE_WF } from './fastq_deduplicate.nf'
 
 workflow STANDARD_merged_AMRplusplus_wKraken {
     take: 

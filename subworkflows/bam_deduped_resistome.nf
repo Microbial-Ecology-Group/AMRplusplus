@@ -1,5 +1,5 @@
 // Deduped functions with prefix for name
-include {runresistome_analyzer as runresistome_dedup ; runsnp as runsnp_dedup; resistomeresults as resistomeresults_dedup ; snpresults as snpresults_dedup ; build_dependencies} from '../modules/Resistome/resistome'
+include { snp_coverage_summary ; runresistome_analyzer as runresistome_dedup ; runsnp as runsnp_dedup; resistomeresults as resistomeresults_dedup ; snpresults as snpresults_dedup ; build_dependencies} from '../modules/Resistome/resistome'
 
 
 workflow BAM_DEDUP_RESISTOME_WF {
@@ -25,6 +25,7 @@ workflow BAM_DEDUP_RESISTOME_WF {
         if (params.snp == "Y") {
             runsnp_dedup(bam_ch, resistomeresults_dedup.out.snp_count_matrix) 
             snpresults_dedup(runsnp_dedup.out.snp_counts.collect(),"dedup_AMR")
+            snp_coverage_summary(runsnp_dedup.out.coverage_stats.collect(), "dedup_AMR") 
         }
 }
 

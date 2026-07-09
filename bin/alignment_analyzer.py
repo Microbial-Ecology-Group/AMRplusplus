@@ -20,7 +20,7 @@ CHANGES IN THIS VERSION
    alongside the existing breadth-based coverage_fraction, plus a "meg_id"
    join column (gene_accession split on the first '|').
 
-4. NEW — retained-read tracking. Every run now reports, and optionally writes
+4. retained-read tracking. Every run now reports, and optionally writes
    to a small stats file, how many primary alignments existed BEFORE any
    --min-mapq/--min-query-coverage filtering vs how many passed (and the %
    retained). Previously this number wasn't tracked or surfaced anywhere —
@@ -393,12 +393,15 @@ def get_passing_genes(gene_fractions: Dict[str, float], min_fraction: float) -> 
     return {gene for gene, frac in gene_fractions.items() if frac >= min_fraction}
 
 
-def format_gene_alignment_field(gene_mapq_qcov: Dict[str, List[Tuple[int, float]]]) -> str:
+def format_gene_alignment_field(gene_mapq_qcov: Dict[str, List[Tuple[int, float, float]]]) -> str:
     if not gene_mapq_qcov:
         return "-"
     parts = []
     for gene in sorted(gene_mapq_qcov.keys()):
-        entry_str = ",".join(f"{mq}:{qc:.1f}" for mq, qc in gene_mapq_qcov[gene])
+        # entries are (mapq, qcov_pct, match_qcov_pct); show mapq:qcov:match_qcov
+        entry_str = ",".join(
+            f"{mq}:{qc:.1f}:{mqc:.1f}" for mq, qc, mqc in gene_mapq_qcov[gene]
+        )
         parts.append(f"{gene}({entry_str})")
     return "/".join(parts)
 
@@ -440,7 +443,7 @@ def summarize_genes_read_end(per_read: Dict[str, Dict[str, Any]], passing_genes:
                 continue
         best_gene, best_mapq = None, -1
         for gene, entries in primary_genes.items():
-            max_mapq_for_gene = max(mq for mq, _qc in entries)
+            max_mapq_for_gene = max(mq for mq, _qc, _mqc in entries)
             if max_mapq_for_gene > best_mapq or (max_mapq_for_gene == best_mapq and (best_gene is None or gene < best_gene)):
                 best_gene, best_mapq = gene, max_mapq_for_gene
         if best_gene is not None:
