@@ -18,8 +18,15 @@ workflow STANDARD_merged_AMRplusplus_wKraken {
         FASTQ_QC_WF( read_pairs_ch )
         // runqc trimming
         FASTQ_TRIM_WF(read_pairs_ch)
+        
+        if( params.read_dedup == "Y" ) {
+            FASTQ_DEDUP_PE_WF( FASTQ_TRIM_WF.out.trimmed_reads )
+            reads_for_merge = FASTQ_DEDUP_PE_WF.out.deduped_reads
+        } else {
+            reads_for_merge = FASTQ_TRIM_WF.out.trimmed_reads
+        }
         // merge reads
-        FASTQ_MERGE_WF( FASTQ_TRIM_WF.out.trimmed_reads )
+        FASTQ_MERGE_WF( reads_for_merge )
         
         FASTQ_MERGE_WF.out.merged
               .join( FASTQ_MERGE_WF.out.unmerged )

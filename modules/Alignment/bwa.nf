@@ -101,10 +101,10 @@ process bwa_merged_align {
 
         # ───── merged reads ──────────────────────────────────────────
         if has_reads ${merged_fq}; then
-            \$BWA mem ${indexfiles[0]} ${merged_fq} -t ${task.cpu} \
+            \$BWA mem ${indexfiles[0]} ${merged_fq} -t ${task.cpus} \
                 -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
-            | \$SAMTOOLS view -@ ${task.cpu} -b ${params.samtools_flag} - \
-            | \$SAMTOOLS sort -@ ${task.cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
+            | \$SAMTOOLS view -@ ${task.cpus} -b ${params.samtools_flag} - \
+            | \$SAMTOOLS sort -@ ${task.cpus} -n -o ${sample_id}_merged_alignment_sorted.bam -
         else
             echo "[INFO] No merged reads for ${sample_id} — creating empty BAM"
             empty_bam ${sample_id}_merged_alignment_sorted.bam
@@ -112,10 +112,10 @@ process bwa_merged_align {
 
         # ───── un-merged reads ───────────────────────────────────────
         if has_reads ${unmerged_fq}; then
-            \$BWA mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpu} \
+            \$BWA mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpus} \
                 -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
-            | \$SAMTOOLS view -@ ${task.cpu} -b ${params.samtools_flag} - \
-            | \$SAMTOOLS sort -@ ${task.cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
+            | \$SAMTOOLS view -@ ${task.cpus} -b ${params.samtools_flag} - \
+            | \$SAMTOOLS sort -@ ${task.cpus} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
         else
             echo "[INFO] No unmerged reads for ${sample_id} — creating empty BAM"
             empty_bam ${sample_id}_unmerged_alignment_sorted.bam
@@ -130,14 +130,14 @@ process bwa_merged_align {
 
         # ───── merged reads (+ dedup) ────────────────────────────────
         if has_reads ${merged_fq}; then
-            \$BWA mem ${indexfiles[0]} ${merged_fq} -t ${task.cpu} \
+            \$BWA mem ${indexfiles[0]} ${merged_fq} -t ${task.cpus} \
                 -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
-            | \$SAMTOOLS view -@ ${task.cpu} -b ${params.samtools_flag} - \
-            | \$SAMTOOLS sort -@ ${task.cpu} -n -o ${sample_id}_merged_alignment_sorted.bam -
+            | \$SAMTOOLS view -@ ${task.cpus} -b ${params.samtools_flag} - \
+            | \$SAMTOOLS sort -@ ${task.cpus} -n -o ${sample_id}_merged_alignment_sorted.bam -
 
-            \$SAMTOOLS fixmate -@ ${task.cpu} -m ${sample_id}_merged_alignment_sorted.bam tmp_merged.bam
-            \$SAMTOOLS sort    -@ ${task.cpu} tmp_merged.bam -o tmp_merged.srt.bam
-            \$SAMTOOLS markdup -r -@ ${task.cpu} tmp_merged.srt.bam ${sample_id}_merged_alignment_dedup.bam
+            \$SAMTOOLS fixmate -@ ${task.cpus} -m ${sample_id}_merged_alignment_sorted.bam tmp_merged.bam
+            \$SAMTOOLS sort    -@ ${task.cpus} tmp_merged.bam -o tmp_merged.srt.bam
+            \$SAMTOOLS markdup -r -@ ${task.cpus} tmp_merged.srt.bam ${sample_id}_merged_alignment_dedup.bam
             rm -f tmp_merged.bam tmp_merged.srt.bam
         else
             echo "[INFO] No merged reads for ${sample_id} — creating empty BAMs"
@@ -147,14 +147,14 @@ process bwa_merged_align {
 
         # ───── un-merged reads (+ dedup) ─────────────────────────────
         if has_reads ${unmerged_fq}; then
-            \$BWA mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpu} \
+            \$BWA mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpus} \
                 -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
-            | \$SAMTOOLS view -@ ${task.cpu} -b ${params.samtools_flag} - \
-            | \$SAMTOOLS sort -@ ${task.cpu} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
+            | \$SAMTOOLS view -@ ${task.cpus} -b ${params.samtools_flag} - \
+            | \$SAMTOOLS sort -@ ${task.cpus} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
 
-            \$SAMTOOLS fixmate -@ ${task.cpu} -m ${sample_id}_unmerged_alignment_sorted.bam tmp_unmerged.bam
-            \$SAMTOOLS sort    -@ ${task.cpu} tmp_unmerged.bam -o tmp_unmerged.srt.bam
-            \$SAMTOOLS markdup -r -@ ${task.cpu} tmp_unmerged.srt.bam ${sample_id}_unmerged_alignment_dedup.bam
+            \$SAMTOOLS fixmate -@ ${task.cpus} -m ${sample_id}_unmerged_alignment_sorted.bam tmp_unmerged.bam
+            \$SAMTOOLS sort    -@ ${task.cpus} tmp_unmerged.bam -o tmp_unmerged.srt.bam
+            \$SAMTOOLS markdup -r -@ ${task.cpus} tmp_unmerged.srt.bam ${sample_id}_unmerged_alignment_dedup.bam
             rm -f tmp_unmerged.bam tmp_unmerged.srt.bam
         else
             echo "[INFO] No unmerged reads for ${sample_id} — creating empty BAMs"
@@ -391,36 +391,30 @@ process HostRemovalStats {
 process samtools_merge_bams {
     tag { sample_id }
     label 'small'
-
-    publishDir "${params.output}/Alignment/BAM_files/Combined", mode: 'copy'
-
+    publishDir "${params.output}/Alignment/BAM_files/Combined/${subdir}", mode: 'copy'
     input:
         tuple val(sample_id), path(bam_list)
-
+        val(subdir)                          // "" standard, "Deduped" for dedup
     output:
-        tuple val(sample_id), path("${sample_id}_combined.bam"), emit: combo_bam
-
+        tuple val(sample_id), path("${sample_id}_combined*.bam*"), emit: combo_bam
     script:
-
+    def outname = subdir ? "${sample_id}_combined.dedup" : "${sample_id}_combined"
     """
     set -euo pipefail
-
-    # Count total alignments across all input BAMs
     total=0
     for bam in ${bam_list.join(' ')}; do
         n=\$(\$SAMTOOLS view -c "\$bam" 2>/dev/null || echo 0)
         total=\$((total + n))
     done
-
     if [ "\$total" -gt 0 ]; then
-        \$SAMTOOLS merge -@ ${task.cpu} ${sample_id}_combined.unsorted.bam ${bam_list.join(' ')}
-        \$SAMTOOLS sort  -@ ${task.cpu} -o ${sample_id}_combined.bam ${sample_id}_combined.unsorted.bam
-        \$SAMTOOLS index ${sample_id}_combined.bam
-        rm -f ${sample_id}_combined.unsorted.bam
+        \$SAMTOOLS merge -@ ${task.cpus} ${outname}.unsorted.bam ${bam_list.join(' ')}
+        \$SAMTOOLS sort  -@ ${task.cpus} -o ${outname}.bam ${outname}.unsorted.bam
+        \$SAMTOOLS index ${outname}.bam
+        rm -f ${outname}.unsorted.bam
     else
-        echo "[INFO] All input BAMs for ${sample_id} are empty — creating empty combined BAM"
-        printf '@HD\\tVN:1.6\\tSO:coordinate\\n' | \$SAMTOOLS view -bS -o ${sample_id}_combined.bam -
-        \$SAMTOOLS index ${sample_id}_combined.bam
+        echo "[INFO] All input BAMs for ${sample_id} empty — creating empty combined BAM"
+        printf '@HD\\tVN:1.6\\tSO:coordinate\\n' | \$SAMTOOLS view -bS -o ${outname}.bam -
+        \$SAMTOOLS index ${outname}.bam
     fi
     """
 }

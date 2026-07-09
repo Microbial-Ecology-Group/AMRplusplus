@@ -1,6 +1,20 @@
 Details on AMR++ updates
 ------------
 
+# 2026-07-08 Partial update
+- Fragment counting, group-aware fragment resolution, and edge-aware query-coverage are now ON
+  BY DEFAULT (count_mode=fragment, group_aware=Y, edge_aware_qcov=Y):
+  * fragment: merged and unmerged reads weighted identically (fixes Combined-BAM double-counting).
+  * group_aware: same-MEGARes-Group mate disagreements collapse to one hit (higher-match_qcov mate).
+  * edge_aware_qcov: qcov is soft/hard-clip invariant and forgives gene-edge overhang while still
+    penalizing genuinely partial (mid-gene) clips.
+- Unified alignment_analyzer.py and coverage_threshold_sweep.py: identical --group-aware flag
+  (old --group-aware-discordant kept as alias), identical match_qcov_pct tie-break, and both parse
+  MEGARes Group from the reference name (alignment_analyzer no longer needs --annotation for
+  group-aware).
+- All three can be disabled (count_mode=read_end|alignment, --no-group-aware, --no-edge-aware-qcov).
+
+
 ## 2026-01-19: AMR++ v3 update
 - Added functionality for single end reads and a pipeline to merge reads with FLASH and analyze both merged fragments and unmerged reads.
 - Resistome analysis: Changed default gene fraction threshold to "0" and changed extraction of alignments from the BAM file to only include primary alignments (one read = one alignment)

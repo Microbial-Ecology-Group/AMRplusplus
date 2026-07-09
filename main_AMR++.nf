@@ -134,6 +134,7 @@ def helpMessage() {
 
     bam_resistome           Resistome analysis from BAM files
     bam_resistome_counts    Resistome counting from BAM files
+    bam_coverage_sweep      Per-BAM coverage threshold sweep + dropoff summary
 
     -------------------------------------------------------------------------------
                               OPTIONS
@@ -258,7 +259,7 @@ include { FASTQ_DEDUP_PE_WF } from './subworkflows/fastq_deduplicate.nf'
 // Load BAM subworkflows
 include { BAM_RESISTOME_WF } from './subworkflows/bam_resistome.nf'
 include { BAM_RESISTOME_COUNTS_WF } from './subworkflows/bam_resistome_counts.nf'
-
+include { BAM_COVERAGE_SWEEP_WF } from './subworkflows/bam_resistome.nf'
 
 // =============================================================================
 //  Entry workflow
@@ -570,6 +571,16 @@ workflow {
             }
             .set {bam_files_ch}
         BAM_RESISTOME_COUNTS_WF( bam_files_ch , params.amr, params.annotation )
+    }
+    else if(params.pipeline == "bam_coverage_sweep"){
+        logPipelineStart("BAM Coverage Threshold Sweep",
+            "Per-BAM coverage_threshold_sweep.py + plot_sweep_dropoff.R summary.\n    Input: ${params.bam_files}")
+        Channel
+            .fromPath(params.bam_files)
+            .ifEmpty { exit 1, "BAM files could not be found: ${params.bam_files}" }
+            .map { file -> tuple(file.baseName.split('\\.')[0], file) }
+            .set { bam_files_ch }
+        BAM_COVERAGE_SWEEP_WF( bam_files_ch )
     }
 
     // =========================================================================

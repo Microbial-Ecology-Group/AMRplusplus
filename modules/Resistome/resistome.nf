@@ -93,6 +93,134 @@ process runresistome {
     """
 }
 
+
+process runresistome_analyzer {
+    tag { sample_id }
+    label "medium"
+
+    publishDir "${params.output}/ResistomeAnalysis", mode: "copy",
+        saveAs: { filename ->
+            if      (filename.endsWith(".gene.tsv"))            "ResistomeCounts/$filename"
+            else if (filename.endsWith("_per_read.tsv"))        "PerReadInfo/$filename"
+            else if (filename.endsWith("_coverage_stats.tsv"))  "CoverageStats/$filename"
+            else {}
+        }
+
+    input:
+        tuple val(sample_id), path(bam)
+
+    output:
+        tuple val(sample_id), path("${sample_id}*.tsv"),    emit: resistome_tsv
+        path("${sample_id}.${params.prefix}.gene.tsv"),      emit: resistome_counts
+
+    script:
+    def count_mode = params.count_mode ?: "fragment"
+    def group_flag = (params.group_aware == "N")     ? "--no-group-aware"     : "--group-aware"
+    def edge_flag  = (params.edge_aware_qcov == "N")  ? "--no-edge-aware-qcov" : "--edge-aware-qcov"
+    def supp_flag  = (params.include_supplementary == "Y") ? "--include-supplementary" : ""
+    def cigar_flag = (params.cigar_aware_coverage  == "Y") ? "--cigar-aware-coverage"  : ""
+    """
+    set -euo pipefail
+
+    aln_count=\$(\$SAMTOOLS view -c ${bam} 2>/dev/null || echo 0)
+
+    if [ "\$aln_count" -gt 0 ]; then
+        \$PYTHON3 $baseDir/bin/alignment_analyzer.py \\
+            -i ${bam} \\
+            -r ${sample_id}.${params.prefix}_per_read.tsv \\
+            -g ${sample_id}.${params.prefix}.gene_summary.tsv \\
+            --sample-id ${sample_id} \\
+            --count-mode ${count_mode} \\
+            --min-mapq ${params.min_mapq} \\
+            --min-gene-fraction ${params.min_gene_fraction} \\
+            --min-query-coverage ${params.min_query_coverage} \\
+            --coverage-output ${sample_id}.${params.prefix}_coverage_stats.tsv \\
+            ${group_flag} ${edge_flag} ${supp_flag} ${cigar_flag}
+
+        # Reshape: gene_accession \\t meg_id \\t count  ->  sample \\t gene \\t count
+        tail -n +2 ${sample_id}.${params.prefix}.gene_summary.tsv \\
+          | awk -v s="${sample_id}" 'BEGIN{FS=OFS="\\t"} {print s, \$1, \$3}' \\
+          > ${sample_id}.${params.prefix}.gene.tsv
+    else
+        echo "[INFO] No alignments in BAM for ${sample_id} — writing empty gene counts"
+        : > ${sample_id}.${params.prefix}.gene.tsv
+    fi
+    """
+}
+
+// Coverage-threshold sweep diagnostic. Runs coverage_threshold_sweep.py on each BAM
+// to profile how gene detection drops off as coverage/quality thresholds increase,
+// then summarizes all per-sample sweeps with plot_sweep_dropoff.R.
+//
+// NOTE on counting: coverage_threshold_sweep.py counts per-FRAGMENT (mates resolved
+// together via base_read_id), so paired-end (unmerged) and FLASH-merged reads are
+// weighted identically. This matches --count-mode fragment in alignment_analyzer.py.
+
+process coverage_threshold_sweep {
+    tag { prefix }
+    label "medium"
+    publishDir "${params.output}/CoverageSweep/PerSample", mode: "copy"
+
+    input:
+        tuple val(prefix), path(bam)
+
+    output:
+        // All four are emitted into one channel so the combine step can stage them
+        // together. gene_detail + length_quantiles are what plot_sweep_dropoff.R needs;
+        // _results.csv is the main grid; _redundancy.csv is optional diagnostics.
+        path("${prefix}_*.csv"), emit: sweep_csvs
+
+    script:
+    def group_flag = (params.group_aware == "N")          ? "--no-group-aware"     : "--group-aware"
+    def edge_flag  = (params.sweep_edge_aware_qcov == "N") ? "--no-edge-aware-qcov" : "--edge-aware-qcov"
+    def snp_flag   = (params.sweep_exclude_snp == "Y")     ? "--exclude-snp-confirmation" : ""
+    """
+    set -euo pipefail
+
+    aln_count=\$(\$SAMTOOLS view -c ${bam} 2>/dev/null || echo 0)
+
+    if [ "\$aln_count" -gt 0 ]; then
+        \$PYTHON3 $baseDir/bin/coverage_threshold_sweep.py \\
+            -i ${bam} \\
+            -o ${prefix}_results.csv \\
+            --min-mapq ${params.min_mapq} \\
+            --gene-detail-output ${prefix}_gene_detail.csv \\
+            --redundancy-output ${prefix}_redundancy.csv \\
+            --length-quantiles-output ${prefix}_length_quantiles.csv \\
+            ${group_flag} ${edge_flag} ${snp_flag}
+    else
+        echo "[INFO] No alignments in ${bam} — writing empty sweep CSVs"
+        echo "min_query_coverage,min_identity,min_match_qcov,min_gene_fraction,n_alignments_retained" \\
+            > ${prefix}_results.csv
+        echo "min_query_coverage,gene_accession,gene_fraction,read_count" > ${prefix}_gene_detail.csv
+        echo "min_query_coverage,group,n_accessions" > ${prefix}_redundancy.csv
+        echo "min_query_coverage,n_alignments" > ${prefix}_length_quantiles.csv
+    fi
+    """
+}
+
+process plot_sweep_dropoff {
+    tag "sweep_summary"
+    label "small"
+    publishDir "${params.output}/CoverageSweep/Summary", mode: "copy"
+
+    input:
+        path(sweep_csvs)
+
+    output:
+        path("*.pdf"), optional: true
+        path("*.png"), optional: true
+        path("*.tsv"), optional: true
+        path("*.csv"), optional: true
+
+    script:
+    """
+    set -euo pipefail
+    \$RSCRIPT $baseDir/bin/plot_sweep_dropoff.R ${sweep_csvs.join(' ')}
+    """
+}
+
+
 process resistomeresults {
     tag "Make AMR count matrix"
     label "small"

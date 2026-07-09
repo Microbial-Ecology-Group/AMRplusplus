@@ -45,7 +45,11 @@ Any characterization of individual genes should be performed with alternative bi
 
 ## Alignment Counting
 
-As of AMR++ v4, we only count 1 alignment hit per read. Previously we counted all alignments (including secondary and supplemental), but we now recommend only keeping primary alignments. You can still change this by modifying the `--samtools_flag` parameter.
+As of AMR++ v4, by default AMR++ counts at the FRAGMENT level: a paired-end read pair and a FLASH-merged read each count as one fragment, so the two library types are directly comparable. When the two mates of a pair land on different-but-near-identical gene accessions (common because MEGARes contains many minor variants of the same gene), group-aware resolution collapses that to a single count for the shared gene Group, crediting the accession whose mate had the higher match-quality (match_qcov_pct) — which stays meaningful even though such reads usually have MAPQ 0.
+
+Query coverage (fraction of a read that aligned) is computed with edge-awareness: a read that aligns cleanly but runs off the end of a short gene is not penalized for the overhang, and soft- vs hard-clipping no longer changes the number. A read clipped in the MIDDLE of a gene (where the gene continues but the read didn't align) is still correctly penalized. Gene fraction (breadth of the gene covered) is measured on the reference and is unaffected.
+
+To reproduce older behavior: count_mode=read_end (or alignment), group_aware=N, edge_aware_qcov=N.
 
 ## Rarefaction Analysis
 

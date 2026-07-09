@@ -44,6 +44,7 @@ CHANGES IN THIS VERSION
 
 import argparse
 import os
+import re
 import statistics
 import sys
 from collections import Counter, defaultdict
@@ -85,18 +86,55 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sample-id", default=None,
                         help="Sample ID column header in the gene summary; inferred from filename if omitted.")
     parser.add_argument(
-        "--count-mode", choices=["read_end", "alignment"], default="read_end",
+        "--count-mode", choices=["read_end", "alignment", "fragment"], default="fragment",
         help=(
             "'read_end' (default): each read-end contributes exactly 1 count to "
             "its best primary alignment gene (highest MAPQ). "
-            "'alignment': each individual passing alignment record contributes 1 count."
+            "'alignment': each individual passing alignment record contributes 1 count. "
+            "'fragment': mates are resolved together into one physical fragment "
+            "(base_read_id groups R1/R2 and strips FLASH suffixes), so a paired-end "
+            "fragment and a FLASH-merged fragment are weighted IDENTICALLY (1 hit each). "
+            "This is the counting unit used by coverage_threshold_sweep.py and fixes the "
+            "old Combined-BAM problem where unmerged (paired) reads were counted twice "
+            "relative to merged reads."
         ),
+    )
+    parser.add_argument(
+        "--group-aware", dest="group_aware", action="store_true", default=True,
+        help=(
+            "(DEFAULT ON) Only meaningful with --count-mode fragment. When two mates of a "
+            "fragment disagree on gene_accession, check whether the two accessions share the "
+            "same MEGARes Group before treating it as real discordance. Same-Group disagreement "
+            "(the multi-mapping/redundant-accession artifact from BWA tie-breaking among "
+            "near-identical DB entries) is collapsed to ONE hit for the higher-match_qcov mate "
+            "rather than double-counted. Group is parsed directly from the MEGARes "
+            "pipe-delimited reference name (no annotation file needed). "
+            "Use --no-group-aware to disable."
+        ),
+    )
+    parser.add_argument(
+        "--no-group-aware", dest="group_aware", action="store_false",
+        help="Disable group-aware fragment resolution (mate disagreements count to each gene).",
     )
     parser.add_argument("--include-supplementary", action="store_true", default=False,
                         help="Include supplementary alignments in counts (and, by default, in breadth coverage).")
     parser.add_argument(
         "--min-gene-fraction", type=float, default=0.0,
         help="Minimum fraction of gene length covered by passing alignments for that gene to count (0.0-1.0).",
+    )
+    parser.add_argument("--edge-aware-qcov", dest="edge_aware_qcov", action="store_true", default=True,
+        help=(
+            "(DEFAULT ON) Compute query-coverage against a coverage-anchored read length: "
+            "reconstruct full read length from the CIGAR (soft AND hard clips) so "
+            "the aligner's clip choice doesn't change qcov, and discount clip bases "
+            "that overhang the reference edge (a read running off the end of a short "
+            "gene is not penalized for the overhanging portion). Only affects the "
+            "qcov (read-axis) metric; gene breadth/fraction is unaffected. "
+            "Use --no-edge-aware-qcov to disable."
+        ),
+    )
+    parser.add_argument("--no-edge-aware-qcov", dest="edge_aware_qcov", action="store_false",
+        help="Disable edge-aware qcov (use raw read.query_length as the denominator).",
     )
     parser.add_argument("--cigar-aware-coverage", action="store_true", default=False,
                         help="Use CIGAR-aware breadth coverage (excludes deletions/skips). Recommended.")
@@ -181,6 +219,49 @@ def get_covered_positions_simple(read: pysam.AlignedSegment) -> Set[int]:
     return set(range(read.reference_start, read.reference_end))
 
 
+def edge_aware_query_length(read: pysam.AlignedSegment, ref_length: int) -> int:
+    """
+    Coverage-anchored read length for query-coverage (qcov).
+
+    Two problems this fixes vs a raw read.query_length:
+      1. SOFT vs HARD clip asymmetry. read.query_length includes soft-clipped
+         bases but NOT hard-clipped ones, so the same physical alignment scores a
+         different qcov depending purely on whether the aligner soft- or
+         hard-clipped. We reconstruct the full physical length from the CIGAR
+         (aligned + BOTH clip types, ops 4=S and 5=H) so the choice is irrelevant.
+      2. REFERENCE-EDGE OVERHANG. When a read runs past the end of a short gene,
+         the overhanging bases COULD NOT have aligned (the reference simply ended).
+         Penalizing qcov for them is wrong. We subtract the portion of each
+         terminal clip that falls outside [0, ref_length) -- i.e. the bases with no
+         reference position to map to -- from the denominator.
+
+    Returns the number of read bases that actually HAD A CHANCE to align. qcov is
+    then aln_len / this, so a read fully explained by the gene that merely runs off
+    the gene's edge scores ~100% regardless of soft/hard clipping.
+
+    Never returns less than query_alignment_length (qcov <= 100%).
+    """
+    if read.cigartuples is None:
+        return read.query_alignment_length or 0
+
+    aln_len = read.query_alignment_length or 0
+    ops = read.cigartuples
+
+    lead_clip = ops[0][1] if ops and ops[0][0] in (4, 5) else 0
+    trail_clip = ops[-1][1] if len(ops) > 1 and ops[-1][0] in (4, 5) else 0
+
+    total_physical = aln_len + lead_clip + trail_clip
+
+    # bases of each terminal clip that overhang the reference edge (couldn't align)
+    ref_start = read.reference_start if read.reference_start is not None else 0
+    ref_end = read.reference_end if read.reference_end is not None else 0
+    overhang_5 = max(0, lead_clip - ref_start)
+    overhang_3 = max(0, trail_clip - (ref_length - ref_end)) if ref_length else 0
+
+    eff = total_physical - overhang_5 - overhang_3
+    return max(eff, aln_len)
+
+
 def aggregate_per_read_and_alignment_counts(
     aln: pysam.AlignmentFile,
     min_mapq: int = 0,
@@ -188,6 +269,8 @@ def aggregate_per_read_and_alignment_counts(
     include_supplementary: bool = False,
     cigar_aware_coverage: bool = False,
     coverage_ignore_filters: bool = False,
+    edge_aware_qcov: bool = False,
+    ref_lengths: Optional[Dict[str, int]] = None,
 ) -> Tuple[Dict[str, Dict[str, Any]], Counter, Counter, Dict[str, Set[int]], Dict[str, List[float]], int, int]:
     """
     Returns (per_read, align_counts_with_supp, align_counts_no_supp,
@@ -227,9 +310,23 @@ def aggregate_per_read_and_alignment_counts(
 
         ref_name = aln.get_reference_name(read.reference_id)
 
-        qlen = read.query_length or 0
         aln_len = read.query_alignment_length or 0
+        if edge_aware_qcov:
+            ref_len = (ref_lengths or {}).get(ref_name, 0)
+            qlen = edge_aware_query_length(read, ref_len)
+        else:
+            qlen = read.query_length or 0
         qcov_pct = round(aln_len / qlen * 100.0, 2) if qlen else 0.0
+
+        # match_qcov_pct = fraction of the WHOLE read explained by genuine matches
+        # (aligned bases minus edit distance), over the same (edge-aware if enabled)
+        # read-length denominator as qcov. Used as the group-aware tie-break metric.
+        # Reads with no NM tag fall back to qcov_pct so they still tie-break sensibly.
+        try:
+            nm = read.get_tag('NM')
+            match_qcov_pct = round((aln_len - nm) / qlen * 100.0, 2) if qlen else 0.0
+        except KeyError:
+            match_qcov_pct = qcov_pct
 
         passes_mapq = read.mapping_quality >= min_mapq
         passes_qcov = qcov_pct >= min_qcov_pct
@@ -244,7 +341,7 @@ def aggregate_per_read_and_alignment_counts(
 
         if read.is_secondary:
             gene_map = per_read[rid]["secondary_genes"]
-            gene_map.setdefault(ref_name, []).append((read.mapping_quality, qcov_pct))
+            gene_map.setdefault(ref_name, []).append((read.mapping_quality, qcov_pct, match_qcov_pct))
             if passes_filter:
                 align_counts_with_supp[ref_name] += 1
                 align_counts_no_supp[ref_name] += 1
@@ -252,7 +349,7 @@ def aggregate_per_read_and_alignment_counts(
 
         if read.is_supplementary:
             gene_map = per_read[rid]["supplementary_genes"]
-            gene_map.setdefault(ref_name, []).append((read.mapping_quality, qcov_pct))
+            gene_map.setdefault(ref_name, []).append((read.mapping_quality, qcov_pct, match_qcov_pct))
             if passes_filter:
                 align_counts_with_supp[ref_name] += 1
             continue
@@ -262,7 +359,7 @@ def aggregate_per_read_and_alignment_counts(
         if passes_filter:
             total_primary_passing += 1
             gene_map = per_read[rid]["primary_genes"]
-            gene_map.setdefault(ref_name, []).append((read.mapping_quality, qcov_pct))
+            gene_map.setdefault(ref_name, []).append((read.mapping_quality, qcov_pct, match_qcov_pct))
             align_counts_with_supp[ref_name] += 1
             align_counts_no_supp[ref_name] += 1
             gene_query_coverages[ref_name].append(qcov_pct)
@@ -418,6 +515,115 @@ def write_stats_output(
         out.write(f"pct_genes_passing_of_baseline\t{pct_genes_passing if pct_genes_passing is not None else 'NA'}\n")
 
 
+# ── Fragment-level counting (mirrors coverage_threshold_sweep.resolve_fragment_hits) ──
+
+# Same regexes coverage_threshold_sweep.py uses, so fragment identity is identical
+# between the two tools: strip FLASH suffixes and a trailing /1 /2 .1 .2.
+_RE_FLASH = re.compile(r'\.(extendedFrags|notCombined)[^/]*$')
+_RE_PAIR  = re.compile(r'[/\.][12]$')
+
+
+def get_base_read_id(read_id: str) -> str:
+    """Collapse a read-end id to its physical-fragment id (matches the sweep)."""
+    base = _RE_FLASH.sub('', read_id)
+    return _RE_PAIR.sub('', base)
+
+
+def parse_megares_group(ref_name: str) -> str:
+    """
+    Extract the Group field from a MEGARes pipe-delimited accession.
+    Header layout: MEG_ID|Type|Class|Mechanism|Group[|SNP]. Returns the Group
+    (5th field, index 4) or '' if the name isn't in the expected format.
+    Mirrors coverage_threshold_sweep.parse_gene_reference so both tools derive
+    Group the same way — directly from the reference name, no annotation CSV needed.
+    """
+    parts = ref_name.split('|')
+    return parts[4] if len(parts) >= 5 else ''
+
+
+def summarize_genes_fragment(
+    per_read: Dict[str, Dict[str, Any]],
+    passing_genes: Optional[Set[str]] = None,
+    group_aware: bool = False,
+) -> Tuple[Counter, Dict[str, int]]:
+    """
+    Fragment-level counting. First reduce each read-end to a single best gene,
+    then group those best-calls by base_read_id and resolve mates together.
+
+    "Best gene per read-end" and the group-aware disagreement tie-break both use
+    match_qcov_pct (fraction of the read explained by genuine matches), consistent
+    with coverage_threshold_sweep.resolve_fragment_hits. Ties broken alphabetically.
+
+      both mates same gene            -> 1 hit
+      only one mate present           -> 1 hit
+      mates disagree, group_aware off -> 1 hit to EACH gene (legacy behaviour)
+      mates disagree, group_aware on:
+        same Group, different accession -> 1 hit to the higher-match_qcov mate
+                                           (redundant-DB-entry artifact collapsed)
+        different Groups                -> 1 hit to EACH gene (real cross-mechanism
+                                           fragment; both mechanisms counted)
+
+    Returns (hits, diagnostics).
+    """
+    # Step 1: best gene per read-end, scored by match_qcov (3rd tuple element)
+    frag_groups: Dict[str, List[Tuple[str, float]]] = defaultdict(list)
+    for rid, info in per_read.items():
+        primary_genes = info["primary_genes"]
+        if not primary_genes:
+            continue
+        if passing_genes is not None:
+            primary_genes = {g: v for g, v in primary_genes.items() if g in passing_genes}
+            if not primary_genes:
+                continue
+        best_gene, best_score = None, -1.0
+        for gene, entries in primary_genes.items():
+            # entries are (mapq, qcov_pct, match_qcov_pct); score on match_qcov
+            max_mqcov = max(mqc for _mq, _qc, mqc in entries)
+            if max_mqcov > best_score or (max_mqcov == best_score and (best_gene is None or gene < best_gene)):
+                best_gene, best_score = gene, max_mqcov
+        if best_gene is not None:
+            frag_groups[get_base_read_id(rid)].append((best_gene, best_score))
+
+    # Step 2: resolve mates within each fragment
+    hits: Counter = Counter()
+    diagnostics: Dict[str, int] = defaultdict(int)
+
+    for base_id, entries in frag_groups.items():
+        if len(entries) == 1:
+            hits[entries[0][0]] += 1
+            diagnostics['one_mate_only'] += 1
+        elif len(entries) == 2:
+            (g1, s1), (g2, s2) = entries
+            if g1 == g2:
+                hits[g1] += 1
+                diagnostics['same_gene'] += 1
+            elif group_aware:
+                grp1, grp2 = parse_megares_group(g1), parse_megares_group(g2)
+                if grp1 and grp1 == grp2:
+                    # Same Group, different accession = redundant-DB-entry artifact.
+                    # Collapse to ONE hit for the higher-match_qcov mate (s1/s2);
+                    # alphabetical on exact tie.
+                    winner = g1 if (s1 > s2 or (s1 == s2 and g1 < g2)) else g2
+                    hits[winner] += 1
+                    diagnostics['same_group_diff_gene'] += 1
+                else:
+                    # Genuinely different Groups = a real cross-mechanism fragment.
+                    # Count ONE hit to EACH gene (both mechanisms are evidenced).
+                    hits[g1] += 1
+                    hits[g2] += 1
+                    diagnostics['cross_group_both_counted'] += 1
+            else:
+                hits[g1] += 1
+                hits[g2] += 1
+                diagnostics['legacy_discordant_both_counted'] += 1
+        else:
+            for g, _ in entries:
+                hits[g] += 1
+            diagnostics['unexpected_multi_mate'] += 1
+
+    return hits, diagnostics
+
+
 def main():
     args = parse_args()
     sample_id = args.sample_id if args.sample_id is not None else sample_id_from_path(args.input)
@@ -442,6 +648,8 @@ def main():
             include_supplementary=args.include_supplementary,
             cigar_aware_coverage=args.cigar_aware_coverage,
             coverage_ignore_filters=args.coverage_ignore_filters,
+            edge_aware_qcov=args.edge_aware_qcov,
+            ref_lengths=ref_lengths,
         )
     )
 
@@ -480,6 +688,12 @@ def main():
 
     if args.count_mode == "read_end":
         gene_counts = summarize_genes_read_end(per_read, passing_genes)
+    elif args.count_mode == "fragment":
+        gene_counts, frag_diag = summarize_genes_fragment(
+            per_read, passing_genes, group_aware=args.group_aware,
+        )
+        diag_str = ", ".join(f"{k}={v}" for k, v in sorted(frag_diag.items())) or "none"
+        print(f"[INFO] Fragment resolution diagnostics: {diag_str}")
     else:
         gene_counts = filter_align_counts(
             align_counts_with_supp if args.include_supplementary else align_counts_no_supp, passing_genes,

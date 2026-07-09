@@ -2,7 +2,7 @@
 include { index ; bwa_align ; bwa_merged_align ;bwa_align_se ; samtools_dedup_se ; samtools_merge_bams ;  samtools_merge_bams as  samtools_merge_bams_dedup} from '../modules/Alignment/bwa'
 
 // resistome
-include { plotrarefaction ; runresistome ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
+include { plotrarefaction ; runresistome_analyzer ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults} from '../modules/Resistome/resistome'
 
 // Deduped resistome
 include { BAM_DEDUP_RESISTOME_WF } from '../subworkflows/bam_deduped_resistome.nf'
@@ -18,11 +18,9 @@ workflow FASTQ_RESISTOME_WF {
         /* ------------ (1) DEPENDENCIES ---------------------------------- */
         if ( !file("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").exists() ) {
             build_dependencies()
-            resistomeanalyzer   = build_dependencies.out.resistomeanalyzer
             rarefactionanalyzer = build_dependencies.out.rarefactionanalyzer
             amrsnp              = build_dependencies.out.amrsnp
         } else {
-            resistomeanalyzer   = file("${baseDir}/bin/resistome")
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
             amrsnp              = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
         }
@@ -46,8 +44,8 @@ workflow FASTQ_RESISTOME_WF {
         /* ------------ (3) AMR ALIGNMENT ----------------------------------- */
         bwa_align(amr_index_files, read_pairs_ch )
         // Split sections below for standard and dedup_ed results
-        runresistome(bwa_align.out.bwa_bam,amr, annotation, resistomeanalyzer )
-        resistomeresults(runresistome.out.resistome_counts.collect(), "AMR")
+        runresistome_analyzer(bwa_align.out.bwa_bam)
+        resistomeresults(runresistome_analyzer.out.resistome_counts.collect(), "AMR")
         if (params.rarefaction == "Y") {
             runrarefaction(bwa_align.out.bwa_bam, annotation, amr, rarefactionanalyzer)
             plotrarefaction(runrarefaction.out.rarefaction.collect(), "AMR")
@@ -81,11 +79,9 @@ workflow MERGED_FASTQ_RESISTOME_WF {
         /* ------------ (1) DEPENDENCIES ---------------------------------- */
         if ( !file("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").exists() ) {
             build_dependencies()
-            resistomeanalyzer   = build_dependencies.out.resistomeanalyzer
             rarefactionanalyzer = build_dependencies.out.rarefactionanalyzer
             amrsnp              = build_dependencies.out.amrsnp
         } else {
-            resistomeanalyzer   = file("${baseDir}/bin/resistome")
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
             amrsnp              = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
         }
@@ -115,12 +111,12 @@ workflow MERGED_FASTQ_RESISTOME_WF {
                             .mix( bwa_merged_align.out.unmerged_bam ) \
                             .groupTuple()          // (id, [bam1,bam2])
 
-        samtools_merge_bams( bam_pairs_ch )
+        samtools_merge_bams( bam_pairs_ch ,"")
         def combo_bam_ch = samtools_merge_bams.out.combo_bam
 
         /* ------------ (5)  RESISTOME / RAREFACTION --------------------------- */
-        runresistome   ( combo_bam_ch, amr, annotation, resistomeanalyzer )
-        resistomeresults( runresistome.out.resistome_counts.collect() , "AMR")
+        runresistome_analyzer   ( combo_bam_ch )
+        resistomeresults( runresistome_analyzer.out.resistome_counts.collect() , "AMR")
 
         runrarefaction ( combo_bam_ch, annotation, amr, rarefactionanalyzer )
         plotrarefaction( runrarefaction.out.rarefaction.collect(), "AMR" )
@@ -136,7 +132,7 @@ workflow MERGED_FASTQ_RESISTOME_WF {
             def dedup_pairs_ch = bwa_merged_align.out.merged_dedup_bam \
                                     .mix( bwa_merged_align.out.unmerged_dedup_bam ) \
                                     .groupTuple()
-            samtools_merge_bams_dedup( dedup_pairs_ch )
+            samtools_merge_bams_dedup( dedup_pairs_ch , "Deduped")
             BAM_DEDUP_RESISTOME_WF( samtools_merge_bams_dedup.out.combo_bam,
                                     amr, annotation )
         }
@@ -153,11 +149,9 @@ workflow FASTQ_RESISTOME_SE_WF {
         /* ------------ (1) DEPENDENCIES ---------------------------------- */
         if ( !file("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").exists() ) {
             build_dependencies()
-            resistomeanalyzer   = build_dependencies.out.resistomeanalyzer
             rarefactionanalyzer = build_dependencies.out.rarefactionanalyzer
             amrsnp              = build_dependencies.out.amrsnp
         } else {
-            resistomeanalyzer   = file("${baseDir}/bin/resistome")
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
             amrsnp              = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
         }
@@ -188,8 +182,8 @@ workflow FASTQ_RESISTOME_SE_WF {
             ? samtools_dedup_se.out.dedup_bam \
             : bwa_align_se.out.bwa_bam
 
-        runresistome   ( bam_for_resistome, amr, annotation, resistomeanalyzer )
-        resistomeresults( runresistome.out.resistome_counts.collect(), "AMR" )
+        runresistome_analyzer   ( bam_for_resistome )
+        resistomeresults( runresistome_analyzer.out.resistome_counts.collect(), "AMR" )
         
         if (params.rarefaction == "Y") {
             runrarefaction ( bam_for_resistome, annotation, amr, rarefactionanalyzer )
