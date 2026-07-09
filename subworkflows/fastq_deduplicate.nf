@@ -28,7 +28,7 @@ workflow FASTQ_DEDUP_PE_WF {
 
 }
 
-// Paired end trimming
+// Merged read trimming
 workflow FASTQ_DEDUP_MERGED_WF {
   take: fastq_files
   main:

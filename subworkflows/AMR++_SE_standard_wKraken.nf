@@ -22,6 +22,7 @@ workflow SE_AMRplusplus_wKraken {
         if( params.read_dedup == "Y" ) {
             FASTQ_DEDUP_SE_WF( FASTQ_TRIM_SE_WF.out.se_fastq )
             reads_for_host = FASTQ_DEDUP_SE_WF.out.deduped_reads
+                .map { sample_id, r1, r2 -> tuple(sample_id, [r1, r2]) }
         } else {
             reads_for_host = FASTQ_TRIM_SE_WF.out.trimmed_reads
         }

@@ -18,6 +18,7 @@ workflow FAST_AMRplusplus {
         if( params.read_dedup == "Y" ) {
             FASTQ_DEDUP_PE_WF( FASTQ_TRIM_WF.out.trimmed_reads )
             reads_for_host = FASTQ_DEDUP_PE_WF.out.deduped_reads
+                .map { sample_id, r1, r2 -> tuple(sample_id, [r1, r2]) }
         } else {
             reads_for_host = FASTQ_TRIM_WF.out.trimmed_reads
         }
