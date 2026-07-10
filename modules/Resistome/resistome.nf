@@ -257,11 +257,11 @@ process resistomeresults {
         val  prefix
 
     output:
-        path("${params.prefix}_analytic_matrix.csv"), emit: raw_count_matrix
-        path("${params.prefix}_analytic_matrix.csv"), emit: snp_count_matrix, optional: true
+        path("${params.prefix}_${params.min_gene_fraction}gf_${params.min_query_coverage}qc_analytic_matrix.csv"), emit: raw_count_matrix
+        path("${params.prefix}_${params.min_gene_fraction}gf_${params.min_query_coverage}qc_analytic_matrix.csv"), emit: snp_count_matrix, optional: true
     script:
     """
-    \$PYTHON3 $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ${params.prefix}_analytic_matrix.csv
+    \$PYTHON3 $baseDir/bin/amr_long_to_wide.py -i ${resistomes} -o ${params.prefix}_${params.min_gene_fraction}gf_${params.min_query_coverage}qc_analytic_matrix.csv
     """
 }
 
