@@ -451,11 +451,11 @@ process snpresults {
         val  prefix
 
     output:
-        path("*_analytic_matrix.csv"), emit: snp_matrix
+        path("*${params.min_gene_fraction}gf_${params.min_query_coverage}qc_analytic_matrix.csv"), emit: snp_matrix
 
     script:
     """
-    \$PYTHON3 $baseDir/bin/snp_long_to_wide.py -i ${snp_counts} -o SNPconfirmed_${prefix}_analytic_matrix.csv
+    \$PYTHON3 $baseDir/bin/snp_long_to_wide.py -i ${snp_counts} -o SNPconfirmed_${prefix}_${params.min_gene_fraction}gf_${params.min_query_coverage}qc_analytic_matrix.csv
     """
 }
 
