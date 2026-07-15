@@ -391,7 +391,9 @@ process HostRemovalStats {
 process samtools_merge_bams {
     tag { sample_id }
     label 'small'
-    publishDir "${params.output}/Alignment/BAM_files/Combined/${subdir}", mode: 'copy'
+
+    publishDir { "${params.output}/Alignment/BAM_files/Combined/${subdir}" }, mode: 'copy'
+
     input:
         tuple val(sample_id), path(bam_list)
         val(subdir)                          // "" standard, "Deduped" for dedup

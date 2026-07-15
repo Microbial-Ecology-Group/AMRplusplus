@@ -86,7 +86,19 @@ workflow MERGED_FASTQ_ALIGN_WF {
                             .mix( bwa_merged_align.out.unmerged_bam ) \
                             .groupTuple()          // (id, [bam1,bam2])
 
-        samtools_merge_bams( bam_pairs_ch )
+        samtools_merge_bams( bam_pairs_ch,"standard" )
+
+        // Add analysis of deduped counts
+        if (params.deduped == "Y"){
+            BAM_DEDUP_RESISTOME_WF(bwa_align.out.bwa_dedup_bam,amr, annotation)
+            def bam_deduped_pairs_ch = bwa_merged_align.out.merged_dedup_bam \
+                            .mix( bwa_merged_align.out.unmerged_dedup_bam ) \
+                            .groupTuple()          // (id, [bam1,bam2])
+            samtools_merge_bams_dedup ( bam_pairs_ch,"deduped" )
+
+
+        }
+
 }
 
 workflow SE_FASTQ_ALIGN_WF {

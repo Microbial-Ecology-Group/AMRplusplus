@@ -603,11 +603,6 @@ workflow {
     }
 
     // =========================================================================
-    //                         ON COMPLETE HANDLER
-    //  Moved inside the entry workflow -- a bare `workflow.onComplete {}` at
-    //  the top level is itself a statement and is rejected by the strict
-    //  parser for the same reason as everything else above.
-    // =========================================================================
     workflow.onComplete = {
         log.info """
     ===============================================================================
