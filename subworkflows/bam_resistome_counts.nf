@@ -10,12 +10,12 @@ workflow BAM_RESISTOME_COUNTS_WF {
 
     main:
         // download resistome and rarefactionanalyzer
-        if (file("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").isEmpty()){
+        if (!file("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").exists() ){
             build_dependencies()
             amrsnp =  build_dependencies.out.amrsnp
         }
         else {
-            amrsnp = file("${baseDir}/bin/AmrPlusPlus_SNP/*")
+            amrsnp = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
         }
         // Run resistome analyzer and count matrix creation
         runresistome_analyzer(bam_ch )
