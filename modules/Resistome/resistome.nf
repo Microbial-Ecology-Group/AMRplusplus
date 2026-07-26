@@ -60,7 +60,7 @@ process runresistome {
         path(resistome)
 
     output:
-        tuple val(sample_id), path("${sample_id}*.tsv"), emit: resistome_tsv
+        tuple val(sample_id), path("${sample_id}.*.tsv"), emit: resistome_tsv
         path("${sample_id}.${params.prefix}.gene.tsv"), emit: resistome_counts
 
     script:
@@ -110,7 +110,7 @@ process runresistome_analyzer {
         tuple val(sample_id), path(bam)
 
     output:
-        tuple val(sample_id), path("${sample_id}*.tsv"),    emit: resistome_tsv
+        tuple val(sample_id), path("${sample_id}.*.tsv"),    emit: resistome_tsv
         path("${sample_id}.${params.prefix}.gene.tsv"),      emit: resistome_counts
 
     script:
