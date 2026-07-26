@@ -238,6 +238,12 @@ wc -l AMR++_results/Results/AM*  # compare row counts across output matrices
 rm -rf work/
 ```
 
+> **Optional — tune your thresholds:** The resistome step above produces per-sample BAM files
+> (under `Alignment/BAM_files/`). If you'd like to see how your resistome results change as you
+> tighten gene-fraction and query-coverage cutoffs, and pick sensible thresholds, run the
+> [coverage threshold sweep](Coverage_sweep_tutorial.md) on those BAMs.
+
+
 ---
 
 ## Step 5 (Optional): Microbiome Analysis (kraken)
