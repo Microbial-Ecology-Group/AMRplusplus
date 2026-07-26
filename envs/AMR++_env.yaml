@@ -20,3 +20,8 @@ dependencies:
   - git
   - flash
   - seqkit
+  - pysam
+  - duckdb            # python duckdb
+  - r-base
+  - r-tidyverse
+  - r-data.table

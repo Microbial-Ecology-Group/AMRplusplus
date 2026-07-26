@@ -9,26 +9,44 @@ nextflow.enable.dsl=2
  * given `params.foo` specify on the run command line `--foo some_value`.
 */
 
-// Determine pipeline type and input source
-def pipelineType = "Paired-end"
-def inputParam = "--reads"
-def inputPath = params.reads
+// =============================================================================
+//  Helper functions
+//  NOTE: All executable logic lives in functions or inside the entry workflow
+//  block below. Top-level statements (variable assignments, Channel pipelines,
+//  if/else chains) cannot be mixed with top-level declarations (process,
+//  workflow, include) under Nextflow's strict syntax parser. Writing it this
+//  way is compatible with both the classic (v1) and strict (v2) parsers.
+// =============================================================================
 
-if (params.pipeline?.startsWith("se_") || params.pipeline == "se_AMR") {
-    pipelineType = "Single-end"
-    inputParam = "--reads"
-    inputPath = params.reads
-} else if (params.pipeline?.startsWith("merged_") || params.pipeline == "merged_AMR" || params.pipeline == "merged_AMR_wKraken") {
-    pipelineType = "Merged reads"
-    inputParam = "--merged_reads"
-    inputPath = params.merged_reads ?: params.reads
-} else if (params.pipeline?.startsWith("bam_")) {
-    pipelineType = "BAM files"
-    inputParam = "--bam_files"
-    inputPath = params.bam_files ?: "Not specified"
+def getPipelineInfo() {
+    def pipelineType = "Paired-end"
+    def inputParam = "--reads"
+    def inputPath = params.reads
+
+    if (params.pipeline?.startsWith("se_") || params.pipeline == "se_AMR") {
+        pipelineType = "Single-end"
+        inputParam = "--reads"
+        inputPath = params.reads
+    } else if (params.pipeline?.startsWith("merged_") || params.pipeline == "merged_AMR" || params.pipeline == "merged_AMR_wKraken") {
+        pipelineType = "Merged reads"
+        inputParam = "--merged_reads"
+        inputPath = params.merged_reads ?: params.reads
+    } else if (params.pipeline?.startsWith("bam_")) {
+        pipelineType = "BAM files"
+        inputParam = "--bam_files"
+        inputPath = params.bam_files ?: "Not specified"
+    }
+
+    return [pipelineType, inputParam, inputPath]
 }
 
-log.info """\
+def printPipelineBanner() {
+    def info = getPipelineInfo()
+    def pipelineType = info[0]
+    def inputParam   = info[1]
+    def inputPath    = info[2]
+
+    log.info """\
  A M R + +    N F   P I P E L I N E
  ===================================
  Pipeline             : ${params.pipeline ?: 'demo'}
@@ -37,9 +55,10 @@ log.info """\
  Output folder        : ${params.output}
  ===================================
 """
+}
 
-
-def helpMessage = """\
+def helpMessage() {
+    return """\
     ===============================================================================
                         AMR++ Nextflow Pipeline Help
     ===============================================================================
@@ -93,6 +112,7 @@ def helpMessage = """\
     se_eval_qc              FastQC for single-end reads
     se_trim_qc              Trimming for single-end reads
     se_rm_host              Host removal for single-end reads
+    se_align                Perform alignment to MEGARes database for single-end reads
     se_resistome            Resistome analysis for single-end reads
     se_kraken               Kraken analysis for single-end reads
 
@@ -103,6 +123,7 @@ def helpMessage = """\
 
     merge_reads             Merge paired-end reads with FLASH
     merged_rm_host          Host removal for merged reads
+    merged_align            Perform alignment to MEGARes database only for merged reads
     merged_resistome        Resistome analysis for merged reads
     merged_kraken           Kraken analysis for merged reads
 
@@ -113,6 +134,7 @@ def helpMessage = """\
 
     bam_resistome           Resistome analysis from BAM files
     bam_resistome_counts    Resistome counting from BAM files
+    bam_coverage_sweep      Per-BAM coverage threshold sweep + dropoff summary
 
     -------------------------------------------------------------------------------
                               OPTIONS
@@ -181,6 +203,7 @@ def helpMessage = """\
     For more information, visit: https://github.com/Microbial-Ecology-Group/AMRplusplus
     ===============================================================================
     """
+}
 
 // Helper function for consistent pipeline logging
 def logPipelineStart(String pipelineName, String description) {
@@ -193,14 +216,9 @@ def logPipelineStart(String pipelineName, String description) {
     """
 }
 
-Channel
-    .fromFilePairs( params.reads , size: (params.reads =~ /\{/) ? 2 : 1)
-    .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
-    .map { id, files -> 
-        def modified_baseName = id.split('\\.')[0]
-        tuple(modified_baseName, files)
-    }
-    .set {fastq_files}
+// =============================================================================
+//  Includes (declarations -- always allowed at top level)
+// =============================================================================
 
 // Load main pipeline workflows
 include { STANDARD_AMRplusplus } from './subworkflows/AMR++_standard.nf' 
@@ -210,20 +228,23 @@ include { STANDARD_AMRplusplus_wKraken } from './subworkflows/AMR++_standard_wKr
 // Load merged read workflows
 include { STANDARD_merged_AMRplusplus } from './subworkflows/AMR++_merged_standard.nf'
 include { STANDARD_merged_AMRplusplus_wKraken } from './subworkflows/AMR++_merged_standard_wKraken.nf'
-include { FASTQ_MERGE_WF } from "$baseDir/subworkflows/fastq_merging.nf"
-include { MERGED_FASTQ_RM_HOST_WF } from "$baseDir/subworkflows/fastq_host_removal.nf" 
-include { MERGED_FASTQ_RESISTOME_WF } from "$baseDir/subworkflows/fastq_resistome.nf"
-include { MERGED_FASTQ_KRAKEN_WF } from "$baseDir/subworkflows/fastq_microbiome.nf"
+include { FASTQ_MERGE_WF } from './subworkflows/fastq_merging.nf'
+include { FASTQ_DEDUP_MERGED_WF } from './subworkflows/fastq_deduplicate.nf'
+include { MERGED_FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf'
+include { MERGED_FASTQ_ALIGN_WF } from './subworkflows/fastq_align.nf' 
+include { MERGED_FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
+include { MERGED_FASTQ_KRAKEN_WF } from './subworkflows/fastq_microbiome.nf'
 
 // Load SE read workflows
 include { SE_AMRplusplus } from './subworkflows/AMR++_SE_standard.nf'
 include { SE_AMRplusplus_wKraken } from './subworkflows/AMR++_SE_standard_wKraken.nf'
 include { FASTQ_QC_SE_WF } from './subworkflows/fastq_information.nf'
 include { FASTQ_TRIM_SE_WF } from './subworkflows/fastq_QC_trimming.nf'
+include { FASTQ_DEDUP_SE_WF } from './subworkflows/fastq_deduplicate.nf'
 include { FASTQ_RM_HOST_SE_WF   } from './subworkflows/fastq_host_removal.nf'
+include { SE_FASTQ_ALIGN_WF } from './subworkflows/fastq_align.nf'
 include { FASTQ_RESISTOME_SE_WF } from './subworkflows/fastq_resistome.nf'
 include { FASTQ_KRAKEN_SE_WF    } from './subworkflows/fastq_microbiome.nf'
-
 
 // Load subworkflows
 include { FASTQ_QC_WF } from './subworkflows/fastq_information.nf'
@@ -233,19 +254,37 @@ include { FASTQ_RM_HOST_WF } from './subworkflows/fastq_host_removal.nf'
 include { FASTQ_RESISTOME_WF } from './subworkflows/fastq_resistome.nf'
 include { FASTQ_KRAKEN_WF } from './subworkflows/fastq_microbiome.nf'
 include { FASTQ_QIIME2_WF } from './subworkflows/fastq_16S_qiime2.nf'
+include { FASTQ_DEDUP_PE_WF } from './subworkflows/fastq_deduplicate.nf'
 
 // Load BAM subworkflows
 include { BAM_RESISTOME_WF } from './subworkflows/bam_resistome.nf'
 include { BAM_RESISTOME_COUNTS_WF } from './subworkflows/bam_resistome_counts.nf'
+include { BAM_COVERAGE_SWEEP_WF } from './subworkflows/bam_resistome.nf'
 
-
+// =============================================================================
+//  Entry workflow
+//  All executable statements (Channel pipelines, if/else routing, onComplete)
+//  live inside this block.
+// =============================================================================
 
 workflow {
+
+    printPipelineBanner()
+
+    Channel
+        .fromFilePairs( params.reads , size: (params.reads =~ /\{/) ? 2 : 1)
+        .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
+        .map { id, files -> 
+            def modified_baseName = id.split('\\.')[0]
+            tuple(modified_baseName, files)
+        }
+        .set { fastq_files }
+
     // =========================================================================
     //                          HELP / DEFAULT
     // =========================================================================
     if (params.pipeline == null || params.pipeline == "help") {
-        println helpMessage
+        println helpMessage()
         FAST_AMRplusplus(fastq_files, params.amr, params.annotation)
     }
 
@@ -322,6 +361,11 @@ workflow {
             "Running Trimmomatic for adapter removal and quality trimming.\n    Generates trimmed reads and QC reports.")
         FASTQ_TRIM_WF( fastq_files )
     }
+    else if(params.pipeline == "dedup") {
+        logPipelineStart("Deduplication",
+            "Deduplicating paired end reads.\n    Generates deduped fastq reads.")
+        FASTQ_DEDUP_PE_WF( fastq_files )
+    }
     else if(params.pipeline == "rm_host") {
         logPipelineStart("Host Removal",
             "Removing host-derived reads using BWA alignment.\n    Host genome: ${params.host}")
@@ -366,7 +410,7 @@ workflow {
             "Running FastQC analysis on single-end reads.")
         Channel
             .fromPath(params.reads)
-            .map { f -> tuple(f.baseName, f) }
+            .map { f -> tuple(f.simpleName, f) }
             .set { read_se_ch }
         FASTQ_QC_SE_WF( read_se_ch )
     }
@@ -375,25 +419,39 @@ workflow {
             "Running Trimmomatic on single-end reads.")
         Channel
             .fromPath(params.reads)
-            .map { f -> tuple(f.baseName, f) }
+            .map { f -> tuple(f.simpleName, f) }
             .set { read_se_ch }
         FASTQ_TRIM_SE_WF( read_se_ch )
+    }
+    else if(params.pipeline == "se_dedup") {
+        logPipelineStart("Deduplication",
+            "Deduplicating single end reads.\n    Generates deduped single-end fastq reads.")
+        FASTQ_DEDUP_SE_WF( fastq_files )
     }
     else if(params.pipeline == "se_rm_host") {
         logPipelineStart("Single-End Host Removal",
             "Removing host reads from single-end data.\n    Host genome: ${params.host}")
         Channel
             .fromPath(params.reads)
-            .map { f -> tuple(f.baseName, f) }
+            .map { f -> tuple(f.simpleName, f) }
             .set { read_se_ch }
         FASTQ_RM_HOST_SE_WF( params.host, read_se_ch )
     }
+    else if(params.pipeline == "se_align") {
+        logPipelineStart("Alignment Only",
+            "Aligning reads to MEGARes database with BWA.\n    Generates BAM files for downstream analysis.")
+        Channel
+            .fromPath(params.reads)
+            .map { f -> tuple(f.simpleName, f) }
+            .set { read_se_ch }
+        SE_FASTQ_ALIGN_WF( read_se_ch, params.amr)
+    }  
     else if(params.pipeline == "se_resistome") {
         logPipelineStart("Single-End Resistome",
             "Performing resistome analysis on single-end reads.")
         Channel
             .fromPath(params.reads)
-            .map { f -> tuple(f.baseName, f) }
+            .map { f -> tuple(f.simpleName, f) }
             .set { read_se_ch }
         FASTQ_RESISTOME_SE_WF( read_se_ch , params.amr, params.annotation )
     }
@@ -402,7 +460,7 @@ workflow {
             "Running Kraken2 on single-end reads.\n    Database: ${params.kraken_db}")
         Channel
             .fromPath(params.reads)
-            .map { f -> tuple(f.baseName, f) }
+            .map { f -> tuple(f.simpleName, f) }
             .set { read_se_ch }
         FASTQ_KRAKEN_SE_WF( read_se_ch )
     }
@@ -438,6 +496,21 @@ workflow {
             }
             .set { to_host_rm_ch }
         MERGED_FASTQ_RM_HOST_WF(params.host, to_host_rm_ch)
+    }  
+    else if(params.pipeline == "merged_align") {
+        logPipelineStart("Alignment Only",
+            "Aligning reads to MEGARes database with BWA.\n    Generates BAM files for downstream analysis.")
+        Channel
+          .fromFilePairs( params.merged_reads, glob: true )
+          .ifEmpty { error "No FASTQ files match: ${params.merged_reads}" }
+          .map { sample_id, files ->
+            def merged   = files.find { it.name.contains('merged')   }
+            def unmerged = files.find { it.name.contains('unmerged') }
+            assert merged && unmerged : "Sample $sample_id missing one of merged/unmerged"
+            tuple( sample_id, merged, unmerged )
+          }
+          .set { to_align_ch }
+        MERGED_FASTQ_ALIGN_WF( to_align_ch, params.amr)
     }  
     else if(params.pipeline == "merged_resistome") {
         logPipelineStart("Merged Reads Resistome",
@@ -499,6 +572,16 @@ workflow {
             .set {bam_files_ch}
         BAM_RESISTOME_COUNTS_WF( bam_files_ch , params.amr, params.annotation )
     }
+    else if(params.pipeline == "bam_coverage_sweep"){
+        logPipelineStart("BAM Coverage Threshold Sweep",
+            "Per-BAM coverage_threshold_sweep.py + plot_sweep_dropoff.R summary.\n    Input: ${params.bam_files}")
+        Channel
+            .fromPath(params.bam_files)
+            .ifEmpty { exit 1, "BAM files could not be found: ${params.bam_files}" }
+            .map { file -> tuple(file.baseName.split('\\.')[0], file) }
+            .set { bam_files_ch }
+        BAM_COVERAGE_SWEEP_WF( bam_files_ch )
+    }
 
     // =========================================================================
     //                         ERROR HANDLING
@@ -515,14 +598,13 @@ workflow {
     Run with --pipeline help to see all available options.
     ===============================================================================
         """
-        println helpMessage
+        println helpMessage()
         System.exit(1)  
     }
-}
 
-
-workflow.onComplete {
-    log.info """
+    // =========================================================================
+    workflow.onComplete = {
+        log.info """
     ===============================================================================
                             Pipeline Complete
     ===============================================================================
@@ -535,4 +617,5 @@ workflow.onComplete {
     Output directory: ${params.output}
     ===============================================================================
     """
+    }
 }

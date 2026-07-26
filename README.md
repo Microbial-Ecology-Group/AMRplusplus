@@ -22,31 +22,45 @@ With AMR++, you will obtain alignment count files for each sample that are combi
 [Detailed changes here.](docs/CHANGELOG.md)
 
 Brief overview:
-1. Switch to only counting primary resistome alignments. 
-2. Changed default AMR gene fraction ```--threshold``` to `0`. We recommend running statistical analysis of count matrices after aggregating to the "Group" level to account for possible false-positive calls of individual gene accessions. 
-3. Added single-end and merged-read analysis.
-4. Changed defaults to skip rarefaction analysis, but default to running the SNP confirmation and deduplication of resistome counts.
+1. **Resistome counting now uses `alignment_analyzer.py` (AlignmentAnalyzer), replacing the compiled `resistomeanalyzer` binary.** The new analyzer reads the BAM directly and produces the gene-level count matrix, with several improvements to *how* alignments are turned into counts (items 2–4 below). The old `resistomeanalyzer` binary is no longer used for gene counting.
+2. **Fragment-level counting — a major change to how hits are counted.** AMR++ now counts at the *fragment* level rather than counting every read as a separate hit.
+   - Previously: every aligned read counted as one hit, so a paired-end fragment (R1 + R2) could be counted twice while a merged read counted once — inflating and skewing counts between library types.
+   - Now: a read pair and a merged read each count as **one hit**, so paired-end and merged data are directly comparable. This is the default (`count_mode = "fragment"`).
+   - When a fragment's two mates map to different-but-near-identical gene accessions in the same MEGARes **Group** (a common database-redundancy artifact), the hit is collapsed to one gene (`group_aware = "Y"`) rather than double-counted. Mates mapping to genuinely different Groups are counted once to each.
+   - Query coverage is now "edge-aware" (`edge_aware_qcov = "Y"`): a read that aligns cleanly but runs off the end of a short gene isn't penalized for the overhanging portion. All three behaviors can be turned off (`count_mode = read_end`, `group_aware = "N"`, `edge_aware_qcov = "N"`).
+3. **Only primary alignments are counted** for the resistome (secondary/supplementary alignments are excluded by default).
+4. Changed default AMR gene fraction `--threshold` to `0`, and added query-coverage / gene-fraction filters to the analyzer (`--min_gene_fraction`, `--min_query_coverage`, both on a 0–1 proportion scale). We recommend running statistical analysis of count matrices after aggregating to the "Group" level to account for possible false-positive calls of individual gene accessions.
+5. **Deduplication: alignment deduplication is no longer run by default — we now recommend read deduplication instead**, particularly when analyzing target-enriched data.
+   - **Read deduplication** (`read_dedup = "Y"`, Clumpify, applied after QC trimming) more directly addresses PCR duplication by collapsing reads that are actual sequence duplicates.
+   - **Alignment deduplication** (`deduped`) produced a larger overall reduction in read numbers, but that reduction included reads that were **not** true duplicates — reads could be collapsed based on alignment coordinates/length rather than being genuine PCR duplicates. Because of this over-collapsing, it is no longer the default recommendation.
+   - Alignment deduplication is still available for comparison via `deduped = "Y"`; read deduplication is the recommended approach.
+6. Added single-end and merged-read analysis.
+7. Changed defaults to skip rarefaction analysis, but default to running SNP confirmation.
+8. **Updated SNP confirmation tool (on a separate branch).** The SNP verifier now adjusts counts by the *proportion of reads that actually carry the confirmed SNP*: it computes (reads with the SNP / reads covering the SNP position) and multiplies by the gene's count, rather than substituting a raw resistant-read count. Genes that require SNP confirmation but have no entry in the SNP database are now set to zero (previously they passed through unconfirmed). The tool has also been updated to run cleanly under **Nextflow DSL2 syntax**.
+9. **New coverage-threshold sweep workflow (`bam_coverage_sweep`).** Runs a set of pre-aligned BAMs across a grid of gene-fraction and query-coverage thresholds, then produces combined matrices and drop-off plots showing how the resistome (genes, classes, mechanisms, groups) shrinks as thresholds tighten — a way to choose sensible cutoffs and see each sample's sensitivity to them. See the [coverage sweep tutorial](docs/Coverage_sweep_tutorial.md).
+
 
 [Additional analysis tips here.](docs/Analysis_recommendations.md)
 
 More Information
 ----------------
 
-- [Installation](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/installation.md)
-- [Usage](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/usage.md)
+- [Getting Started](docs/GettingStarted.md)
+- [Installation](docs/installation.md)
+- [Usage](docs/usage.md)
   - [Choosing the right pipeline](docs/choosing_pipeline.md)
   - [Analysis recommendations](docs/Analysis_recommendations.md)
   - [Paired-end analysis step-by-step](docs/Step_by_step_tutorial.md)
   - [Single-end analysis step-by-step](docs/SingleEnd_read_tutorial.md)
   - [Merged-read analysis step-by-step](docs/Merged_read_tutorial.md)
-- [Configuration](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/configuration.md)
+  - [Coverage threshold sweep](docs/Coverage_sweep_tutorial.md)
+- [Configuration](docs/configuration.md)
   - [Tips for using SLURM](docs/Running_with_SLURM.md)
-- [Output](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/output.md)
-- [Dependencies](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/dependencies.md)
-- [Software Requirements](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/requirements.md)
-- [Troubleshooting and FAQs](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/FAQs.md)
-- [Details on AMR++ updates](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/update_details.md)
-- [Contact](https://github.com/Microbial-Ecology-Group/AMRplusplus/blob/master/docs/contact.md)
+- [Output](docs/output.md)
+- [Dependencies](docs/dependencies.md)
+- [Troubleshooting and FAQs](FAQs.md)
+- [Details on AMR++ updates](docs/CHANGELOG.md)
+- [Contact](docs/contact.md)
 
 
 
@@ -74,7 +88,7 @@ conda env create -f envs/AMR++_env.yaml
 # This can take 5-10 mins (or more) depending on your internet speed, computing resources, etc. 
 
 # Once it's completed, activate the environment
-conda activate AMR++_env.yaml
+conda activate AMR++_env
 
 # You now have access to all the AMR++ software dependencies (locally)
 samtools --help
@@ -116,7 +130,9 @@ Here are some tutorials to run each analysis step by step:
 
 - [Paired-end analysis step-by-step](docs/Step_by_step_tutorial.md)
 - [Single-end analysis step-by-step](docs/SingleEnd_read_tutorial.md)
-- [Merged-read analysis step-by-step](docs/Merged_read_tutorial.md) 
+- [Merged-read analysis step-by-step](docs/Merged_read_tutorial.md)
+
+> **Tip:** Always run the demo first (`--pipeline demo`) before your first analysis. See [Getting Started](docs/GettingStarted.md) for an explanation of the work directory, SLURM setup, and conda vs local profiles.
 
 
 # Optional flags

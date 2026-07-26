@@ -1,8 +1,6 @@
 // Load modules
 include {MergeReadsFlash } from '../modules/QC/merge'
 
-import java.nio.file.Paths
-
 workflow FASTQ_MERGE_WF {
     take: 
         read_pairs_ch

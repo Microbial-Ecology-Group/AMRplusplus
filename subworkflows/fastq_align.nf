@@ -1,7 +1,6 @@
 // Load modules
-include { index ; bwa_align } from '../modules/Alignment/bwa'
-
-import java.nio.file.Paths
+include { index ; bwa_align ; bwa_merged_align ;bwa_align_se ; samtools_dedup_se ; samtools_merge_bams ;  samtools_merge_bams as  samtools_merge_bams_dedup } from '../modules/Alignment/bwa'
+include { build_dependencies } from '../modules/Resistome/resistome'
 
 workflow FASTQ_ALIGN_WF {
     take: 
@@ -9,26 +8,139 @@ workflow FASTQ_ALIGN_WF {
         amr
 
     main:
-        // Define amr_index_files variable
-        if (params.amr_index == null) {
+        /* ------------ (1) DEPENDENCIES ---------------------------------- */
+        if ( !file("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").exists() ) {
+            build_dependencies()
+            resistomeanalyzer   = build_dependencies.out.resistomeanalyzer
+            rarefactionanalyzer = build_dependencies.out.rarefactionanalyzer
+            amrsnp              = build_dependencies.out.amrsnp
+        } else {
+            resistomeanalyzer   = file("${baseDir}/bin/resistome")
+            rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
+            amrsnp              = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
+        }
+
+        /* ------------ (2) AMR INDEX --------------------------------------- */
+        if (params.amr_index) {
+            amr_index_files = Channel
+                .fromPath(params.amr_index, glob: true)
+                .ifEmpty { error "No files match --amr_index '${params.amr_index}'" }
+                .collect()
+                .map { files ->
+                    if (files.size() < 7) {
+                        error "Expected 7 AMR index files, found ${files.size()}. Please provide all 7 files, including the AMR database fasta file. Remember to use * in your path."
+                    }
+                    files.sort()
+                }
+        } else {
             index(amr)
             amr_index_files = index.out
-        } else {
-            amr_index_files = Channel
-                .fromPath(Paths.get(params.amr_index))
-                .map { file(it.toString()) }
-                .filter { file(it).exists() }
-                .toList()
-                .map { files ->
-                    if (files.size() < 6) {
-                        error "Expected 6 AMR index files, found ${files.size()}. Please provide all 6 files, including the AMR database fasta file. Remember to use * in your path."
-                    } else {
-                        files.sort()
-                    }
-                }
-         }        
-        // AMR alignment
+        }     
+        /* ------------ (3) AMR ALIGNMENT ----------------------------------- */
         bwa_align(amr_index_files, read_pairs_ch )
 }
 
 
+workflow MERGED_FASTQ_ALIGN_WF {
+
+    /* ------------ INPUTS -------------------------------------------------- */
+    take:
+        merged_reads_ch      // tuple(id, merged_fq, unmerged_fq)
+        amr
+
+    main:
+        /* ------------ (1) DEPENDENCIES ---------------------------------- */
+        if ( !file("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").exists() ) {
+            build_dependencies()
+            resistomeanalyzer   = build_dependencies.out.resistomeanalyzer
+            rarefactionanalyzer = build_dependencies.out.rarefactionanalyzer
+            amrsnp              = build_dependencies.out.amrsnp
+        } else {
+            resistomeanalyzer   = file("${baseDir}/bin/resistome")
+            rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
+            amrsnp              = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
+        }
+
+        /* ------------ (2) AMR INDEX ------------------------------------- */
+        if (params.amr_index) {
+            amr_index_files = Channel
+                .fromPath(params.amr_index, glob: true)
+                .ifEmpty { error "No files match --amr_index '${params.amr_index}'" }
+                .collect()
+                .map { files ->
+                    if (files.size() < 7) {
+                        error "Expected 7 AMR index files, found ${files.size()}. Please provide all 7 files, including the AMR database fasta file. Remember to use * in your path."
+                    }
+                    files.sort()
+                }
+        } else {
+            index(amr)
+            amr_index_files = index.out
+        }
+
+        /* ------------ (3)  ALIGN READS --------------------------------------- */
+        bwa_merged_align( amr_index_files, merged_reads_ch )
+
+        /* ------------ (4)  MERGE BAMs ---------------------------------------- */
+        def bam_pairs_ch = bwa_merged_align.out.merged_bam \
+                            .mix( bwa_merged_align.out.unmerged_bam ) \
+                            .groupTuple()          // (id, [bam1,bam2])
+
+        samtools_merge_bams( bam_pairs_ch,"standard" )
+
+        // Add analysis of deduped counts
+        if (params.deduped == "Y"){
+            def bam_deduped_pairs_ch = bwa_merged_align.out.merged_dedup_bam \
+                            .mix( bwa_merged_align.out.unmerged_dedup_bam ) \
+                            .groupTuple()          // (id, [bam1,bam2])
+            samtools_merge_bams_dedup ( bam_pairs_ch,"deduped" )
+
+
+        }
+
+}
+
+workflow SE_FASTQ_ALIGN_WF {
+    take:
+        se_nonhost_ch
+        amr
+
+    main:
+        /* ------------ (1) DEPENDENCIES ---------------------------------- */
+        if ( !file("${baseDir}/bin/AmrPlusPlus_SNP/SNP_Verification.py").exists() ) {
+            build_dependencies()
+            resistomeanalyzer   = build_dependencies.out.resistomeanalyzer
+            rarefactionanalyzer = build_dependencies.out.rarefactionanalyzer
+            amrsnp              = build_dependencies.out.amrsnp
+        } else {
+            resistomeanalyzer   = file("${baseDir}/bin/resistome")
+            rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
+            amrsnp              = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
+        }
+
+        /* ------------ (2) AMR INDEX --------------------------------------- */
+        if (params.amr_index) {
+            amr_index_files = Channel
+                .fromPath(params.amr_index, glob: true)
+                .ifEmpty { error "No files match --amr_index '${params.amr_index}'" }
+                .collect()
+                .map { files ->
+                    if (files.size() < 7) {
+                        error "Expected 7 AMR index files, found ${files.size()}. Please provide all 7 files, including the AMR database fasta file. Remember to use * in your path."
+                    }
+                    files.sort()
+                }
+        } else {
+            index(amr)
+            amr_index_files = index.out
+        }
+
+        /* ------------ (3) ALIGN SE → coordinate-sorted BAM + index --------- */
+        bwa_align_se( amr_index_files, se_nonhost_ch )
+
+        // Optional de-dup using samtools markdup
+        samtools_dedup_se( bwa_align_se.out.bwa_bam )
+        def bam_for_resistome = (params.deduped == 'Y') \
+            ? samtools_dedup_se.out.dedup_bam \
+            : bwa_align_se.out.bwa_bam
+}
