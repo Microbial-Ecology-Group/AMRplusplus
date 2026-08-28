@@ -240,12 +240,12 @@ def parse_args() -> argparse.Namespace:
                     help="Comma-separated min-gene-fraction values to test (0-1)")
     ap.add_argument("--identity-sweep", default="0",
                     help=(
-                        "Comma-separated minimum percent-identity values to sweep (0-100). "
+                        "Comma-separated minimum identity values to sweep as PROPORTIONS (0-1). "
                         "Identity = (query_alignment_length - NM) / query_alignment_length * 100, "
                         "measuring how similar the ALIGNED PORTION of each read is to the "
                         "reference, independent of how much of the read aligned (qcov handles "
                         "that). Default '0' (no identity filtering, same as previous behavior). "
-                        "Typical sweep: '0,80,90,95,97'. "
+                        "Typical sweep: '0,0.8,0.9,0.95,0.97'. "
                         "Reads missing an NM tag pass at identity=0 but are excluded at any "
                         "higher threshold. Can be used alongside --query-coverage-sweep to "
                         "produce a 3-axis grid, or set --query-coverage-sweep 0 to sweep "
@@ -254,7 +254,7 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--match-qcov-sweep", default="0",
                     help=(
                         "Comma-separated minimum 'match-only query-coverage' values to sweep "
-                        "(0-100). match_qcov_pct = (query_alignment_length - NM) / "
+                        "as PROPORTIONS (0-1). match_qcov_pct = (query_alignment_length - NM) / "
                         "query_length * 100 — what fraction of the WHOLE read is explained "
                         "by genuine matches, with both clipped bases AND mismatches/indels "
                         "excluded from the numerator. Unlike plain --query-coverage-sweep "
@@ -267,7 +267,7 @@ def parse_args() -> argparse.Namespace:
                         "matter how clean it is; high identity cannot 'rescue' a short hit "
                         "the way it might first seem to. Default '0' (disabled, same as "
                         "previous behavior). Typical sweep for filtering on this alone: "
-                        "'0,50,60,70,80,90'. Designed to be used INSTEAD of separately "
+                        "'0,0.5,0.6,0.7,0.8,0.9'. Designed to be used INSTEAD of separately "
                         "sweeping --query-coverage-sweep and --identity-sweep, when you want "
                         "extent and quality combined into a single filtering decision rather "
                         "than tracked as two independent diagnostic axes — set "
@@ -630,8 +630,8 @@ def main():
     for values, name, lo, hi in [
         (qcov_values,       "query-coverage", 0.0, 1.0),
         (gf_values,         "gene-fraction",  0.0, 1.0),
-        (identity_values,   "identity",       0.0, 100.0),
-        (match_qcov_values, "match-qcov",     0.0, 100.0),
+        (identity_values,   "identity",       0.0, 1.0),
+        (match_qcov_values, "match-qcov",     0.0, 1.0),
     ]:
         for x in values:
             if not lo <= x <= hi:
@@ -674,7 +674,36 @@ def main():
               flush=True)
 
     con = duckdb.connect(":memory:")
-    con.execute(f"CREATE TABLE aln AS SELECT * FROM read_csv('{tmp_csv}', header=true)")
+
+    # Declare the column types explicitly rather than letting DuckDB infer them.
+    # Inference is driven by the data, so two situations silently produce VARCHAR
+    # columns and a "Cannot compare values of type VARCHAR and type DOUBLE"
+    # BinderException when the WHERE clause compares them to a numeric threshold:
+    #
+    #   1. A sample with zero usable alignments leaves a header-only CSV, so
+    #      DuckDB has nothing to infer from and types EVERY column VARCHAR.
+    #   2. A sample where no read carries an NM tag leaves pct_identity,
+    #      match_qcov_pct and matched_length empty on every row, so those three
+    #      become VARCHAR even though the file has plenty of alignments.
+    #
+    # Fixing the schema up front makes the query valid in both cases.
+    ALN_COLUMN_TYPES = {
+        "gene_accession": "VARCHAR",
+        "mapq":           "INTEGER",
+        "qcov_pct":       "DOUBLE",
+        "read_length":    "INTEGER",
+        "aln_length":     "INTEGER",
+        "base_read_id":   "VARCHAR",
+        "pct_identity":   "DOUBLE",
+        "match_qcov_pct": "DOUBLE",
+        "matched_length": "INTEGER",
+        "blocks":         "VARCHAR",
+    }
+    types_sql = "{" + ", ".join(f"'{k}': '{v}'" for k, v in ALN_COLUMN_TYPES.items()) + "}"
+    con.execute(
+        f"CREATE TABLE aln AS SELECT * FROM read_csv('{tmp_csv}', header=true, "
+        f"columns={types_sql})"
+    )
 
     baseline_n = con.execute("SELECT COUNT(*) FROM aln").fetchone()[0]
     baseline_genes = con.execute("SELECT COUNT(DISTINCT gene_accession) FROM aln").fetchone()[0]
@@ -694,6 +723,67 @@ def main():
           f"{baseline_n:,} alignments, {baseline_genes:,} genes, "
           f"{baseline_classes:,} classes, {baseline_mechanisms:,} mechanisms, "
           f"{baseline_groups:,} groups\n", flush=True)
+
+    # ── Zero usable alignments ───────────────────────────────────────────────
+    # A sample can legitimately reach this point with nothing left: too few reads
+    # mapped, everything failed --min-mapq, or (commonly) every alignment was to a
+    # RequiresSNPConfirmation gene and --exclude-snp-confirmation removed it. There
+    # is no grid to evaluate, so write header-only outputs and finish cleanly
+    # rather than emitting an empty or malformed CSV that breaks the combine step.
+    if baseline_n == 0:
+        print("[WARN] No alignments remain after the fixed pre-filters "
+              "(--min-mapq"
+              f"{', --exclude-snp-confirmation' if args.exclude_snp_confirmation else ''}).",
+              flush=True)
+        print("[WARN] Writing header-only outputs for this sample and exiting normally.",
+              flush=True)
+
+        empty_outputs = [
+            (args.output, [
+                "min_query_coverage", "min_identity", "min_match_qcov",
+                "min_gene_fraction", "n_alignments_retained",
+                "pct_alignments_retained_of_baseline",
+                "n_alignments_in_passing_genes",
+                "pct_alignments_in_passing_genes_of_baseline",
+                "n_fragment_hits_retained", "pct_fragment_hits_retained_of_baseline",
+                "n_fragment_hits_in_passing_genes",
+                "pct_fragment_hits_in_passing_genes_of_baseline",
+                "n_genes_at_filter", "n_genes_passing_both",
+                "pct_genes_passing_of_baseline_genes",
+                "n_classes_passing", "pct_classes_passing",
+                "n_mechanisms_passing", "pct_mechanisms_passing",
+                "n_groups_passing", "pct_groups_passing",
+            ]),
+            (args.gene_detail_output, [
+                "min_query_coverage", "min_identity", "min_match_qcov",
+                "gene_accession", "meg_id", "type", "class", "mechanism", "group",
+                "snp", "gene_length", "covered_bases", "gene_fraction",
+                "read_count", "n_fragment_hits", "pct_of_baseline_alignments",
+            ]),
+            (args.redundancy_output, [
+                "min_query_coverage", "min_identity", "min_match_qcov", "group",
+                "n_accessions", "total_reads", "max_accession_reads",
+                "pct_reads_in_top_accession", "total_fragment_hits",
+                "max_accession_fragment_hits", "pct_fragment_hits_in_top_accession",
+                "mean_gene_length", "gene_length_cv", "likely_redundant",
+            ]),
+            (args.length_quantiles_output, [
+                "min_query_coverage", "min_identity", "min_match_qcov", "n_alignments",
+            ]),
+        ]
+        for path, header in empty_outputs:
+            if not path:
+                continue
+            d = os.path.dirname(path)
+            if d:
+                os.makedirs(d, exist_ok=True)
+            with open(path, "w", newline="") as fh:
+                csv.writer(fh).writerow(header)
+            print(f"[INFO] Wrote header-only {path}", flush=True)
+
+        if not args.tmp_csv and not args.keep_tmp_csv:
+            os.remove(tmp_csv)
+        return
 
     rows_out = []
     gene_detail_rows = []
@@ -716,8 +806,11 @@ def main():
             "AND (? = 0 OR (pct_identity IS NOT NULL AND pct_identity >= ?)) "
             "AND (? = 0 OR (match_qcov_pct IS NOT NULL AND match_qcov_pct >= ?))"
         )
-        params_base = [qcov * 100.0, args.min_aln_length, identity, identity,
-                       match_qcov, match_qcov]
+        # Sweep values are proportions (0-1); the stored pct_identity and
+        # match_qcov_pct columns are percentages, so scale before comparing.
+        params_base = [qcov * 100.0, args.min_aln_length,
+                       identity * 100.0, identity * 100.0,
+                       match_qcov * 100.0, match_qcov * 100.0]
 
         if args.max_unaligned_length is not None:
             sub = con.execute(
@@ -922,7 +1015,7 @@ def main():
                 f"({n_same_group:,} same-Group collapsed, {n_cross_group:,} cross-Group counted-both)"
             )
 
-        print(f"  qcov>={qcov:.0%} identity>={identity:.0f}% match_qcov>={match_qcov:.0f}%: "
+        print(f"  qcov>={qcov:.0%} identity>={identity:.0%} match_qcov>={match_qcov:.0%}: "
               f"{n_retained:,} alignments ({pct_retained:.1f}% of baseline), "
               f"{n_fragment_hits_retained:,} fragment hits ({pct_fragment_hits_retained:.1f}%), "
               f"{n_genes_at_filter:,} genes detectable (pre-gf) | {gf_console_summary}{discordant_suffix}",

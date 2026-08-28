@@ -117,8 +117,10 @@ process runresistome_analyzer {
     def count_mode = params.count_mode ?: "fragment"
     def group_flag = (params.group_aware == "N")     ? "--no-group-aware"     : "--group-aware"
     def edge_flag  = (params.edge_aware_qcov == "N")  ? "--no-edge-aware-qcov" : "--edge-aware-qcov"
-    def supp_flag  = (params.include_supplementary == "Y") ? "--include-supplementary" : ""
+    def supp_flag  = (params.include_supplementary == "Y") ? "--include-supplementary" : "" 
+    def sec_flag  = (params.include_secondary == "Y") ? "--include_secondary" : ""
     def cigar_flag = (params.cigar_aware_coverage  == "Y") ? "--cigar-aware-coverage"  : ""
+    def mq_flag = (params.match_qcov == "Y") ? "--match-qcov" : "--no-match-qcov"
     """
     set -euo pipefail
 
@@ -134,8 +136,10 @@ process runresistome_analyzer {
             --min-mapq ${params.min_mapq} \\
             --min-gene-fraction ${params.min_gene_fraction} \\
             --min-query-coverage ${params.min_query_coverage} \\
+            --min-identity ${params.min_identity} \\
+            ${mq_flag} \\
             --coverage-output ${sample_id}.${params.prefix}_coverage_stats.tsv \\
-            ${group_flag} ${edge_flag} ${supp_flag} ${cigar_flag}
+            ${group_flag} ${edge_flag} ${supp_flag} ${cigar_flag} ${sec_flag}
 
         # Reshape: gene_accession \\t meg_id \\t count  ->  sample \\t gene \\t count
         tail -n +2 ${sample_id}.${params.prefix}.gene_summary.tsv \\
@@ -345,40 +349,6 @@ process plotrarefaction {
 }
 
 
-process old_runsnp {
-    tag {sample_id}
-    label "snp_ignore"
-
-    publishDir "${params.output}/ResistomeAnalysis/SNP_verification", mode: "copy",
-            saveAs: { filename ->
-                if(filename.indexOf(".tsv") > 0) "SNP_verification_counts/$filename"
-                else "SNP_detailed_output/$filename"
-            }
-
-    input:
-        tuple val(sample_id), path(bam)
-        path(snp_count_matrix)
-
-    output:
-        path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
-    script:
-    """
-    cp -rsa $baseDir/bin/AmrPlusPlus_SNP/* .
-
-    # change name to stay consistent with count matrix name, but only if the names don't match
-    if [ "${bam}" != "${sample_id}.bam" ]; then
-        mv ${bam} ${sample_id}.bam
-    fi
-
-    \$PYTHON3 SNP_Verification.py -c config.ini -t ${task.cpus} -a true -i ${sample_id}.bam -o ${sample_id}.${params.prefix}_SNPs --count_matrix ${snp_count_matrix} --detailed_output=all
-
-    \$PYTHON3 $baseDir/bin/extract_snp_column.py \
-      --sample-id "${sample_id}" \
-      --matrix "${sample_id}.${params.prefix}_SNPs${snp_count_matrix}" \
-      --out-tsv "${sample_id}.SNP_confirmed_gene.tsv"
-    """
-}
-
 process runsnp {
     tag {sample_id}
     label "snp_ignore"
@@ -394,6 +364,7 @@ process runsnp {
     input:
         tuple val(sample_id), path(bam)
         path(snp_count_matrix)
+        path(snp_tool_files)
 
     output:
         path("${sample_id}.SNP_confirmed_gene.tsv"), emit: snp_counts
@@ -403,7 +374,6 @@ process runsnp {
 
     script:
     """
-    cp -rsa $baseDir/bin/AmrPlusPlus_SNP/* .
 
     # Rename BAM to a clean, dot-free stem so the tool's sample subfolder is predictable.
     if [ "${bam}" != "${sample_id}.bam" ]; then

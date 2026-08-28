@@ -29,7 +29,7 @@ workflow BAM_RESISTOME_WF {
         }
         // Add SNP confirmation
         if (params.snp == "Y") {
-            runsnp(bam_ch, resistomeresults.out.snp_count_matrix)
+            runsnp(bam_ch, resistomeresults.out.snp_count_matrix, amrsnp)
             snpresults(runsnp.out.snp_counts.collect(), "AMR")
             snp_coverage_summary(runsnp.out.coverage_stats.collect(), "AMR") 
         }

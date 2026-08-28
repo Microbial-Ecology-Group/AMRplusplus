@@ -398,7 +398,7 @@ process samtools_merge_bams {
         tuple val(sample_id), path(bam_list)
         val(subdir)                          // "" standard, "Deduped" for dedup
     output:
-        tuple val(sample_id), path("${sample_id}_combined*.bam*"), emit: combo_bam
+        tuple val(sample_id), path("${sample_id}_combined*.bam"), emit: combo_bam
     script:
     def outname = subdir ? "${sample_id}_combined.dedup" : "${sample_id}_combined"
     """

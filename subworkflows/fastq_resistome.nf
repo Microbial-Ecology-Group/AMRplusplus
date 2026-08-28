@@ -6,6 +6,7 @@ include { snp_coverage_summary ; plotrarefaction ; runresistome_analyzer ; runsn
 
 // Deduped resistome
 include { BAM_DEDUP_RESISTOME_WF } from '../subworkflows/bam_deduped_resistome.nf'
+include { RESOLVE_BWA_INDEX } from './fastq_align.nf'
 
 
 workflow FASTQ_RESISTOME_WF {
@@ -26,21 +27,9 @@ workflow FASTQ_RESISTOME_WF {
         }
 
         /* ------------ (2) AMR INDEX --------------------------------------- */
-        if (params.amr_index) {
-            amr_index_files = Channel
-                .fromPath(params.amr_index, glob: true)
-                .ifEmpty { error "No files match --amr_index '${params.amr_index}'" }
-                .collect()
-                .map { files ->
-                    if (files.size() < 7) {
-                        error "Expected 7 AMR index files, found ${files.size()}. Please provide all 7 files, including the AMR database fasta file. Remember to use * in your path."
-                    }
-                    files.sort()
-                }
-        } else {
-            index(amr)
-            amr_index_files = index.out
-        }     
+        RESOLVE_BWA_INDEX(amr)
+        amr_index_files = RESOLVE_BWA_INDEX.out.amr_index_files  
+
         /* ------------ (3) AMR ALIGNMENT ----------------------------------- */
         bwa_align(amr_index_files, read_pairs_ch )
         // Split sections below for standard and dedup_ed results
@@ -52,7 +41,7 @@ workflow FASTQ_RESISTOME_WF {
         }
         // Add SNP confirmation
         if (params.snp == "Y") {
-            runsnp(bwa_align.out.bwa_bam, resistomeresults.out.snp_count_matrix)
+            runsnp(bwa_align.out.bwa_bam, resistomeresults.out.snp_count_matrix,amrsnp)
             snpresults(runsnp.out.snp_counts.collect() ,"AMR" )
             snp_coverage_summary(runsnp.out.coverage_stats.collect(), "AMR") 
         }
@@ -85,24 +74,11 @@ workflow MERGED_FASTQ_RESISTOME_WF {
         } else {
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
             amrsnp              = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
-        }
+        }  
 
         /* ------------ (2) AMR INDEX ------------------------------------- */
-        if (params.amr_index) {
-            amr_index_files = Channel
-                .fromPath(params.amr_index, glob: true)
-                .ifEmpty { error "No files match --amr_index '${params.amr_index}'" }
-                .collect()
-                .map { files ->
-                    if (files.size() < 7) {
-                        error "Expected 7 AMR index files, found ${files.size()}. Please provide all 7 files, including the AMR database fasta file. Remember to use * in your path."
-                    }
-                    files.sort()
-                }
-        } else {
-            index(amr)
-            amr_index_files = index.out
-        }
+        RESOLVE_BWA_INDEX(amr)
+        amr_index_files = RESOLVE_BWA_INDEX.out.amr_index_files  
 
         /* ------------ (3)  ALIGN READS --------------------------------------- */
         bwa_merged_align( amr_index_files, merged_reads_ch )
@@ -124,7 +100,7 @@ workflow MERGED_FASTQ_RESISTOME_WF {
 
         /* ------------ (6)  SNP (optional) ------------------------------------ */
         if( params.snp == 'Y' ) {
-            runsnp    ( combo_bam_ch, resistomeresults.out.snp_count_matrix )
+            runsnp    ( combo_bam_ch, resistomeresults.out.snp_count_matrix , amrsnp)
             snpresults( runsnp.out.snp_counts.collect() ,"AMR")
             snp_coverage_summary(runsnp.out.coverage_stats.collect(), "AMR") 
         }
@@ -159,21 +135,8 @@ workflow FASTQ_RESISTOME_SE_WF {
         }
 
         /* ------------ (2) AMR INDEX --------------------------------------- */
-        if (params.amr_index) {
-            amr_index_files = Channel
-                .fromPath(params.amr_index, glob: true)
-                .ifEmpty { error "No files match --amr_index '${params.amr_index}'" }
-                .collect()
-                .map { files ->
-                    if (files.size() < 7) {
-                        error "Expected 7 AMR index files, found ${files.size()}. Please provide all 7 files, including the AMR database fasta file. Remember to use * in your path."
-                    }
-                    files.sort()
-                }
-        } else {
-            index(amr)
-            amr_index_files = index.out
-        }
+        RESOLVE_BWA_INDEX(amr)
+        amr_index_files = RESOLVE_BWA_INDEX.out.amr_index_files  
 
         /* ------------ (3) ALIGN SE → coordinate-sorted BAM + index --------- */
         bwa_align_se( amr_index_files, se_nonhost_ch )
@@ -193,7 +156,7 @@ workflow FASTQ_RESISTOME_SE_WF {
         }
 
         if( params.snp == 'Y' ) {
-            runsnp    ( bam_for_resistome, resistomeresults.out.snp_count_matrix )
+            runsnp    ( bam_for_resistome, resistomeresults.out.snp_count_matrix,amrsnp )
             snpresults( runsnp.out.snp_counts.collect(), "AMR" )
             snp_coverage_summary(runsnp.out.coverage_stats.collect(), "AMR") 
         }

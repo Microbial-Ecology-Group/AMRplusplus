@@ -23,7 +23,7 @@ workflow BAM_DEDUP_RESISTOME_WF {
         runresistome_dedup(bam_ch)
         resistomeresults_dedup(runresistome_dedup.out.resistome_counts.collect(),"dedup_AMR")
         if (params.snp == "Y") {
-            runsnp_dedup(bam_ch, resistomeresults_dedup.out.snp_count_matrix) 
+            runsnp_dedup(bam_ch, resistomeresults_dedup.out.snp_count_matrix, amrsnp) 
             snpresults_dedup(runsnp_dedup.out.snp_counts.collect(),"dedup_AMR")
             snp_coverage_summary(runsnp_dedup.out.coverage_stats.collect(), "dedup_AMR") 
         }

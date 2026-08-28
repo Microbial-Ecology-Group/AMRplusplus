@@ -69,9 +69,43 @@ def parse_args() -> argparse.Namespace:
         "--min-query-coverage", type=float, default=0.0,
         help=(
             "Minimum fraction of the READ that must be covered by the alignment "
-            "(aligned query bases / total read length, 0.0-1.0, default: 0.0). "
-            "Read-level counterpart to --min-gene-fraction: filters out "
-            "alignments built from only a short partial overlap of the read."
+            "(0.0-1.0, default: 0.0). Read-level counterpart to "
+            "--min-gene-fraction: filters out alignments built from only a short "
+            "partial overlap of the read. HOW this is computed depends on "
+            "--match-qcov: by default it is aligned_length / read_length, which "
+            "counts mismatches inside the aligned region as covered; with "
+            "--match-qcov it is (aligned_length - NM) / read_length, counting "
+            "only genuine matches. The threshold value means the same thing in "
+            "both modes, only the metric it is compared against changes."
+        ),
+    )
+    parser.add_argument(
+        "--match-qcov", dest="match_qcov", action="store_true", default=False,
+        help=(
+            "Compute query coverage from MATCHING bases only, i.e. "
+            "(aligned_length - NM) / read_length rather than "
+            "aligned_length / read_length. This makes --min-query-coverage "
+            "penalize a fully-aligned but mismatch-heavy read, which the default "
+            "calculation does not. Because NM is never negative, this value can "
+            "never exceed the default one, so a given threshold is always at "
+            "least as strict in this mode. Requires the NM tag: when "
+            "--min-query-coverage > 0, alignments without NM are excluded."
+        ),
+    )
+    parser.add_argument(
+        "--no-match-qcov", dest="match_qcov", action="store_false",
+        help="Compute query coverage from aligned length only (default).",
+    )
+    parser.add_argument(
+        "--min-identity", type=float, default=0.0,
+        help=(
+            "Minimum fraction of the ALIGNED PORTION that matches the reference "
+            "((aligned_length - NM) / aligned_length, 0.0-1.0, default: 0.0). "
+            "Independent of how much of the read aligned: a short fragment that "
+            "aligns cleanly scores highly here, whereas --min-query-coverage "
+            "would not. Requires the NM tag: at any threshold above 0, "
+            "alignments without NM are excluded, since identity cannot be "
+            "verified for them."
         ),
     )
     parser.add_argument(
@@ -115,6 +149,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--no-group-aware", dest="group_aware", action="store_false",
         help="Disable group-aware fragment resolution (mate disagreements count to each gene).",
+    )
+    parser.add_argument(
+        "--include-secondary", action="store_true", default=False,
+        help=(
+            "Include secondary alignments (SAM flag 0x100) in gene-breadth "
+            "coverage and in --count-mode alignment. A secondary alignment is the "
+            "SAME read segment placed at a competing location, so including it "
+            "credits one physical read to several genes and inflates both breadth "
+            "and alignment counts. Off by default. BWA-MEM emits no secondary "
+            "records unless run with '-a', so this changes nothing for standard "
+            "AMR++ BAMs."
+        ),
     )
     parser.add_argument("--include-supplementary", action="store_true", default=False,
                         help="Include supplementary alignments in counts (and, by default, in breadth coverage).")
@@ -262,15 +308,76 @@ def edge_aware_query_length(read: pysam.AlignedSegment, ref_length: int) -> int:
     return max(eff, aln_len)
 
 
+def preflight_nm_check(path: str, n_sample: int = 20000) -> Tuple[int, int]:
+    """
+    Scan the first n_sample primary mapped alignments and report how many carry
+    an NM (edit distance) tag.
+
+    NM is an OPTIONAL SAM field. Nothing in the spec requires an aligner to emit
+    it, and several routine operations remove it. Because --min-identity and
+    --match-qcov are both computed from NM, an alignment without it cannot be
+    evaluated and would otherwise be dropped silently, which for a BAM lacking
+    the tag entirely means losing every alignment while still exiting zero.
+
+    Returns (n_with_nm, n_checked).
+    """
+    n_with_nm = 0
+    n_checked = 0
+    aln = open_alignment(path)
+    try:
+        for read in aln.fetch(until_eof=True):
+            if read.is_unmapped or read.is_secondary or read.is_supplementary:
+                continue
+            n_checked += 1
+            if read.has_tag('NM'):
+                n_with_nm += 1
+            if n_checked >= n_sample:
+                break
+    finally:
+        aln.close()
+    return n_with_nm, n_checked
+
+
+NM_MISSING_HELP = """
+The NM tag records each alignment's edit distance to the reference. It is an
+OPTIONAL SAM field, so its absence is not a malformed-file error, but the
+following filters cannot be computed without it:
+
+    --min-identity        (aligned_length - NM) / aligned_length
+    --match-qcov          (aligned_length - NM) / read_length
+
+Common reasons NM is absent:
+  * the aligner did not emit it (BWA-MEM, Bowtie2 and minimap2 all do by
+    default, so this is most likely with a less common or custom aligner)
+  * optional tags were stripped downstream, e.g. 'samtools view -x NM',
+    Picard RevertSam with --clearTags, or a custom SAM rewrite
+  * the BAM was produced by a tool that rewrites records without copying
+    optional fields
+  * a CRAM file was converted without access to the original reference
+  * the file is simulated, hand-built, or a test fixture
+
+To add NM (and MD) using the reference the reads were aligned to:
+
+    samtools calmd -b input.bam reference.fasta > output.nm.bam
+    samtools index output.nm.bam
+
+Alternatively, re-run without the NM-dependent filters: drop --min-identity
+(or set it to 0) and use the default query-coverage calculation instead of
+--match-qcov.
+"""
+
 def aggregate_per_read_and_alignment_counts(
     aln: pysam.AlignmentFile,
     min_mapq: int = 0,
     min_query_coverage: float = 0.0,
     include_supplementary: bool = False,
+    include_secondary: bool = False,
     cigar_aware_coverage: bool = False,
     coverage_ignore_filters: bool = False,
     edge_aware_qcov: bool = False,
     ref_lengths: Optional[Dict[str, int]] = None,
+    match_qcov: bool = False,
+    min_identity: float = 0.0,
 ) -> Tuple[Dict[str, Dict[str, Any]], Counter, Counter, Dict[str, Set[int]], Dict[str, List[float]], int, int]:
     """
     Returns (per_read, align_counts_with_supp, align_counts_no_supp,
@@ -291,6 +398,7 @@ def aggregate_per_read_and_alignment_counts(
     gene_query_coverages: Dict[str, List[float]] = defaultdict(list)
     total_primary_seen = 0
     total_primary_passing = 0
+    total_primary_dropped_no_nm = 0
 
     get_covered_positions = (
         get_covered_positions_cigar_aware if cigar_aware_coverage
@@ -298,6 +406,7 @@ def aggregate_per_read_and_alignment_counts(
     )
 
     min_qcov_pct = min_query_coverage * 100.0
+    min_identity_pct = min_identity * 100.0
 
     for read in aln.fetch(until_eof=True):
         rid = read_end_id(read)
@@ -316,25 +425,73 @@ def aggregate_per_read_and_alignment_counts(
             qlen = edge_aware_query_length(read, ref_len)
         else:
             qlen = read.query_length or 0
+        # Plain query coverage: how much of the read aligned, counting mismatches
+        # inside the aligned region as covered.
         qcov_pct = round(aln_len / qlen * 100.0, 2) if qlen else 0.0
 
-        # match_qcov_pct = fraction of the WHOLE read explained by genuine matches
-        # (aligned bases minus edit distance), over the same (edge-aware if enabled)
-        # read-length denominator as qcov. Used as the group-aware tie-break metric.
-        # Reads with no NM tag fall back to qcov_pct so they still tie-break sensibly.
+        # NM-derived metrics. Both need the edit-distance tag; has_nm records
+        # whether it was available so the filters below can be strict about it.
         try:
             nm = read.get_tag('NM')
+            has_nm = True
+            # match_qcov_pct: fraction of the WHOLE read explained by genuine
+            # matches, over the same (edge-aware if enabled) denominator as qcov.
             match_qcov_pct = round((aln_len - nm) / qlen * 100.0, 2) if qlen else 0.0
+            # pct_identity: fraction of the ALIGNED PORTION that matches. Blind to
+            # how much of the read aligned, which is what distinguishes it from
+            # the two coverage metrics above.
+            pct_identity = round((aln_len - nm) / aln_len * 100.0, 2) if aln_len else 0.0
         except KeyError:
+            has_nm = False
+            # Fall back to qcov_pct so group-aware tie-breaking still behaves
+            # sensibly for these reads; the filters below handle them separately.
             match_qcov_pct = qcov_pct
+            pct_identity = None
+
+        # --match-qcov switches WHICH metric --min-query-coverage is compared
+        # against. The threshold value is unchanged; only the metric differs.
+        effective_qcov_pct = match_qcov_pct if match_qcov else qcov_pct
 
         passes_mapq = read.mapping_quality >= min_mapq
-        passes_qcov = qcov_pct >= min_qcov_pct
-        passes_filter = passes_mapq and passes_qcov
 
+        if min_qcov_pct <= 0:
+            passes_qcov = True
+        elif match_qcov and not has_nm:
+            # Asked to filter on matches but the read carries no NM tag, so the
+            # metric cannot be computed. Exclude rather than silently passing it
+            # on the looser aligned-length value.
+            passes_qcov = False
+        else:
+            passes_qcov = effective_qcov_pct >= min_qcov_pct
+
+        if min_identity_pct <= 0:
+            passes_identity = True
+        elif not has_nm:
+            passes_identity = False
+        else:
+            passes_identity = pct_identity >= min_identity_pct
+
+        passes_filter = passes_mapq and passes_qcov and passes_identity
+
+        # Track alignments rejected specifically because NM was absent, so a
+        # partial-NM file produces a number rather than a silent shortfall.
+        dropped_for_missing_nm = (
+            (not has_nm)
+            and passes_mapq
+            and ((min_identity_pct > 0) or (match_qcov and min_qcov_pct > 0))
+        )
+
+        # Breadth must exclude secondary alignments by default. A secondary
+        # alignment is the same read segment placed at a competing location, so
+        # its reference positions are not independent evidence that the gene is
+        # present: the read was already counted at its primary location. Letting
+        # them through allows a gene that never wins a primary alignment to reach
+        # high breadth purely from multi-mapped reads and pass --min-gene-fraction.
         include_for_breadth = (
             coverage_ignore_filters
-            or (passes_filter and (include_supplementary or not read.is_supplementary))
+            or (passes_filter
+                and (include_supplementary or not read.is_supplementary)
+                and (include_secondary or not read.is_secondary))
         )
         if include_for_breadth:
             gene_coverage[ref_name].update(get_covered_positions(read))
@@ -342,7 +499,9 @@ def aggregate_per_read_and_alignment_counts(
         if read.is_secondary:
             gene_map = per_read[rid]["secondary_genes"]
             gene_map.setdefault(ref_name, []).append((read.mapping_quality, qcov_pct, match_qcov_pct))
-            if passes_filter:
+            # Still recorded in per_read['secondary_genes'] above for the per-read
+            # report, but only counted when explicitly requested.
+            if passes_filter and include_secondary:
                 align_counts_with_supp[ref_name] += 1
                 align_counts_no_supp[ref_name] += 1
             continue
@@ -356,6 +515,8 @@ def aggregate_per_read_and_alignment_counts(
 
         # ── primary alignment ──────────────────────────────────────────────
         total_primary_seen += 1
+        if dropped_for_missing_nm:
+            total_primary_dropped_no_nm += 1
         if passes_filter:
             total_primary_passing += 1
             gene_map = per_read[rid]["primary_genes"]
@@ -366,7 +527,8 @@ def aggregate_per_read_and_alignment_counts(
 
     return (per_read, align_counts_with_supp, align_counts_no_supp,
             gene_coverage, gene_query_coverages,
-            total_primary_seen, total_primary_passing)
+            total_primary_seen, total_primary_passing,
+            total_primary_dropped_no_nm)
 
 
 def calculate_gene_fractions(gene_coverage: Dict[str, Set[int]], ref_lengths: Dict[str, int]) -> Dict[str, float]:
@@ -639,20 +801,61 @@ def main():
         sys.exit(f"[ERROR] --min-gene-fraction must be 0.0-1.0, got {args.min_gene_fraction}")
     if not 0.0 <= args.min_query_coverage <= 1.0:
         sys.exit(f"[ERROR] --min-query-coverage must be 0.0-1.0, got {args.min_query_coverage}")
+    if not 0.0 <= args.min_identity <= 1.0:
+        sys.exit(f"[ERROR] --min-identity must be 0.0-1.0, got {args.min_identity}")
+
+    # ── NM preflight ─────────────────────────────────────────────────────────
+    # Only relevant when a filter that needs NM was actually requested. Checking
+    # unconditionally would reject perfectly usable BAMs for a tag nothing is
+    # going to read.
+    needs_nm = (args.min_identity > 0.0) or (args.match_qcov and args.min_query_coverage > 0.0)
+    if needs_nm:
+        which = []
+        if args.min_identity > 0.0:
+            which.append(f"--min-identity {args.min_identity}")
+        if args.match_qcov and args.min_query_coverage > 0.0:
+            which.append(f"--match-qcov with --min-query-coverage {args.min_query_coverage}")
+        n_with_nm, n_checked = preflight_nm_check(args.input)
+
+        if n_checked == 0:
+            print("[WARN] No primary mapped alignments found while checking for NM tags.")
+        elif n_with_nm == 0:
+            sys.exit(
+                f"[ERROR] No NM tag found in the first {n_checked:,} primary alignments of\n"
+                f"        {args.input}\n"
+                f"        but {' and '.join(which)} requires it.\n"
+                f"        Every alignment would be excluded and the resulting counts would\n"
+                f"        be empty or near-empty without any other indication of a problem.\n"
+                f"{NM_MISSING_HELP}"
+            )
+        elif n_with_nm < n_checked:
+            pct = n_with_nm / n_checked * 100.0
+            print(f"[WARN] Only {n_with_nm:,}/{n_checked:,} ({pct:.1f}%) of the first sampled "
+                  f"primary alignments carry an NM tag.")
+            print(f"[WARN] {' and '.join(which)} is in effect, so alignments without NM will "
+                  f"be EXCLUDED.")
+            print(f"[WARN] Run 'samtools calmd -b {args.input} <reference.fasta>' to add NM if "
+                  f"this is not intended.")
+        else:
+            print(f"[INFO] NM tag present in all {n_checked:,} sampled primary alignments.")
 
     aln = open_alignment(args.input)
     ref_lengths = get_reference_lengths(aln)
     print(f"[INFO] Found {len(ref_lengths)} references in BAM header")
 
     (per_read, align_counts_with_supp, align_counts_no_supp, gene_coverage,
-     gene_query_coverages, total_primary_seen, total_primary_passing) = (
+     gene_query_coverages, total_primary_seen, total_primary_passing,
+     total_primary_dropped_no_nm) = (
         aggregate_per_read_and_alignment_counts(
             aln, min_mapq=args.min_mapq, min_query_coverage=args.min_query_coverage,
             include_supplementary=args.include_supplementary,
+            include_secondary=args.include_secondary,
             cigar_aware_coverage=args.cigar_aware_coverage,
             coverage_ignore_filters=args.coverage_ignore_filters,
             edge_aware_qcov=args.edge_aware_qcov,
             ref_lengths=ref_lengths,
+            match_qcov=args.match_qcov,
+            min_identity=args.min_identity,
         )
     )
 
@@ -662,9 +865,20 @@ def main():
     n_genes_baseline = len(gene_coverage)
 
     pct_retained = round(total_primary_passing / total_primary_seen * 100, 2) if total_primary_seen else 0.0
+    qcov_mode = "matches only" if args.match_qcov else "aligned length"
     print(f"[INFO] Primary alignments: {total_primary_passing:,} / {total_primary_seen:,} "
-          f"passed --min-mapq {args.min_mapq} + --min-query-coverage {args.min_query_coverage:.0%} "
+          f"passed --min-mapq {args.min_mapq} + "
+          f"--min-query-coverage {args.min_query_coverage:.0%} ({qcov_mode}) + "
+          f"--min-identity {args.min_identity:.0%} "
           f"({pct_retained:.2f}% retained)")
+
+    if total_primary_dropped_no_nm > 0:
+        pct_nm = (total_primary_dropped_no_nm / total_primary_seen * 100
+                  if total_primary_seen else 0.0)
+        print(f"[WARN] {total_primary_dropped_no_nm:,} primary alignments "
+              f"({pct_nm:.2f}%) were EXCLUDED because they carry no NM tag while "
+              f"an NM-dependent filter is active.")
+        print(f"[WARN] Add NM with: samtools calmd -b {args.input} <reference.fasta>")
 
     if passing_genes is not None:
         print(f"[INFO] Gene fraction filter: {len(passing_genes)}/{n_genes_baseline} "
