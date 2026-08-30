@@ -1,1091 +1,764 @@
-#!/usr/bin/env python3
-"""
-coverage_threshold_sweep.py
-════════════════════════════════════════════════════════════════════════════════
-
-Single-pass-then-sweep diagnostic for choosing --min-query-coverage and
---min-gene-fraction thresholds for alignment_analyzer.py.
-
-WHY A SEPARATE SCRIPT
-──────────────────────
-alignment_analyzer.py applies one fixed pair of thresholds per run. Testing
-N query-coverage values x M gene-fraction values by re-running it N*M times
-would re-scan a multi-gigabyte BAM N*M times. This script reads every
-PRIMARY mapped alignment's (gene, mapq, query_coverage_pct, reference span,
-read_length, alignment_length) ONCE into a small intermediate CSV, then
-evaluates the entire threshold grid as fast DuckDB queries + in-memory
-interval merges — no further BAM reads.
-
-WHAT'S IN THIS VERSION
-─────────────────────────
-1. Two "retained" columns, on purpose (see below) — n_alignments_retained
-   (qcov filter alone) vs n_alignments_in_passing_genes (qcov + gene_fraction
-   together).
-2. --exclude-snp-confirmation: drops alignments to genes flagged
-   "RequiresSNPConfirmation" in MEGARes. Coverage of these genes only tells
-   you the (often universally-conserved) gene is present — NOT that the
-   specific resistance-conferring point mutation was observed. Applied as a
-   fixed pre-filter alongside --min-mapq, before any threshold sweep.
-3. Class/Mechanism/Group pass-counts added directly to the main grid output,
-   so you can see how taxonomy-level detection is affected without needing
-   the separate batch/taxonomy pipeline.
-4. --redundancy-output: quantifies multi-mapping redundancy — groups of
-   near-identical reference accessions (same Group label, similar length,
-   each propped up by only a couple of reads) that are very likely the same
-   underlying signal split across redundant database entries by alignment
-   tie-breaking, rather than independent evidence.
-5. --gene-detail-output gains taxonomy columns and per-gene read_length /
-   alignment_length quantiles (p10/median/p90).
-6. --length-quantiles-output: dataset-wide read_length / alignment_length
-   quantiles (p5/p10/p25/median/p75/p90/p95) per query-coverage threshold —
-   a quick characterization of your read-length distribution independent of
-   any one gene.
-
-READING THE OUTPUT — TWO DIFFERENT "RETAINED" COLUMNS, ON PURPOSE
-────────────────────────────────────────────────────────────────────
-  n_alignments_retained / pct_alignments_retained_of_baseline
-      Alignments passing --min-query-coverage ALONE. Identical across every
-      min_gene_fraction row for a given min_query_coverage.
-  n_alignments_in_passing_genes / pct_alignments_in_passing_genes_of_baseline
-      Alignments belonging to a gene that ALSO clears min_gene_fraction.
-  n_genes_at_qcov_threshold / n_genes_passing_both / pct_genes_passing_of_baseline_genes
-      Gene COUNTS, not alignment counts.
-  n_classes_passing / n_mechanisms_passing / n_groups_passing
-      Distinct taxonomy categories with >=1 gene passing both filters.
-
-It's normal for alignment-retention to stay high while gene/category counts
-drop sharply — alignment counts per gene are typically very skewed.
-
-BREADTH APPROXIMATION
-───────────────────────
-Gene-length breadth is the UNION OF [reference_start, reference_end)
-INTERVALS of qualifying alignments — not full CIGAR-aware position tracking
-like alignment_analyzer.py's --cigar-aware-coverage. Close approximation for
-typical short-read alignments; use this to narrow down thresholds, then
-confirm the exact number for your final pair with --cigar-aware-coverage.
-
-7. Fragment-aware hit counting (n_fragment_hits): a paired fragment where
-   both mates agree on the same gene counts as ONE hit, not two. If only one
-   mate is classified, that's still one hit. If the mates disagree, each
-   gene gets its own hit (two total) — disagreement is itself informative,
-   so it's not collapsed away. This applies uniformly to PE fragments and to
-   the not-combined ("unmerged") subset of a merge workflow, since both
-   share the same base_read_id structure; a true FLASH-merged read has no
-   mate at all and trivially counts as one hit through the same code path.
-   This sits alongside the existing alignment-record-based counts (read_count,
-   n_alignments_retained, etc.) rather than replacing them, since those
-   remain meaningful on their own — n_fragment_hits is what you want when
-   comparing PE and merged workflows on equal footing, since raw alignment
-   counts otherwise double-count concordant PE pairs relative to a single
-   merged read covering the same physical fragment.
-
-Usage:
-    python coverage_threshold_sweep.py -i sample.bam -o sweep_results.csv \\
-        --min-mapq 0 \\
-        --exclude-snp-confirmation \\
-        --query-coverage-sweep 0,0.5,0.6,0.7,0.8,0.9,0.95 \\
-        --gene-fraction-sweep 0,0.1,0.25,0.5,0.8 \\
-        --gene-detail-output gene_detail.csv \\
-        --redundancy-output redundancy.csv \\
-        --length-quantiles-output length_quantiles.csv
-"""
-
-import argparse
-import csv
-import os
-import re
-import statistics
-import sys
-import tempfile
-from collections import defaultdict
-from typing import Dict, List, Tuple, Optional
-
-import duckdb
-import pysam
-
-# Same stripping convention used throughout this pipeline: a FLASH-merged
-# read's name ends in '.extendedFrags...' with no mate suffix; a not-combined
-# PE mate ends in '/1', '/2', '.1', or '.2'. Stripping both yields one
-# base_read_id per physical fragment regardless of which case applies.
-_RE_FLASH = re.compile(r'\.(extendedFrags|notCombined)[^/]*$')
-_RE_PAIR  = re.compile(r'[/\.][12]$')
-
-
-def get_base_read_id(read_id: str) -> str:
-    base = _RE_FLASH.sub('', read_id)
-    return _RE_PAIR.sub('', base)
-
-
-def edge_aware_query_length(read, ref_length: int) -> int:
-    """
-    Coverage-anchored read length for query-coverage (qcov). Identical logic to
-    alignment_analyzer.edge_aware_query_length so the two tools agree.
-
-    Fixes two things vs raw read.query_length:
-      1. Soft- vs hard-clip asymmetry (query_length includes soft clips but not
-         hard clips). Full physical length is rebuilt from the CIGAR (aligned +
-         both clip types, ops 4=S, 5=H) so the aligner's clip choice is irrelevant.
-      2. Reference-edge overhang: clip bases that fall outside [0, ref_length)
-         couldn't have aligned (the gene simply ended) and are discounted from the
-         denominator, so a read running off a short gene's edge isn't penalized.
-
-    Returns read bases that HAD A CHANCE to align; never below query_alignment_length.
-    """
-    if read.cigartuples is None:
-        return read.query_alignment_length or 0
-    aln_len = read.query_alignment_length or 0
-    ops = read.cigartuples
-    lead_clip = ops[0][1] if ops and ops[0][0] in (4, 5) else 0
-    trail_clip = ops[-1][1] if len(ops) > 1 and ops[-1][0] in (4, 5) else 0
-    total_physical = aln_len + lead_clip + trail_clip
-    ref_start = read.reference_start if read.reference_start is not None else 0
-    ref_end = read.reference_end if read.reference_end is not None else 0
-    overhang_5 = max(0, lead_clip - ref_start)
-    overhang_3 = max(0, trail_clip - (ref_length - ref_end)) if ref_length else 0
-    eff = total_physical - overhang_5 - overhang_3
-    return max(eff, aln_len)
-
-
-def parse_args() -> argparse.Namespace:
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("-i", "--input", required=True, nargs="+",
-                    help=(
-                        "Input BAM/SAM. Accepts one or more paths (e.g. "
-                        "-i merged.bam unmerged.bam) to treat several files as ONE logical "
-                        "sample — every alignment from every file given is combined into "
-                        "the same per-gene breadth/fragment-hit computation. Use this for a "
-                        "merge-workflow sample split across a merged BAM and a not-combined "
-                        "(unmerged) BAM: gene_fraction needs the union of intervals from "
-                        "BOTH to be correct, since breadth from two non-overlapping subsets "
-                        "doesn't average — it has to be computed from the combined raw "
-                        "alignments, not reconstructed from two separate breadth numbers "
-                        "after the fact. Safer than pointing this at an externally-merged "
-                        "Combined/ BAM, since this pipeline has previously found Combined/ "
-                        "BAMs to triple-count reads depending on what went into the merge — "
-                        "passing the original source files here sidesteps that risk entirely."
-                    ))
-    ap.add_argument("-o", "--output", required=True, help="Output sweep-grid CSV")
-    ap.add_argument("--min-mapq", type=int, default=0,
-                    help="Fixed MAPQ floor applied to every grid cell (default 0)")
-    ap.add_argument("--edge-aware-qcov", dest="edge_aware_qcov", action="store_true", default=True,
-                    help="(DEFAULT ON) Compute qcov (and match_qcov) against a coverage-anchored "
-                         "read length: rebuild full length from the CIGAR so soft/hard "
-                         "clips are equivalent, and discount clip bases that overhang "
-                         "the reference edge (a read running off a short gene's end is "
-                         "not penalized). Only affects read-axis qcov metrics; gene "
-                         "breadth is unaffected. Matches alignment_analyzer.py's flag. "
-                         "Use --no-edge-aware-qcov to disable.")
-    ap.add_argument("--no-edge-aware-qcov", dest="edge_aware_qcov", action="store_false",
-                    help="Disable edge-aware qcov (use raw read.query_length as denominator).")
-    ap.add_argument("--min-aln-length", type=int, default=0,
-                    help=(
-                        "Fixed ABSOLUTE aligned-length floor (in bp), applied alongside "
-                        "every swept --query-coverage-sweep value rather than replacing it. "
-                        "Catches reads that don't have ENOUGH absolute matching sequence "
-                        "even if their percentage technically passes (most relevant for "
-                        "short reads). Default 0 (disabled)."
-                    ))
-    ap.add_argument("--max-unaligned-length", type=int, default=None,
-                    help=(
-                        "Fixed ABSOLUTE cap (in bp) on read_length - aln_length, applied "
-                        "alongside every swept --query-coverage-sweep value. Catches the "
-                        "OTHER direction: a long read (e.g. a 300bp FLASH-merged read) can "
-                        "clear a 50%% query-coverage bar while still leaving 150bp "
-                        "unexplained, far more absolute unaligned sequence than the same "
-                        "50%% would tolerate on a 150bp read. Combined with the qcov_pct "
-                        "sweep, this naturally makes longer reads satisfy a STRICTER "
-                        "effective percentage without needing a different --query-coverage- "
-                        "sweep value per read-length stratum: at a fixed cap, a 300bp read's "
-                        "effective bar tightens automatically relative to a 150bp read's, "
-                        "exactly compensating for read length rather than ignoring it. "
-                        "Default None (disabled, identical to previous behavior)."
-                    ))
-    ap.add_argument("--exclude-snp-confirmation", action="store_true", default=False,
-                    help=(
-                        "Exclude alignments to genes flagged 'RequiresSNPConfirmation' "
-                        "in MEGARes (e.g. RPOB, GYRA, 16S/23S rRNA mutation markers). "
-                        "These are often universally-conserved housekeeping genes where "
-                        "coverage alone does NOT confirm the specific resistance "
-                        "mutation was observed. Applied as a fixed pre-filter, like "
-                        "--min-mapq, before the threshold sweep."
-                    ))
-    ap.add_argument("--group-aware", "--group-aware-discordant", dest="group_aware",
-                    action="store_true", default=True,
-                    help=(
-                        "(DEFAULT ON) Changes how a fragment whose two mates classify to "
-                        "DIFFERENT gene_accessions is counted (see resolve_fragment_hits() "
-                        "docstring for full reasoning). With this ON, mates that disagree on "
-                        "gene_accession but share the same MEGARes Group are treated as the "
-                        "SAME underlying signal split across redundant database entries (the "
-                        "multi-mapping artifact tracked via --redundancy-output) and "
-                        "counted as ONE hit, credited to whichever mate has the higher "
-                        "match_qcov_pct. Genuine cross-Group disagreement (mates hit "
-                        "truly different Groups) is instead counted as ONE hit to EACH "
-                        "gene, since both mechanisms are real evidence; tracked "
-                        "separately in the console diagnostics so you can see "
-                        "how often each case actually occurs. Group is parsed from the "
-                        "MEGARes pipe-delimited reference name. Use --no-group-aware "
-                        "to restore legacy behavior (both genes get 1 hit each, 2 total). "
-                        "(--group-aware-discordant is a backward-compatible alias.)"
-                    ))
-    ap.add_argument("--no-group-aware", "--no-group-aware-discordant", dest="group_aware",
-                    action="store_false",
-                    help="Disable group-aware resolution; mates that disagree on "
-                         "gene_accession each get their own hit (legacy behavior).")
-    ap.add_argument("--query-coverage-sweep", default="0,0.5,0.6,0.7,0.8,0.9,0.95",
-                    help="Comma-separated min-query-coverage values to test (0-1). "
-                         "Set to '0' to disable qcov filtering and use identity-sweep alone.")
-    ap.add_argument("--gene-fraction-sweep", default="0,0.1,0.25,0.5,0.8",
-                    help="Comma-separated min-gene-fraction values to test (0-1)")
-    ap.add_argument("--identity-sweep", default="0",
-                    help=(
-                        "Comma-separated minimum identity values to sweep as PROPORTIONS (0-1). "
-                        "Identity = (query_alignment_length - NM) / query_alignment_length * 100, "
-                        "measuring how similar the ALIGNED PORTION of each read is to the "
-                        "reference, independent of how much of the read aligned (qcov handles "
-                        "that). Default '0' (no identity filtering, same as previous behavior). "
-                        "Typical sweep: '0,0.8,0.9,0.95,0.97'. "
-                        "Reads missing an NM tag pass at identity=0 but are excluded at any "
-                        "higher threshold. Can be used alongside --query-coverage-sweep to "
-                        "produce a 3-axis grid, or set --query-coverage-sweep 0 to sweep "
-                        "identity × gene-fraction only."
-                    ))
-    ap.add_argument("--match-qcov-sweep", default="0",
-                    help=(
-                        "Comma-separated minimum 'match-only query-coverage' values to sweep "
-                        "as PROPORTIONS (0-1). match_qcov_pct = (query_alignment_length - NM) / "
-                        "query_length * 100 — what fraction of the WHOLE read is explained "
-                        "by genuine matches, with both clipped bases AND mismatches/indels "
-                        "excluded from the numerator. Unlike plain --query-coverage-sweep "
-                        "(which only checks clipping, blind to mismatches) this also "
-                        "penalizes a fully-aligned-but-noisy read. Unlike --identity-sweep "
-                        "alone (which only checks the aligned portion's quality, blind to "
-                        "extent) this also penalizes a short-but-clean fragment — and "
-                        "because NM >= 0, match_qcov_pct can NEVER exceed plain qcov_pct, so "
-                        "a short fragment is capped at its own length-driven ceiling no "
-                        "matter how clean it is; high identity cannot 'rescue' a short hit "
-                        "the way it might first seem to. Default '0' (disabled, same as "
-                        "previous behavior). Typical sweep for filtering on this alone: "
-                        "'0,0.5,0.6,0.7,0.8,0.9'. Designed to be used INSTEAD of separately "
-                        "sweeping --query-coverage-sweep and --identity-sweep, when you want "
-                        "extent and quality combined into a single filtering decision rather "
-                        "than tracked as two independent diagnostic axes — set "
-                        "--query-coverage-sweep 0 --identity-sweep 0 and sweep this instead."
-                    ))
-    ap.add_argument("--tmp-csv", default=None,
-                    help="Where to write the intermediate per-alignment CSV "
-                         "(default: temp file, deleted after run)")
-    ap.add_argument("--keep-tmp-csv", action="store_true", default=False,
-                    help="Don't delete the intermediate per-alignment CSV after the run")
-    ap.add_argument("--gene-detail-output", default=None,
-                    help="Optional CSV: per-gene breadth, read count, taxonomy, and "
-                         "read/alignment-length quantiles at each swept qcov threshold.")
-    ap.add_argument("--redundancy-output", default=None,
-                    help="Optional CSV: per-Group multi-mapping redundancy metrics at "
-                         "each swept qcov threshold (see module docstring point 4).")
-    ap.add_argument("--length-quantiles-output", default=None,
-                    help="Optional CSV: dataset-wide read_length/alignment_length "
-                         "quantiles at each swept qcov threshold.")
-    return ap.parse_args()
-
-
-def parse_gene_reference(ref_name: str) -> Tuple[str, str, str, str, str, str]:
-    """MEGARes pipe-delimited name -> (MEG_ID, Type, Class, Mechanism, Group, SNP)."""
-    parts = ref_name.split('|')
-    if len(parts) >= 5:
-        return (parts[0], parts[1], parts[2], parts[3], parts[4],
-                parts[5] if len(parts) > 5 else '')
-    return (ref_name, '', '', '', '', '')
-
-
-def percentile(sorted_vals: List[float], q: float) -> float:
-    """Linear-interpolation percentile (q in 0-100), robust down to n=1."""
-    if not sorted_vals:
-        return 0.0
-    if len(sorted_vals) == 1:
-        return float(sorted_vals[0])
-    k = (len(sorted_vals) - 1) * (q / 100.0)
-    f = int(k)
-    c = min(f + 1, len(sorted_vals) - 1)
-    if f == c:
-        return float(sorted_vals[f])
-    return sorted_vals[f] * (c - k) + sorted_vals[c] * (k - f)
-
-
-def stream_primary_alignments_to_csv(
-    bam_paths: List[str], out_csv: str, min_mapq: int,
-    exclude_snp_confirmation: bool, edge_aware_qcov: bool = False
-) -> Tuple[int, Dict[str, int], int]:
-    """
-    Single pass over EACH BAM in bam_paths (e.g. a sample's merged BAM and
-    its not-combined/unmerged BAM together), writing every PRIMARY MAPPED
-    alignment passing --min-mapq AND (if requested) not flagged
-    RequiresSNPConfirmation into ONE shared per-alignment CSV. Both filters
-    are fixed for the whole sweep, applied here once.
-
-    Combining multiple files here (rather than relying on a pre-merged BAM)
-    means gene_fraction/breadth downstream is computed from the TRUE union
-    of intervals across every file — base_read_id collisions across files
-    aren't a concern for files belonging to the same sample, since a given
-    original fragment is FLASH-assigned to exactly one of merged/unmerged,
-    never both, so read IDs don't collide between the two.
-
-    Returns (total_primary_seen_before_any_filter, ref_lengths, n_excluded_by_snp).
-    """
-    total_seen = 0
-    n_excluded_by_snp = 0
-    out_dir = os.path.dirname(out_csv)
-    if out_dir:
-        os.makedirs(out_dir, exist_ok=True)
-
-    ref_lengths: Dict[str, int] = {}
-
-    with open(out_csv, "w", newline="") as fh:
-        writer = csv.writer(fh)
-        # 'blocks' replaces the old ref_start/ref_end pair. get_blocks()
-        # returns the CIGAR-aware list of gapless aligned segments, correctly
-        # splitting around deletions (D/N) — a read with CIGAR 40M10D50M
-        # produces "start:50;60:end" rather than one span "start:end" that
-        # silently counts the 10bp deletion gap as covered. This matches
-        # ResistomeAnalyzer's per-base CIGAR walk for deletions, and fixes
-        # the one blind spot the old interval-span approach had.
-        writer.writerow(["gene_accession", "mapq", "qcov_pct",
-                         "read_length", "aln_length", "base_read_id",
-                         "pct_identity", "match_qcov_pct", "matched_length", "blocks"])
-
-        for bam_path in bam_paths:
-            with pysam.AlignmentFile(bam_path, "rb", check_sq=False) as bam:
-                ref_lengths.update(dict(zip(bam.references, bam.lengths)))
-
-                for read in bam.fetch(until_eof=True):
-                    if read.flag & 0x900:
-                        continue
-                    if read.is_unmapped:
-                        continue
-                    total_seen += 1
-
-                    if read.mapping_quality < min_mapq:
-                        continue
-
-                    gene = bam.get_reference_name(read.reference_id)
-
-                    if exclude_snp_confirmation:
-                        snp_field = gene.split('|')[-1] if '|' in gene else ''
-                        if snp_field == 'RequiresSNPConfirmation':
-                            n_excluded_by_snp += 1
-                            continue
-
-                    qlen = read.query_length or 0
-                    aln_len = read.query_alignment_length or 0
-                    if edge_aware_qcov:
-                        _ref_len = ref_lengths.get(gene, 0)
-                        qlen = edge_aware_query_length(read, _ref_len)
-                    qcov_pct = round(aln_len / qlen * 100.0, 2) if qlen else 0.0
-                    base_id = get_base_read_id(read.query_name)
-
-                    # NM tag (edit distance) = mismatches + inserted bases +
-                    # deleted reference bases. Absent in some poorly-formed SAMs;
-                    # we write NULL rather than silently assigning 0% or 100%.
-                    # pct_identity = (aln_len - NM) / aln_len * 100
-                    #   -> 100% = every aligned base matches perfectly
-                    #   -> lower values = sum of all edit events as a fraction
-                    #      of the aligned (non-clipped) query length.
-                    # Soft clips are correctly excluded from both aln_len and NM
-                    # so clipping alone doesn't penalize identity — only real
-                    # mismatches/indels inside the aligned region do.
-                    try:
-                        nm = read.get_tag('NM')
-                        pct_identity = round((aln_len - nm) / aln_len * 100.0, 2) if aln_len else 0.0
-                        # match_qcov_pct = what fraction of the WHOLE read is
-                        # explained by genuine matches (clipped bases AND
-                        # mismatches/indels both excluded from the numerator).
-                        # Mathematically: match_qcov_pct = qcov_pct * pct_identity / 100,
-                        # and since NM >= 0, match_qcov_pct can never exceed
-                        # qcov_pct — a short fragment is capped at its own
-                        # qcov_pct ceiling regardless of how clean it is, so
-                        # this metric can't be "rescued" by high identity the
-                        # way a naive intuition might worry about. It directly
-                        # answers "how much of this read is confidently,
-                        # correctly explained by this reference," combining
-                        # extent and quality into one number.
-                        match_qcov_pct = round((aln_len - nm) / qlen * 100.0, 2) if qlen else 0.0
-                        # matched_length = absolute bp of TRUE matches, i.e.
-                        # aln_length with mismatches/indels (NM) subtracted
-                        # out. The exact integer underlying both pct_identity
-                        # (matched_length / aln_length) and match_qcov_pct
-                        # (matched_length / read_length) — stored directly so
-                        # downstream length distributions don't have to
-                        # re-derive it from already-rounded percentages.
-                        matched_length = aln_len - nm
-                    except KeyError:
-                        pct_identity = None
-                        match_qcov_pct = None
-                        matched_length = None
-
-                    raw_blocks = read.get_blocks()
-                    blocks_str = (
-                        ";".join(f"{s}:{e}" for s, e in raw_blocks)
-                        if raw_blocks
-                        else f"{read.reference_start}:{read.reference_end}"
-                    )
-
-                    writer.writerow([gene, read.mapping_quality, qcov_pct,
-                                     qlen, aln_len, base_id,
-                                     pct_identity, match_qcov_pct, matched_length, blocks_str])
-
-    return total_seen, ref_lengths, n_excluded_by_snp
-
-
-def resolve_fragment_hits(
-    rows: List[Tuple[str, str, float]],
-    taxonomy_cache: Optional[Dict[str, Tuple[str, str, str, str, str, str]]] = None,
-    group_aware: bool = False,
-) -> Tuple[Dict[str, int], Dict[str, int]]:
-    """
-    rows: list of (gene_accession, base_read_id, match_qcov_pct) for
-    alignments passing the current threshold combination. match_qcov_pct is
-    only used as a tie-breaker when group_aware=True; pass 0.0 if unused.
-
-    DEFAULT (group_aware=False — exact previous behavior, unchanged):
-      both mates agree on gene_accession -> 1 hit
-      only one mate present              -> 1 hit
-      mates disagree on gene_accession   -> 1 hit to EACH gene (2 total)
-
-    group_aware=True (opt-in): before treating a gene-level disagreement as
-    real discordance, check whether the two accessions share the same
-    MEGARes Group. If they do, this is almost certainly the multi-mapping/
-    redundant-accession artifact this pipeline has tracked all along via
-    the redundancy diagnostics (BWA's tie-breaking among near-identical
-    database entries) — both mates agree on what's biologically there, they
-    just landed on different specific accessions. Counted as ONE hit,
-    credited to whichever mate has the higher match_qcov_pct (the
-    established combined extent+quality confidence metric).
-
-    Genuine cross-Group disagreement (the two accessions belong to
-    DIFFERENT Groups entirely — e.g. one mate hits a beta-lactamase, the
-    other an aminoglycoside-modifying enzyme) is a real, more concerning
-    signal: a chimeric fragment, PCR artifact, contamination, or a bad
-    FLASH merge. Also resolved to ONE hit (the higher-match_qcov_pct mate),
-    rather than doubling the count for what's likely noise either way —
-    but tracked separately in diagnostics so you can see how often this
-    actually happens, since it's a meaningfully different situation from
-    same-Group disagreement.
-
-    A true single/merged read has no mate sharing its base_read_id, so it
-    falls into the "only one present" case trivially — same code path, no
-    special-casing needed for merged vs PE.
-
-    Returns (hits, diagnostics):
-      hits        — gene_accession -> fragment-hit count
-      diagnostics — counts of each resolution case actually encountered:
-                    'same_gene', 'one_mate_only',
-                    'same_group_diff_gene' (group_aware only),
-                    'cross_group_both_counted' (group_aware only),
-                    'legacy_discordant_both_counted' (group_aware=False only)
-    """
-    frag_groups: Dict[str, List[Tuple[str, float]]] = defaultdict(list)
-    for gene, base_id, mq in rows:
-        frag_groups[base_id].append((gene, mq))
-
-    hits: Dict[str, int] = defaultdict(int)
-    diagnostics: Dict[str, int] = defaultdict(int)
-
-    for base_id, entries in frag_groups.items():
-        if len(entries) == 1:
-            hits[entries[0][0]] += 1
-            diagnostics['one_mate_only'] += 1
-        elif len(entries) == 2:
-            (g1, mq1), (g2, mq2) = entries
-            if g1 == g2:
-                hits[g1] += 1
-                diagnostics['same_gene'] += 1
-            elif group_aware:
-                group1 = (taxonomy_cache or {}).get(g1, (g1, '', '', '', '', ''))[4]
-                group2 = (taxonomy_cache or {}).get(g2, (g2, '', '', '', '', ''))[4]
-                if group1 and group1 == group2:
-                    # Same Group, different accession = redundant-DB-entry artifact.
-                    # Collapse to ONE hit for the higher-match_qcov mate (mq1/mq2).
-                    winner = g1 if mq1 >= mq2 else g2
-                    hits[winner] += 1
-                    diagnostics['same_group_diff_gene'] += 1
-                else:
-                    # Genuinely different Groups = a real cross-mechanism fragment.
-                    # Count ONE hit to EACH gene (both mechanisms evidenced).
-                    hits[g1] += 1
-                    hits[g2] += 1
-                    diagnostics['cross_group_both_counted'] += 1
-            else:
-                hits[g1] += 1          # mates disagree -> one hit each (legacy)
-                hits[g2] += 1
-                diagnostics['legacy_discordant_both_counted'] += 1
-        else:
-            # Shouldn't happen — each base_read_id should have at most one
-            # primary alignment per mate (R1, R2, or single). If it does,
-            # fall back to counting each entry separately rather than guessing.
-            for g, _ in entries:
-                hits[g] += 1
-            diagnostics['unexpected_3plus'] += 1
-    return hits, diagnostics
-
-
-def merged_interval_length(intervals: List[Tuple[int, int]]) -> int:
-    if not intervals:
-        return 0
-    intervals = sorted(intervals)
-    total = 0
-    cur_start, cur_end = intervals[0]
-    for s, e in intervals[1:]:
-        if s <= cur_end:
-            cur_end = max(cur_end, e)
-        else:
-            total += cur_end - cur_start
-            cur_start, cur_end = s, e
-    total += cur_end - cur_start
-    return total
-
-
-def compute_redundancy_table(
-    threshold_labels: Dict[str, float],
-    gene_data: Dict[str, dict],
-    gene_fragment_hits: Dict[str, int],
-    ref_lengths: Dict[str, int],
-    taxonomy_cache: Dict[str, Tuple[str, str, str, str, str, str]],
-) -> List[dict]:
-    """
-    Groups gene accessions by their taxonomy Group field and quantifies
-    multi-mapping redundancy: many accessions, each backed by only a few
-    reads, all roughly the same length, with no single accession dominating
-    the read count -> strong sign these are the SAME underlying signal split
-    across near-duplicate reference entries by alignment tie-breaking,
-    rather than independent distinct hits.
-
-    threshold_labels: dict of column_name -> value, prepended to every output
-    row (e.g. {"min_query_coverage": 0.0, "min_identity": 90.0,
-    "min_match_qcov": 0.0}) — generalized from a single qcov argument so the
-    redundancy table stays labeled correctly across however many threshold
-    axes are actually being swept.
-
-    Reports both the raw alignment-record count (total_reads, as before) and
-    the fragment-hit count (total_fragment_hits). A concordant PE pair
-    inflates total_reads to 2 for what is really one piece of evidence —
-    total_fragment_hits is the fairer number when comparing a PE workflow's
-    redundancy against a merged workflow's.
-    """
-    by_group: Dict[str, List[Tuple[str, int, int, int]]] = defaultdict(list)
-    for gene, d in gene_data.items():
-        n = len(d['read_lengths'])
-        if n == 0:
-            continue
-        _, _, _, _, group, _ = taxonomy_cache.get(gene, (gene, '', '', '', '', ''))
-        if not group:
-            continue
-        by_group[group].append((gene, n, ref_lengths.get(gene, 0), gene_fragment_hits.get(gene, 0)))
-
-    rows = []
-    for group, entries in by_group.items():
-        n_accessions = len(entries)
-        total_reads = sum(e[1] for e in entries)
-        max_reads = max(e[1] for e in entries)
-        total_hits = sum(e[3] for e in entries)
-        max_hits = max(e[3] for e in entries) if entries else 0
-        lengths = [e[2] for e in entries if e[2] > 0]
-        mean_length = statistics.mean(lengths) if lengths else 0.0
-        length_cv = (
-            statistics.pstdev(lengths) / mean_length
-            if (len(lengths) > 1 and mean_length > 0) else 0.0
-        )
-        pct_top = round(max_reads / total_reads * 100, 2) if total_reads else 0.0
-        pct_top_hits = round(max_hits / total_hits * 100, 2) if total_hits else 0.0
-
-        # Heuristic flag — adjust thresholds to taste; raw columns are kept
-        # so you can re-sort/re-filter with your own criteria instead.
-        likely_redundant = (n_accessions >= 5 and pct_top < 50 and length_cv < 0.10)
-
-        rows.append({
-            **threshold_labels,
-            "group": group,
-            "n_accessions": n_accessions,
-            "total_reads": total_reads,
-            "max_accession_reads": max_reads,
-            "pct_reads_in_top_accession": pct_top,
-            "total_fragment_hits": total_hits,
-            "max_accession_fragment_hits": max_hits,
-            "pct_fragment_hits_in_top_accession": pct_top_hits,
-            "mean_gene_length": round(mean_length, 1),
-            "gene_length_cv": round(length_cv, 4),
-            "likely_redundant": likely_redundant,
-        })
-    return rows
-
-
-def main():
-    args = parse_args()
-
-    qcov_values       = sorted(float(x) for x in args.query_coverage_sweep.split(","))
-    gf_values         = sorted(float(x) for x in args.gene_fraction_sweep.split(","))
-    identity_values   = sorted(float(x) for x in args.identity_sweep.split(","))
-    match_qcov_values = sorted(float(x) for x in args.match_qcov_sweep.split(","))
-
-    for values, name, lo, hi in [
-        (qcov_values,       "query-coverage", 0.0, 1.0),
-        (gf_values,         "gene-fraction",  0.0, 1.0),
-        (identity_values,   "identity",       0.0, 1.0),
-        (match_qcov_values, "match-qcov",     0.0, 1.0),
-    ]:
-        for x in values:
-            if not lo <= x <= hi:
-                sys.exit(f"[ERROR] {name} sweep values must be {lo}-{hi}, got {x}")
-
-    tmp_csv = args.tmp_csv or tempfile.mktemp(suffix=".csv")
-    if len(args.input) > 1:
-        print(f"[INFO] Scanning {len(args.input)} input files as ONE sample -> {tmp_csv}", flush=True)
-        for p in args.input:
-            print(f"         {p}", flush=True)
-    else:
-        print(f"[INFO] Scanning {args.input[0]} once -> {tmp_csv}", flush=True)
-    if args.exclude_snp_confirmation:
-        print("[INFO] --exclude-snp-confirmation is ON: genes flagged "
-              "RequiresSNPConfirmation will be dropped entirely from this analysis.",
-              flush=True)
-    if args.min_aln_length > 0:
-        print(f"[INFO] --min-aln-length {args.min_aln_length}bp is ON: applied alongside "
-              f"every swept threshold combination.", flush=True)
-    if args.max_unaligned_length is not None:
-        print(f"[INFO] --max-unaligned-length {args.max_unaligned_length}bp is ON.", flush=True)
-    if identity_values != [0.0]:
-        print(f"[INFO] Identity sweep: {identity_values}", flush=True)
-    else:
-        print("[INFO] Identity sweep: off (all reads pass; set --identity-sweep to enable)", flush=True)
-    if match_qcov_values != [0.0]:
-        print(f"[INFO] Match-qcov sweep: {match_qcov_values}", flush=True)
-    else:
-        print("[INFO] Match-qcov sweep: off (all reads pass; set --match-qcov-sweep to enable)", flush=True)
-
-    total_seen, ref_lengths, n_excluded_by_snp = stream_primary_alignments_to_csv(
-        args.input, tmp_csv, args.min_mapq, args.exclude_snp_confirmation,
-        edge_aware_qcov=args.edge_aware_qcov
-    )
-    print(f"[INFO] {total_seen:,} primary mapped alignments seen "
-          f"(before any filtering)", flush=True)
-    if args.exclude_snp_confirmation:
-        print(f"[INFO] {n_excluded_by_snp:,} alignments excluded as "
-              f"RequiresSNPConfirmation (after --min-mapq, before query-coverage sweep)",
-              flush=True)
-
-    con = duckdb.connect(":memory:")
-
-    # Declare the column types explicitly rather than letting DuckDB infer them.
-    # Inference is driven by the data, so two situations silently produce VARCHAR
-    # columns and a "Cannot compare values of type VARCHAR and type DOUBLE"
-    # BinderException when the WHERE clause compares them to a numeric threshold:
-    #
-    #   1. A sample with zero usable alignments leaves a header-only CSV, so
-    #      DuckDB has nothing to infer from and types EVERY column VARCHAR.
-    #   2. A sample where no read carries an NM tag leaves pct_identity,
-    #      match_qcov_pct and matched_length empty on every row, so those three
-    #      become VARCHAR even though the file has plenty of alignments.
-    #
-    # Fixing the schema up front makes the query valid in both cases.
-    ALN_COLUMN_TYPES = {
-        "gene_accession": "VARCHAR",
-        "mapq":           "INTEGER",
-        "qcov_pct":       "DOUBLE",
-        "read_length":    "INTEGER",
-        "aln_length":     "INTEGER",
-        "base_read_id":   "VARCHAR",
-        "pct_identity":   "DOUBLE",
-        "match_qcov_pct": "DOUBLE",
-        "matched_length": "INTEGER",
-        "blocks":         "VARCHAR",
+# ══════════════════════════════════════════════════════════════════════════════
+# Sweep Threshold Dropoff — Query-Coverage and Gene-Fraction
+# ══════════════════════════════════════════════════════════════════════════════
+#
+# Reads combined_gene_detail.csv / combined_results.csv / combined_length_quantiles.csv
+# (from combine_sweep_results.py). Each row carries a sample_id; there is no
+# workflow / read_subset grouping and no faceting. Line plots are a single panel
+# showing the mean across samples (bold) with each sample as a thin grey line.
+#
+# Heatmaps are drawn as TWO PANELS side by side: the absolute feature count on
+# the left and the percentage of baseline retained on the right. The two need
+# independent fill scales, which is why patchwork is used to combine them.
+#
+# The gene-fraction grid is read from combined_results.csv rather than hardcoded,
+# so it always matches whatever was actually swept by coverage_threshold_sweep.py.
+#
+# Usage:
+#   Rscript plot_sweep_dropoff.R
+#   Rscript plot_sweep_dropoff.R combined_sweep_results/ figures/
+# ══════════════════════════════════════════════════════════════════════════════
+
+suppressPackageStartupMessages({
+  library(data.table)
+  library(ggplot2)
+  library(scales)
+})
+setDTthreads(1)
+
+# patchwork is used to place the count and percentage heatmaps side by side with
+# independent fill scales. If it is unavailable the script still runs and writes
+# the two panels as separate files instead.
+HAVE_PATCHWORK <- requireNamespace("patchwork", quietly = TRUE)
+if (HAVE_PATCHWORK) suppressPackageStartupMessages(library(patchwork))
+
+# ── arguments ─────────────────────────────────────────────────────────────────
+args    <- commandArgs(trailingOnly = TRUE)
+in_dir  <- if (length(args) >= 1) args[1] else "combined_sweep_results/"
+out_dir <- if (length(args) >= 2) args[2] else file.path(in_dir, "figures")
+dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+gene_path <- file.path(in_dir, "combined_gene_detail.csv")
+if (!file.exists(gene_path)) stop("combined_gene_detail.csv not found in ", in_dir,
+                                  " - run combine_sweep_results.py first")
+
+LEVELS_TO_PLOT <- c("gene_accession", "class", "mechanism", "group")
+
+# Fallback only. This is overwritten below with the actual values found in
+# combined_results.csv, so it no longer has to be kept in sync by hand.
+GF_SWEEP <- c(0, 0.1, 0.25, 0.5, 0.8)
+
+message("Loading data...")
+genes <- fread(gene_path, showProgress = FALSE)
+genes <- genes[sample_id != "sample_id"]   # drop any embedded header rows
+
+qcov_values     <- sort(unique(as.double(genes$min_query_coverage)))
+identity_values <- if ("min_identity" %in% names(genes))
+  sort(unique(as.double(genes$min_identity))) else c(0)
+match_qcov_values <- if ("min_match_qcov" %in% names(genes))
+  sort(unique(as.double(genes$min_match_qcov))) else c(0)
+
+# Priority for "which axis is primary": match_qcov > identity > qcov.
+if (length(match_qcov_values) > 1) {
+  primary_values <- match_qcov_values
+  primary_col    <- "min_match_qcov"
+  primary_label  <- "Min match-qcov"
+} else if (length(identity_values) > 1) {
+  primary_values <- identity_values
+  primary_col    <- "min_identity"
+  primary_label  <- "Min identity"
+} else {
+  primary_values <- qcov_values
+  primary_col    <- "min_query_coverage"
+  primary_label  <- "Min query coverage"
+}
+# All four sweep axes are now proportions (0-1), so no axis needs special
+# scaling. PRIMARY_IS_IDENTITY is retained as FALSE for backward compatibility
+# with any local edits that referenced it.
+PRIMARY_IS_IDENTITY <- FALSE
+
+# ── Guard: these figures assume ONE read-level axis was swept ─────────────────
+# coverage_threshold_sweep.py evaluates the full cartesian product of
+# query-coverage x identity x match-qcov x gene-fraction. Every figure below
+# plots against a single "primary" axis. If more than one read-level axis was
+# swept, the other axes have to be dealt with somehow; this script holds them at
+# their most permissive value (see hold_non_primary below) so each figure means
+# "detection vs the primary axis, with the other filters off". That is a
+# well-defined statement, but it is NOT the same as exploring the joint grid, so
+# say so loudly rather than letting the reader assume otherwise.
+n_axes_swept <- sum(c(length(qcov_values) > 1,
+                      length(identity_values) > 1,
+                      length(match_qcov_values) > 1))
+if (n_axes_swept > 1) {
+  message("")
+  message("  ================================================================")
+  message("  NOTE: more than one read-level threshold axis was swept.")
+  message("    query-coverage values : ", length(qcov_values))
+  message("    identity values       : ", length(identity_values))
+  message("    match-qcov values     : ", length(match_qcov_values))
+  message("  Figures plot against '", primary_col, "' and hold the other axes")
+  message("  at their most permissive value. The CSV outputs contain the full")
+  message("  grid and remain the source of truth for joint effects.")
+  message("  To plot a different axis, sweep that one alone.")
+  message("  ================================================================")
+  message("")
+}
+
+# Restrict a table to the most permissive value of every read-level threshold
+# axis other than the one being plotted. Without this, per-level counts computed
+# with uniqueN() would union across the ignored axes, and heatmap tiles would be
+# drawn multiple times on top of each other.
+# Describe any read-level filter that was pinned at a single NON-ZERO value.
+# Such a filter is applied at every point in the grid but never appears on an
+# axis, so without this the figures would silently omit it.
+fixed_filter_note <- function(dt, keep_col) {
+  notes <- character(0)
+  for (ax in setdiff(c("min_query_coverage", "min_identity", "min_match_qcov"), keep_col)) {
+    if (ax %in% names(dt)) {
+      vals <- unique(as.double(dt[[ax]]))
+      if (length(vals) == 1 && vals[1] > 0) {
+        notes <- c(notes, paste0(ax, " fixed at ", vals[1]))
+      }
     }
-    types_sql = "{" + ", ".join(f"'{k}': '{v}'" for k, v in ALN_COLUMN_TYPES.items()) + "}"
-    con.execute(
-        f"CREATE TABLE aln AS SELECT * FROM read_csv('{tmp_csv}', header=true, "
-        f"columns={types_sql})"
+  }
+  if (length(notes) == 0) "" else paste0("Also applied at every point: ",
+                                         paste(notes, collapse = "; "))
+}
+
+hold_non_primary <- function(dt, keep_col, label) {
+  for (ax in setdiff(c("min_query_coverage", "min_identity", "min_match_qcov"), keep_col)) {
+    if (ax %in% names(dt)) {
+      vals <- as.double(dt[[ax]])
+      if (uniqueN(vals) > 1) {
+        ax_min <- min(vals, na.rm = TRUE)
+        message("  [", label, "] holding ", ax, " at its most permissive value (", ax_min, ")")
+        dt <- dt[as.double(get(ax)) == ax_min]
+      }
+    }
+  }
+  dt
+}
+
+message(sprintf("  %s rows | %d samples",
+                formatC(nrow(genes), format = "d", big.mark = ","),
+                uniqueN(genes$sample_id)))
+message(sprintf("  Primary sweep: %s - values: %s",
+                primary_col, paste(primary_values, collapse = ", ")))
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Quick summary table (per-sample + averaged across samples)
+# ══════════════════════════════════════════════════════════════════════════════
+results_path <- file.path(in_dir, "combined_results.csv")
+if (file.exists(results_path)) {
+  message("\nBuilding quick summary table from combined_results.csv...")
+  results <- fread(results_path, showProgress = FALSE)
+  results <- results[sample_id != "sample_id"]
+  results[, n_fragment_hits_in_passing_genes := as.double(n_fragment_hits_in_passing_genes)]
+
+  # Derive the gene-fraction grid from the data instead of hardcoding it, so the
+  # figures always match whatever grid was passed to coverage_threshold_sweep.py.
+  if ("min_gene_fraction" %in% names(results)) {
+    results[, min_gene_fraction := as.double(min_gene_fraction)]
+    GF_SWEEP <- sort(unique(results$min_gene_fraction))
+    message("  Gene-fraction grid read from data: ", paste(GF_SWEEP, collapse = ", "))
+  } else {
+    message("  [NOTE] min_gene_fraction column absent; using default grid: ",
+            paste(GF_SWEEP, collapse = ", "))
+  }
+
+  THRESHOLD_COLS <- intersect(c("min_query_coverage", "min_identity",
+                                "min_match_qcov", "min_gene_fraction"),
+                              names(results))
+  message("  Threshold columns detected: ", paste(THRESHOLD_COLS, collapse = ", "))
+
+  raw_cols  <- c("n_alignments_in_passing_genes", "n_fragment_hits_in_passing_genes",
+                "n_genes_passing_both", "n_classes_passing",
+                "n_mechanisms_passing", "n_groups_passing")
+  new_names <- c("n_classified_alignments", "n_classified_fragment_hits",
+                "n_genes", "n_classes", "n_mechanisms", "n_groups")
+  present   <- raw_cols %in% names(results)
+  raw_cols  <- raw_cols[present]
+  new_names <- new_names[present]
+
+  id_cols <- c("sample_id", THRESHOLD_COLS)
+  per_sample_summary <- results[, ..id_cols]
+  for (i in seq_along(raw_cols)) per_sample_summary[[new_names[i]]] <- results[[raw_cols[i]]]
+
+  fwrite(per_sample_summary, file.path(out_dir, "summary_table_per_sample.csv"))
+  message(sprintf("  saved: summary_table_per_sample.csv (%s rows - one per sample x threshold combination)",
+                  formatC(nrow(per_sample_summary), format = "d", big.mark = ",")))
+
+  summary_table_avg <- per_sample_summary[, c(
+    lapply(.SD, mean), .(n_samples = .N)
+  ), by = THRESHOLD_COLS, .SDcols = new_names]
+  setnames(summary_table_avg, new_names, paste0("mean_", new_names))
+  setorderv(summary_table_avg, THRESHOLD_COLS)
+
+  fwrite(summary_table_avg, file.path(out_dir, "summary_table_averaged.csv"))
+  message(sprintf("  saved: summary_table_averaged.csv (%d rows - one per threshold combination, averaged across samples)",
+                  nrow(summary_table_avg)))
+  message("\nPreview of summary_table_averaged.csv:")
+  print(summary_table_avg)
+} else {
+  message("\n[NOTE] combined_results.csv not found in ", in_dir,
+         " - skipping quick summary table.")
+  message("  Using default gene-fraction grid: ", paste(GF_SWEEP, collapse = ", "))
+}
+
+show_plot <- function(p, stem, w = 9, h = 7) {
+  print(p)
+  ggsave(file.path(out_dir, paste0(stem, ".png")), p, width = w, height = h, dpi = 150)
+  message("  saved: ", stem, ".png")
+}
+
+# ── two-panel heatmap helper ───────────────────────────────────────────────────
+# The count panel and the percentage panel need independent fill scales, since a
+# raw feature count and a 0-100 percentage share no meaningful range. ggplot2
+# facets force a single shared scale, so the panels are built separately and
+# combined with patchwork. Falls back to two files when patchwork is absent.
+save_two_panel <- function(p_count, p_pct, stem, title = NULL, w = 13, h = 6) {
+  if (HAVE_PATCHWORK) {
+    combined <- p_count + p_pct + patchwork::plot_layout(ncol = 2)
+    if (!is.null(title)) {
+      combined <- combined + patchwork::plot_annotation(
+        title = title,
+        theme = theme(plot.title = element_text(size = 13, face = "bold"))
+      )
+    }
+    show_plot(combined, stem, w = w, h = h)
+  } else {
+    message("  [NOTE] patchwork not installed; writing count and percent panels separately for ", stem)
+    show_plot(p_count, paste0(stem, "_count"), w = w / 2 + 1, h = h)
+    show_plot(p_pct,   paste0(stem, "_pct"),   w = w / 2 + 1, h = h)
+  }
+}
+
+# Shared heatmap skeleton so the two panels are visually consistent.
+heatmap_panel <- function(data, x_col, y_col, fill_col, label_expr,
+                          fill_name, panel_title, x_lab, y_lab,
+                          fill_limits = NULL) {
+  ggplot(data, aes(factor(.data[[x_col]]), factor(.data[[y_col]]), fill = .data[[fill_col]])) +
+    geom_tile(colour = "white") +
+    geom_text(aes(label = label_expr), size = 2.7) +
+    scale_fill_distiller(palette = "RdYlBu", direction = 1,
+                         name = fill_name, limits = fill_limits) +
+    labs(title = panel_title, x = x_lab, y = y_lab) +
+    theme_bw(base_size = 9) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          plot.title  = element_text(size = 10, face = "bold"),
+          legend.position = "right")
+}
+
+# Combination-effect plot (single panel): x = retention, y = one threshold,
+# colour = the other threshold. Optional per-sample grey lines under the mean.
+make_combo_plot <- function(data, level, x_col, y_col, colour_col, colour_label,
+                            x_lab, y_lab, fname_stem, sample_data = NULL) {
+  p <- ggplot(data, aes(.data[[x_col]], .data[[y_col]],
+                       colour = factor(.data[[colour_col]])))
+  if (!is.null(sample_data)) {
+    p <- p + geom_line(
+      data = sample_data,
+      aes(x = .data[[x_col]], y = .data[[y_col]],
+          group = interaction(sample_id, .data[[colour_col]])),
+      colour = "grey70", alpha = 0.25, linewidth = 0.25, inherit.aes = FALSE
     )
+  }
+  p <- p +
+    geom_line(linewidth = 0.9) + geom_point(size = 1.6) +
+    scale_y_continuous(labels = label_percent()) +
+    scale_colour_viridis_d(name = colour_label) +
+    labs(title    = paste0(toupper(substr(level,1,1)), substr(level,2,nchar(level)),
+                           " - combined effect of both thresholds"),
+         subtitle = if (!is.null(sample_data))
+           "Bold = mean across samples; grey = each individual sample"
+         else
+           "Each line holds the other threshold fixed at its labelled value",
+         x = x_lab, y = y_lab) +
+    theme_bw(base_size = 11) + theme(legend.position = "bottom")
+  p <- p + if (x_col == "mean_pct") {
+    scale_x_continuous(labels = label_comma(suffix = "%"), limits = c(0, 100))
+  } else {
+    scale_x_continuous(labels = label_comma())
+  }
+  show_plot(p, fname_stem)
+}
 
-    baseline_n = con.execute("SELECT COUNT(*) FROM aln").fetchone()[0]
-    baseline_genes = con.execute("SELECT COUNT(DISTINCT gene_accession) FROM aln").fetchone()[0]
+# ══════════════════════════════════════════════════════════════════════════════
+# Reads retained (single panel; mean line + per-sample grey lines)
+# ══════════════════════════════════════════════════════════════════════════════
+if (exists("results")) {
+  message("\nBuilding reads-retained figures from combined_results.csv...")
 
-    distinct_genes = [r[0] for r in con.execute("SELECT DISTINCT gene_accession FROM aln").fetchall()]
-    taxonomy_cache = {g: parse_gene_reference(g) for g in distinct_genes}
+  # Keep one read-level axis varying; hold the others at their loosest setting so
+  # each heatmap tile and each line corresponds to exactly one threshold pair.
+  results <- hold_non_primary(results, primary_col, "reads")
 
-    def distinct_taxonomy_count(idx: int) -> int:
-        return len({taxonomy_cache[g][idx] for g in distinct_genes if taxonomy_cache[g][idx]})
+  plot_reads_retained <- function(fixed_col, fixed_val, x_col, x_lab, fname_stem) {
+    sub <- results[get(fixed_col) == fixed_val]
+    value_cols <- c("pct_fragment_hits_in_passing_genes_of_baseline",
+                    "n_fragment_hits_in_passing_genes")
+    sub_long <- melt(sub, id.vars = c("sample_id", x_col), measure.vars = value_cols)
+    sub_long[, metric := factor(variable, levels = value_cols,
+                                labels = c("Mean % of baseline retained", "Mean absolute reads retained"))]
 
-    baseline_classes = distinct_taxonomy_count(2)
-    baseline_mechanisms = distinct_taxonomy_count(3)
-    baseline_groups = distinct_taxonomy_count(4)
+    mean_data <- sub_long[, .(mean_val = mean(value)), by = c(x_col, "metric")]
 
-    print(f"[INFO] Baseline (--min-mapq {args.min_mapq}"
-          f"{', SNP-confirmation excluded' if args.exclude_snp_confirmation else ''}): "
-          f"{baseline_n:,} alignments, {baseline_genes:,} genes, "
-          f"{baseline_classes:,} classes, {baseline_mechanisms:,} mechanisms, "
-          f"{baseline_groups:,} groups\n", flush=True)
+    p <- ggplot(mean_data, aes(.data[[x_col]] * 100, mean_val)) +
+      geom_line(data = sub_long, aes(x = .data[[x_col]] * 100, y = value, group = sample_id),
+               colour = "grey55", alpha = 0.35, linewidth = 0.3, inherit.aes = FALSE) +
+      geom_line(colour = "steelblue4", linewidth = 1) +
+      geom_point(colour = "steelblue4", size = 1.6) +
+      facet_wrap(~metric, scales = "free_y", ncol = 1) +
+      scale_x_continuous(breaks = seq(0, 100, 20), labels = label_percent(scale = 1)) +
+      scale_y_continuous(labels = label_comma()) +
+      labs(title = paste0("Fragment-hits retained vs ", x_lab, " - every sample (grey) + mean (blue)"),
+           x = x_lab, y = NULL) +
+      theme_bw(base_size = 10) +
+      theme(strip.background = element_rect(fill = "grey92"))
+    show_plot(p, fname_stem, h = 9)
+  }
 
-    # ── Zero usable alignments ───────────────────────────────────────────────
-    # A sample can legitimately reach this point with nothing left: too few reads
-    # mapped, everything failed --min-mapq, or (commonly) every alignment was to a
-    # RequiresSNPConfirmation gene and --exclude-snp-confirmation removed it. There
-    # is no grid to evaluate, so write header-only outputs and finish cleanly
-    # rather than emitting an empty or malformed CSV that breaks the combine step.
-    if baseline_n == 0:
-        print("[WARN] No alignments remain after the fixed pre-filters "
-              "(--min-mapq"
-              f"{', --exclude-snp-confirmation' if args.exclude_snp_confirmation else ''}).",
-              flush=True)
-        print("[WARN] Writing header-only outputs for this sample and exiting normally.",
-              flush=True)
+  plot_reads_retained("min_gene_fraction", min(GF_SWEEP),
+                      primary_col, primary_label, "reads_retained_vs_primary")
+  plot_reads_retained(primary_col, min(primary_values),
+                      "min_gene_fraction", "Min gene fraction", "reads_retained_vs_gf")
 
-        empty_outputs = [
-            (args.output, [
-                "min_query_coverage", "min_identity", "min_match_qcov",
-                "min_gene_fraction", "n_alignments_retained",
-                "pct_alignments_retained_of_baseline",
-                "n_alignments_in_passing_genes",
-                "pct_alignments_in_passing_genes_of_baseline",
-                "n_fragment_hits_retained", "pct_fragment_hits_retained_of_baseline",
-                "n_fragment_hits_in_passing_genes",
-                "pct_fragment_hits_in_passing_genes_of_baseline",
-                "n_genes_at_filter", "n_genes_passing_both",
-                "pct_genes_passing_of_baseline_genes",
-                "n_classes_passing", "pct_classes_passing",
-                "n_mechanisms_passing", "pct_mechanisms_passing",
-                "n_groups_passing", "pct_groups_passing",
-            ]),
-            (args.gene_detail_output, [
-                "min_query_coverage", "min_identity", "min_match_qcov",
-                "gene_accession", "meg_id", "type", "class", "mechanism", "group",
-                "snp", "gene_length", "covered_bases", "gene_fraction",
-                "read_count", "n_fragment_hits", "pct_of_baseline_alignments",
-            ]),
-            (args.redundancy_output, [
-                "min_query_coverage", "min_identity", "min_match_qcov", "group",
-                "n_accessions", "total_reads", "max_accession_reads",
-                "pct_reads_in_top_accession", "total_fragment_hits",
-                "max_accession_fragment_hits", "pct_fragment_hits_in_top_accession",
-                "mean_gene_length", "gene_length_cv", "likely_redundant",
-            ]),
-            (args.length_quantiles_output, [
-                "min_query_coverage", "min_identity", "min_match_qcov", "n_alignments",
-            ]),
-        ]
-        for path, header in empty_outputs:
-            if not path:
-                continue
-            d = os.path.dirname(path)
-            if d:
-                os.makedirs(d, exist_ok=True)
-            with open(path, "w", newline="") as fh:
-                csv.writer(fh).writerow(header)
-            print(f"[INFO] Wrote header-only {path}", flush=True)
+  reads_grid <- results[, .(
+    mean_pct = mean(pct_fragment_hits_in_passing_genes_of_baseline),
+    mean_n   = mean(n_fragment_hits_in_passing_genes)
+  ), by = THRESHOLD_COLS]
 
-        if not args.tmp_csv and not args.keep_tmp_csv:
-            os.remove(tmp_csv)
-        return
+  fwrite(reads_grid, file.path(out_dir, "reads_retained_combined_grid.csv"))
 
-    rows_out = []
-    gene_detail_rows = []
-    redundancy_rows = []
-    length_quantile_rows = []
-    baseline_fragment_hits: Optional[int] = None   # captured on the first (smallest) qcov below
+  reads_per_sample <- copy(results)
+  setnames(reads_per_sample,
+          c("pct_fragment_hits_in_passing_genes_of_baseline", "n_fragment_hits_in_passing_genes"),
+          c("mean_pct", "mean_n"))
 
-    QUANTILES_OVERALL = [5, 10, 25, 50, 75, 90, 95]
+  # ── TWO-PANEL heatmap: absolute count | percent of baseline ────────────────
+  p_reads_heat_count <- heatmap_panel(
+    reads_grid, primary_col, "min_gene_fraction", "mean_n",
+    label_expr  = round(reads_grid$mean_n, 0),
+    fill_name   = "Fragment\nhits",
+    panel_title = "Absolute fragment-hits retained",
+    x_lab = primary_label, y_lab = "Min gene fraction"
+  )
+  p_reads_heat_pct <- heatmap_panel(
+    reads_grid, primary_col, "min_gene_fraction", "mean_pct",
+    label_expr  = paste0(round(reads_grid$mean_pct, 0), "%"),
+    fill_name   = "% of\nbaseline",
+    panel_title = "Percent of baseline retained",
+    x_lab = primary_label, y_lab = "Min gene fraction",
+    fill_limits = c(0, 100)
+  )
+  save_two_panel(p_reads_heat_count, p_reads_heat_pct,
+                 "reads_retained_combined_heatmap",
+                 title = "Fragment-hits retained across the joint threshold grid")
 
-    for qcov in qcov_values:
-      for identity in identity_values:
-       for match_qcov in match_qcov_values:
-        # Build the SQL WHERE clause. NULL handling for identity AND
-        # match_qcov: at threshold=0, reads missing the underlying NM tag
-        # pass (treated as unfiltered); at any positive threshold, NULL
-        # values are excluded — we can't verify them, so they shouldn't
-        # silently pass.
-        base_where = (
-            "qcov_pct >= ? AND aln_length >= ? "
-            "AND (? = 0 OR (pct_identity IS NOT NULL AND pct_identity >= ?)) "
-            "AND (? = 0 OR (match_qcov_pct IS NOT NULL AND match_qcov_pct >= ?))"
-        )
-        # Sweep values are proportions (0-1); the stored pct_identity and
-        # match_qcov_pct columns are percentages, so scale before comparing.
-        params_base = [qcov * 100.0, args.min_aln_length,
-                       identity * 100.0, identity * 100.0,
-                       match_qcov * 100.0, match_qcov * 100.0]
+  make_combo_plot(reads_grid, "reads", "mean_pct", primary_col, "min_gene_fraction",
+                  "Gene\nfraction", "Mean % of baseline retained", primary_label,
+                  "reads_retained_combo_by_primary_pct", sample_data = reads_per_sample)
+  make_combo_plot(reads_grid, "reads", "mean_n", primary_col, "min_gene_fraction",
+                  "Gene\nfraction", "Mean absolute reads retained", primary_label,
+                  "reads_retained_combo_by_primary_count", sample_data = reads_per_sample)
+  make_combo_plot(reads_grid, "reads", "mean_pct", "min_gene_fraction", primary_col,
+                  gsub("\n", " ", primary_label), "Mean % of baseline retained", "Min gene fraction",
+                  "reads_retained_combo_by_gf_pct", sample_data = reads_per_sample)
+  make_combo_plot(reads_grid, "reads", "mean_n", "min_gene_fraction", primary_col,
+                  gsub("\n", " ", primary_label), "Mean absolute reads retained", "Min gene fraction",
+                  "reads_retained_combo_by_gf_count", sample_data = reads_per_sample)
 
-        if args.max_unaligned_length is not None:
-            sub = con.execute(
-                "SELECT gene_accession, read_length, aln_length, base_read_id, "
-                f"COALESCE(pct_identity, 0.0) AS pct_identity, "
-                f"COALESCE(matched_length, 0) AS matched_length, blocks FROM aln "
-                f"WHERE {base_where} AND (read_length - aln_length) <= ?",
-                params_base + [args.max_unaligned_length],
-            ).fetchall()
-        else:
-            sub = con.execute(
-                "SELECT gene_accession, read_length, aln_length, base_read_id, "
-                f"COALESCE(pct_identity, 0.0) AS pct_identity, "
-                f"COALESCE(matched_length, 0) AS matched_length, blocks FROM aln WHERE {base_where}",
-                params_base,
-            ).fetchall()
+  baseline_per_sample <- results[
+    get(primary_col) == min(primary_values) & min_gene_fraction == min(GF_SWEEP),
+    .(sample_id, baseline_hits = n_fragment_hits_in_passing_genes)
+  ]
+  results_lost <- merge(results, baseline_per_sample, by = "sample_id")
+  results_lost[, n_hits_lost   := baseline_hits - n_fragment_hits_in_passing_genes]
+  results_lost[, pct_hits_lost := as.double(100 - pct_fragment_hits_in_passing_genes_of_baseline)]
+  results_lost[, n_hits_lost   := as.double(n_hits_lost)]
 
-        n_retained = len(sub)
-        pct_retained = round(n_retained / baseline_n * 100, 2) if baseline_n else 0.0
+  plot_reads_lost <- function(fixed_col, fixed_val, x_col, x_lab, fname_stem) {
+    sub <- results_lost[get(fixed_col) == fixed_val]
+    value_cols <- c("pct_hits_lost", "n_hits_lost")
+    sub_long <- melt(sub, id.vars = c("sample_id", x_col), measure.vars = value_cols)
+    sub_long[, metric := factor(variable, levels = value_cols,
+                                labels = c("Mean % of baseline LOST", "Mean absolute reads LOST"))]
 
-        gene_data: Dict[str, dict] = defaultdict(lambda: {
-            'intervals': [], 'read_lengths': [], 'aln_lengths': [],
-            'identities': [], 'matched_lengths': []
-        })
-        for gene, rl, al, base_id, pid, mlen, blocks_str in sub:
-            d = gene_data[gene]
-            for block in blocks_str.split(';'):
-                s_str, e_str = block.split(':')
-                d['intervals'].append((int(s_str), int(e_str)))
-            d['read_lengths'].append(rl)
-            d['aln_lengths'].append(al)
-            d['identities'].append(pid)
-            d['matched_lengths'].append(mlen)
+    mean_data <- sub_long[, .(mean_val = mean(value)), by = c(x_col, "metric")]
 
-        gene_fragment_hits, discordant_diagnostics = resolve_fragment_hits(
-            [(gene, base_id, (mlen / rl * 100.0 if rl else 0.0))
-             for gene, rl, _, base_id, _, mlen, _ in sub],
-            taxonomy_cache=taxonomy_cache,
-            group_aware=args.group_aware,
-        )
-        n_fragment_hits_retained = sum(gene_fragment_hits.values())
-        if baseline_fragment_hits is None:
-            baseline_fragment_hits = n_fragment_hits_retained
-        pct_fragment_hits_retained = (
-            round(n_fragment_hits_retained / baseline_fragment_hits * 100, 2)
-            if baseline_fragment_hits else 0.0
-        )
+    p <- ggplot(mean_data, aes(.data[[x_col]] * 100, mean_val)) +
+      geom_line(data = sub_long, aes(x = .data[[x_col]] * 100, y = value, group = sample_id),
+               colour = "grey55", alpha = 0.35, linewidth = 0.3, inherit.aes = FALSE) +
+      geom_line(colour = "firebrick", linewidth = 1) +
+      geom_point(colour = "firebrick", size = 1.6) +
+      facet_wrap(~metric, scales = "free_y", ncol = 1) +
+      scale_x_continuous(breaks = seq(0, 100, 20), labels = label_percent(scale = 1)) +
+      scale_y_continuous(labels = label_comma()) +
+      labs(title = paste0("Fragment-hits LOST vs ", x_lab, " - every sample (grey) + mean (red)"),
+           subtitle = "Complement of the retained figures; baseline = count at no-filter (qcov=0, gf=0)",
+           x = x_lab, y = NULL) +
+      theme_bw(base_size = 10) +
+      theme(strip.background = element_rect(fill = "grey92"))
+    show_plot(p, fname_stem, h = 9)
+  }
 
-        gene_fraction_at_filter: Dict[str, float] = {}
-        gene_aln_count: Dict[str, int] = {}
-        for gene, d in gene_data.items():
-            length = ref_lengths.get(gene, 0)
-            covered = merged_interval_length(d['intervals'])
-            gene_fraction_at_filter[gene] = (covered / length) if length else 0.0
-            gene_aln_count[gene] = len(d['read_lengths'])
+  plot_reads_lost("min_gene_fraction", min(GF_SWEEP),
+                  primary_col, primary_label, "reads_lost_vs_primary")
+  plot_reads_lost(primary_col, min(primary_values),
+                  "min_gene_fraction", "Min gene fraction", "reads_lost_vs_gf")
+}
 
-        n_genes_at_filter = len(gene_fraction_at_filter)
+# ══════════════════════════════════════════════════════════════════════════════
+# Percent identity + alignment-length distributions (single panel each)
+# ══════════════════════════════════════════════════════════════════════════════
+quant_path <- file.path(in_dir, "combined_length_quantiles.csv")
+if (file.exists(quant_path)) {
+  message("\nBuilding identity and alignment-length figures from combined_length_quantiles.csv...")
+  quant <- fread(quant_path, showProgress = FALSE)
+  quant <- quant[sample_id != "sample_id"]
 
-        threshold_labels = {
-            "min_query_coverage": qcov,
-            "min_identity": identity,
-            "min_match_qcov": match_qcov,
+  id_cols_present <- grep("^pct_identity_p", names(quant), value = TRUE)
+  if (length(id_cols_present) == 0) {
+    message("  [NOTE] No pct_identity_p* columns found in combined_length_quantiles.csv.")
+  } else {
+    quant[, (id_cols_present) := lapply(.SD, as.double), .SDcols = id_cols_present]
+    quant[, min_query_coverage := as.double(min_query_coverage)]
+
+    quant_mq_vals  <- if ("min_match_qcov" %in% names(quant)) sort(unique(as.double(quant$min_match_qcov))) else c(0)
+    quant_id_vals  <- if ("min_identity"   %in% names(quant)) sort(unique(as.double(quant$min_identity)))   else c(0)
+    quant_primary_col <- if (length(quant_mq_vals) > 1) "min_match_qcov" else
+                         if (length(quant_id_vals) > 1) "min_identity" else
+                         "min_query_coverage"
+    quant_primary_label <- switch(quant_primary_col,
+      min_match_qcov     = "Min match-qcov",
+      min_identity        = "Min identity",
+      min_query_coverage  = "Min query coverage")
+    quant[, quant_primary := as.double(get(quant_primary_col))]
+
+    # ── Figure 1: identity distribution vs the primary threshold ───────────
+    id_summary <- quant[, .(
+      p10  = mean(as.double(pct_identity_p10)),
+      p25  = mean(as.double(pct_identity_p25)),
+      p50  = mean(as.double(pct_identity_p50)),
+      p75  = mean(as.double(pct_identity_p75)),
+      p90  = mean(as.double(pct_identity_p90)),
+      p5   = mean(as.double(pct_identity_p5)),
+      p95  = mean(as.double(pct_identity_p95))
+    ), by = .(quant_primary)]
+
+    sample_median <- quant[, .(median_identity = mean(as.double(pct_identity_p50))),
+                          by = .(sample_id, quant_primary)]
+
+    p_id_dist <- ggplot(id_summary, aes(x = factor(round(quant_primary, 0)))) +
+      geom_errorbar(aes(ymin = p5, ymax = p95), width = 0.2, colour = "grey40") +
+      geom_crossbar(aes(y = p50, ymin = p25, ymax = p75),
+                    fill = "steelblue4", alpha = 0.7, colour = "steelblue4", width = 0.5) +
+      geom_line(data = sample_median,
+               aes(x = factor(round(quant_primary, 0)),
+                   y = median_identity, group = sample_id),
+               colour = "grey70", alpha = 0.3, linewidth = 0.25, inherit.aes = FALSE) +
+      geom_point(aes(y = p50), colour = "white", size = 2) +
+      scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20),
+                         labels = label_percent(scale = 1)) +
+      labs(title = paste0("Percent identity distribution vs ", quant_primary_label),
+           subtitle = paste0("Box = IQR (p25-p75), whiskers = p5-p95, white dot = mean median,",
+                             " grey lines = per-sample median.\n",
+                             "Identity = (aln_length - NM) / aln_length; based on NM edit-distance tag."),
+           x = quant_primary_label, y = "Percent identity across aligned region") +
+      theme_bw(base_size = 10)
+    show_plot(p_id_dist, "identity_distribution_vs_primary", h = 7, w = 10)
+
+    # ── Figure 2: alignment length, WITH and WITHOUT accounting for matches ─
+    ml_cols_present <- grep("^matched_length_p", names(quant), value = TRUE)
+    if (length(ml_cols_present) == 0) {
+      message("  [NOTE] No matched_length_p* columns found - skipping length comparison.")
+    } else {
+      quant[, (ml_cols_present) := lapply(.SD, as.double), .SDcols = ml_cols_present]
+      al_cols_present <- grep("^aln_length_p", names(quant), value = TRUE)
+      quant[, (al_cols_present) := lapply(.SD, as.double), .SDcols = al_cols_present]
+
+      len_summary <- quant[, .(
+        raw_p25 = mean(aln_length_p25), raw_p50 = mean(aln_length_p50), raw_p75 = mean(aln_length_p75),
+        raw_p5  = mean(aln_length_p5),  raw_p95 = mean(aln_length_p95),
+        match_p25 = mean(matched_length_p25), match_p50 = mean(matched_length_p50), match_p75 = mean(matched_length_p75),
+        match_p5  = mean(matched_length_p5),  match_p95 = mean(matched_length_p95)
+      ), by = .(quant_primary)]
+
+      len_long <- rbindlist(list(
+        len_summary[, .(quant_primary, length_type = "Raw aligned length (incl. mismatches/indels)",
+                        p5 = raw_p5, p25 = raw_p25, p50 = raw_p50, p75 = raw_p75, p95 = raw_p95)],
+        len_summary[, .(quant_primary, length_type = "Matched-only length (true matches)",
+                        p5 = match_p5, p25 = match_p25, p50 = match_p50, p75 = match_p75, p95 = match_p95)]
+      ))
+
+      p_len_dist <- ggplot(len_long, aes(x = factor(round(quant_primary, 0)),
+                                         colour = length_type, fill = length_type)) +
+        geom_errorbar(aes(ymin = p5, ymax = p95), width = 0.2,
+                     position = position_dodge(width = 0.6)) +
+        geom_crossbar(aes(y = p50, ymin = p25, ymax = p75), alpha = 0.6, width = 0.5,
+                     position = position_dodge(width = 0.6)) +
+        scale_colour_manual(values = c("Raw aligned length (incl. mismatches/indels)" = "grey40",
+                                       "Matched-only length (true matches)" = "steelblue4")) +
+        scale_fill_manual(values = c("Raw aligned length (incl. mismatches/indels)" = "grey70",
+                                     "Matched-only length (true matches)" = "steelblue4")) +
+        scale_y_continuous(labels = label_comma()) +
+        labs(title = paste0("Alignment length vs ", quant_primary_label, " - with and without accounting for matches"),
+             subtitle = paste0("Box = IQR (p25-p75), whiskers = p5-p95, across samples.\n",
+                               "Matched-only length = aln_length - NM (mismatches/indels subtracted via the NM edit-distance tag)."),
+             x = quant_primary_label, y = "Length (bp)", colour = NULL, fill = NULL) +
+        theme_bw(base_size = 10) + theme(legend.position = "bottom")
+      show_plot(p_len_dist, "alignment_length_with_vs_without_matches", h = 7, w = 10)
+
+      fwrite(len_summary, file.path(out_dir, "alignment_length_quantile_summary.csv"))
+      message("  saved: alignment_length_quantile_summary.csv")
+    }
+
+    # ── Figure 3: identity quantile heatmap ─────────────────────────────────
+    quant_long <- melt(id_summary,
+                       id.vars     = c("quant_primary"),
+                       measure.vars = c("p5", "p10", "p25", "p50", "p75", "p90", "p95"),
+                       variable.name = "quantile", value.name = "mean_identity")
+
+    p_id_heat <- ggplot(quant_long,
+                        aes(factor(quantile, levels = c("p5","p10","p25","p50","p75","p90","p95")),
+                            factor(round(quant_primary, 0)),
+                            fill = mean_identity)) +
+      geom_tile(colour = "white") +
+      geom_text(aes(label = round(mean_identity, 1)), size = 2.6) +
+      scale_fill_distiller(palette = "RdYlBu", direction = 1,
+                           limits = c(50, 100), name = "Mean\nidentity (%)") +
+      labs(title = paste0("Mean percent identity quantiles by ", quant_primary_label),
+           subtitle = "Each cell = mean across samples of that quantile of the identity distribution",
+           x = "Identity quantile", y = quant_primary_label) +
+      theme_bw(base_size = 9)
+    show_plot(p_id_heat, "identity_quantile_heatmap", w = 10)
+
+    fwrite(id_summary, file.path(out_dir, "identity_quantile_summary.csv"))
+    message("  saved: identity_quantile_summary.csv")
+
+    # ── Figures 4-6: BASELINE (zero-filter) distribution histograms ────────────
+    QLEVELS_HIST  <- c(5, 10, 25, 50, 75, 90, 95)
+    INTERVAL_MASS <- c(5, 15, 25, 25, 15,  5)
+    TRUE_MASS     <- 0.90
+    N_PTS         <- 2000
+
+    reconstruct <- function(qvals, n) {
+      qvals <- as.numeric(qvals)
+      if (any(is.na(qvals)) || length(qvals) != 7) return(numeric(0))
+      pts <- list()
+      for (i in 1:6) {
+        ni <- round(n * INTERVAL_MASS[i] / 90)
+        lo <- qvals[i]; hi <- qvals[i + 1]
+        if (hi < lo) hi <- lo
+        pts[[i]] <- if (ni > 0) runif(ni, lo, hi) else numeric(0)
+      }
+      unlist(pts)
+    }
+
+    build_pts <- function(data, prefix) {
+      qcols <- paste0(prefix, "_p", QLEVELS_HIST)
+      if (!all(qcols %in% names(data))) return(NULL)
+      rbindlist(lapply(seq_len(nrow(data)), function(i) {
+        pts <- reconstruct(as.numeric(data[i, ..qcols]), N_PTS)
+        if (length(pts) == 0) return(NULL)
+        data.table(value = pts)
+      }))
+    }
+
+    density_hist_plot <- function(pts_dt, x_lab, title, fname, binwidth, xlim = NULL) {
+      if (is.null(pts_dt) || nrow(pts_dt) == 0) {
+        message("  [SKIP] No data to plot for ", fname); return(invisible(NULL))
+      }
+      v <- pts_dt$value
+      lo_b <- floor(min(v) / binwidth) * binwidth
+      hi_b <- ceiling(max(v) / binwidth) * binwidth + binwidth
+      brks <- seq(lo_b, hi_b, by = binwidth)
+      h <- hist(v, breaks = brks, plot = FALSE)
+      hist_dt <- data.table(mid = h$mids, density = h$counts / length(v) * TRUE_MASS / binwidth)
+      d <- density(v); dens_dt <- data.table(x = d$x, y = d$y * TRUE_MASS)
+
+      p <- ggplot() +
+        geom_col(data = hist_dt, aes(mid, density), width = binwidth,
+                fill = "steelblue4", colour = "white", alpha = 0.8) +
+        geom_line(data = dens_dt, aes(x, y), colour = "firebrick", linewidth = 0.7) +
+        { if (!is.null(xlim)) coord_cartesian(xlim = xlim) } +
+        labs(title = title,
+             subtitle = paste0("Baseline (zero-filter) distribution reconstructed from per-sample quantiles ",
+                               "(p5-p95; shaded area = ", TRUE_MASS,
+                               "; outer 5% tails on each side not shown).\n",
+                               uniqueN(pts_dt), " pooled sample-rows."),
+             x = x_lab,
+             y = paste0("Density (integrates to ~", TRUE_MASS,
+                        " over shown range; remaining ", 1 - TRUE_MASS, " in unshown tails)")) +
+        theme_bw(base_size = 10)
+      show_plot(p, fname, h = 6, w = 9)
+    }
+
+    quant_thresh_cols <- intersect(c("min_query_coverage", "min_identity",
+                                     "min_match_qcov"), names(quant))
+    for (col in quant_thresh_cols) quant[, (col) := as.double(get(col))]
+    quant_baseline <- quant[Reduce(`&`, lapply(quant_thresh_cols, function(c) get(c) == 0))]
+    message("  Baseline (zero-filter) rows for histograms: ", nrow(quant_baseline))
+
+    if (nrow(quant_baseline) > 0) {
+      rl_pts <- build_pts(quant_baseline, "read_length")
+      rl_range <- if (!is.null(rl_pts)) diff(range(rl_pts$value)) else 0
+      rl_bw <- max(1, round(rl_range / 40))
+      density_hist_plot(rl_pts, "Read length (bp)",
+                        "Baseline read-length distribution",
+                        "baseline_read_length_histogram", binwidth = rl_bw)
+
+      density_hist_plot(build_pts(quant_baseline, "aln_length"),
+                        "Aligned length (bp)  [clipping-only, includes mismatches/indels]",
+                        "Baseline aligned-length distribution",
+                        "baseline_aln_length_histogram", binwidth = rl_bw)
+
+      ml_cols_hist <- paste0("matched_length_p", QLEVELS_HIST)
+      if (all(ml_cols_hist %in% names(quant_baseline))) {
+        density_hist_plot(build_pts(quant_baseline, "matched_length"),
+                          "Matched length (bp)  [aln_length - NM; true matches only]",
+                          "Baseline matched-length distribution (matches only)",
+                          "baseline_matched_length_histogram", binwidth = rl_bw)
+      }
+
+      mq_exact <- paste0("match_qcov_pct_p", QLEVELS_HIST)
+      if (all(mq_exact %in% names(quant_baseline))) {
+        mq_pts <- build_pts(quant_baseline, "match_qcov_pct")
+        mq_title_sfx <- ""
+      } else if (all(c(ml_cols_hist, paste0("read_length_p", QLEVELS_HIST)) %in% names(quant_baseline))) {
+        message("  [APPROX] match_qcov_pct_p* absent - approximating as matched_length_p{q}/read_length_p{q}")
+        approx_mq <- copy(quant_baseline)
+        mq_out_cols <- paste0("match_qcov_pct_p", QLEVELS_HIST)
+        for (q in QLEVELS_HIST) {
+          ml_c <- paste0("matched_length_p", q); rl_c <- paste0("read_length_p", q)
+          approx_mq[, paste0("match_qcov_pct_p", q) := get(ml_c) / get(rl_c) * 100]
         }
+        for (i in seq_len(nrow(approx_mq))) {
+          v <- cummax(as.numeric(approx_mq[i, ..mq_out_cols]))
+          approx_mq[i, (mq_out_cols) := as.list(v)]
+        }
+        mq_pts   <- build_pts(approx_mq, "match_qcov_pct")
+        mq_title_sfx <- " [approximate]"
+      } else {
+        mq_pts <- NULL; mq_title_sfx <- ""
+      }
+      density_hist_plot(mq_pts,
+                        "Match-query percentage (%)  [(matched_length / read_length) x 100]",
+                        paste0("Baseline match-query-% distribution", mq_title_sfx),
+                        "baseline_match_qcov_pct_histogram", binwidth = 2.5, xlim = c(0, 100))
+    }
+  }
+} else {
+  message("\n[NOTE] combined_length_quantiles.csv not found in ", in_dir, " - skipping identity/length figures.")
+}
 
-        # ── redundancy and length-quantile outputs — written once per
-        # (qcov, identity, match_qcov), not once per gf (a downstream filter) ──
-        if args.redundancy_output:
-            redundancy_rows.extend(
-                compute_redundancy_table(threshold_labels, gene_data, gene_fragment_hits,
-                                         ref_lengths, taxonomy_cache)
-            )
+# ══════════════════════════════════════════════════════════════════════════════
+# Per-level dropoff: derive counts at each (primary x gene-fraction) from raw
+# gene_detail, for each annotation level. Heatmaps are two-panel: count | percent.
+# ══════════════════════════════════════════════════════════════════════════════
+message("\nBuilding per-level dropoff figures from combined_gene_detail.csv...")
 
-        if args.length_quantiles_output:
-            all_rl = sorted(rl for d in gene_data.values() for rl in d['read_lengths'])
-            all_al = sorted(al for d in gene_data.values() for al in d['aln_lengths'])
-            all_ml = sorted(ml for d in gene_data.values() for ml in d['matched_lengths'])
-            all_id = sorted(pid for d in gene_data.values() for pid in d['identities'])
-            # TRUE per-read match_qcov_pct quantiles: matched_lengths and
-            # read_lengths are parallel lists (same index = same read) within
-            # each gene's accumulator, so pairing them with zip() and dividing
-            # PER READ before taking quantiles is mathematically correct —
-            # unlike dividing matched_length_p{q} by read_length_p{q} (the
-            # quantile of a ratio is NOT the ratio of quantiles in general).
-            all_mq = sorted(
-                (ml / rl * 100.0 if rl else 0.0)
-                for d in gene_data.values()
-                for rl, ml in zip(d['read_lengths'], d['matched_lengths'])
-            )
-            qrow = {**threshold_labels, "n_alignments": len(all_rl)}
-            for q in QUANTILES_OVERALL:
-                qrow[f"read_length_p{q}"] = round(percentile(all_rl, q), 1)
-            for q in QUANTILES_OVERALL:
-                qrow[f"aln_length_p{q}"] = round(percentile(all_al, q), 1)
-            # matched_length: same as aln_length above but with mismatches/
-            # indels (NM) subtracted out — the "with vs without accounting
-            # for matches" comparison. Plot aln_length_p* and matched_length_p*
-            # side by side to see how much of the reported aligned length is
-            # actually composed of true matches vs noise.
-            for q in QUANTILES_OVERALL:
-                qrow[f"matched_length_p{q}"] = round(percentile(all_ml, q), 1)
-            for q in QUANTILES_OVERALL:
-                qrow[f"pct_identity_p{q}"] = round(percentile(all_id, q), 2)
-            for q in QUANTILES_OVERALL:
-                qrow[f"match_qcov_pct_p{q}"] = round(percentile(all_mq, q), 2)
-            length_quantile_rows.append(qrow)
+# numeric coercions
+num_cols <- intersect(c("min_query_coverage", "min_identity", "min_match_qcov",
+                        "gene_fraction", "read_count"), names(genes))
+for (col in num_cols) genes[, (col) := as.double(get(col))]
 
-        if args.gene_detail_output:
-            for gene, frac in gene_fraction_at_filter.items():
-                d = gene_data[gene]
-                rl_sorted = sorted(d['read_lengths'])
-                al_sorted = sorted(d['aln_lengths'])
-                ml_sorted = sorted(d['matched_lengths'])
-                meg_id, gtype, gclass, mech, group, snp = taxonomy_cache.get(
-                    gene, (gene, '', '', '', '', '')
-                )
-                gene_detail_rows.append({
-                    **threshold_labels,
-                    "gene_accession": gene,
-                    "meg_id": meg_id, "type": gtype, "class": gclass,
-                    "mechanism": mech, "group": group, "snp": snp,
-                    "gene_length": ref_lengths.get(gene, 0),
-                    "covered_bases": merged_interval_length(d['intervals']),
-                    "gene_fraction": round(frac, 4),
-                    "read_count": gene_aln_count[gene],
-                    "n_fragment_hits": gene_fragment_hits.get(gene, 0),
-                    "pct_of_baseline_alignments": round(
-                        gene_aln_count[gene] / baseline_n * 100, 4) if baseline_n else 0.0,
-                    "identity_p10": round(percentile(sorted(d['identities']), 10), 2),
-                    "identity_median": round(percentile(sorted(d['identities']), 50), 2),
-                    "identity_p90": round(percentile(sorted(d['identities']), 90), 2),
-                    "read_length_p10": round(percentile(rl_sorted, 10), 1),
-                    "read_length_median": round(percentile(rl_sorted, 50), 1),
-                    "read_length_p90": round(percentile(rl_sorted, 90), 1),
-                    "aln_length_p10": round(percentile(al_sorted, 10), 1),
-                    "aln_length_median": round(percentile(al_sorted, 50), 1),
-                    "aln_length_p90": round(percentile(al_sorted, 90), 1),
-                    # matched_length: aln_length with mismatches/indels (NM)
-                    # subtracted — "alignment length accounting for only
-                    # matches." Compare against aln_length_p* above to see
-                    # how much of the reported alignment is genuine match
-                    # vs noise, per gene.
-                    "matched_length_p10": round(percentile(ml_sorted, 10), 1),
-                    "matched_length_median": round(percentile(ml_sorted, 50), 1),
-                    "matched_length_p90": round(percentile(ml_sorted, 90), 1),
-                })
+# the primary sweep column present in gene_detail
+gd_primary_col <- if ("min_match_qcov" %in% names(genes) && length(match_qcov_values) > 1) "min_match_qcov" else
+                  if ("min_identity"   %in% names(genes) && length(identity_values)   > 1) "min_identity"   else
+                  "min_query_coverage"
 
-        # ── main grid: (qcov × identity × match_qcov × gf) ───────────────────
-        gf_group_summary = []  # (gf, n_groups_passing) — surfaced in the console line below,
-                                # since the per-threshold print previously only showed counts
-                                # from BEFORE the gf filter (n_genes_at_filter), making it look
-                                # like gene-fraction wasn't being swept at all even though it was.
-        for gf in gf_values:
-            passing_genes = [g for g, f in gene_fraction_at_filter.items() if f >= gf]
-            n_genes_passing = len(passing_genes)
-            pct_genes_passing = round(n_genes_passing / baseline_genes * 100, 2) if baseline_genes else 0.0
+level_available <- LEVELS_TO_PLOT[LEVELS_TO_PLOT %in% names(genes)]
+if (length(level_available) == 0) {
+  message("  [NOTE] none of ", paste(LEVELS_TO_PLOT, collapse = ", "),
+          " are columns in gene_detail - skipping per-level dropoff.")
+}
 
-            n_aln_in_passing_genes = sum(gene_aln_count[g] for g in passing_genes)
-            pct_aln_in_passing_genes = round(n_aln_in_passing_genes / baseline_n * 100, 2) if baseline_n else 0.0
+# Same treatment as the reads figures. Critical here: the per-level counts use
+# uniqueN() over the filtered rows, so leaving a second read-level axis in place
+# would union the detected features across all its values and report the count at
+# its most permissive setting under a label implying otherwise.
+genes <- hold_non_primary(genes, gd_primary_col, "per-level")
 
-            n_hits_in_passing_genes = sum(gene_fragment_hits.get(g, 0) for g in passing_genes)
-            pct_hits_in_passing_genes = (
-                round(n_hits_in_passing_genes / baseline_fragment_hits * 100, 2)
-                if baseline_fragment_hits else 0.0
-            )
+for (level in level_available) {
+  message("  level: ", level)
+  Level <- paste0(toupper(substr(level, 1, 1)), substr(level, 2, nchar(level)))
 
-            passing_classes    = {taxonomy_cache[g][2] for g in passing_genes if taxonomy_cache[g][2]}
-            passing_mechanisms = {taxonomy_cache[g][3] for g in passing_genes if taxonomy_cache[g][3]}
-            passing_groups     = {taxonomy_cache[g][4] for g in passing_genes if taxonomy_cache[g][4]}
-            gf_group_summary.append((gf, len(passing_groups)))
+  # For each (sample, primary, gene_fraction cutoff), count distinct level entities
+  # whose gene_fraction >= cutoff. Built across the data-derived GF_SWEEP grid.
+  level_rows <- rbindlist(lapply(GF_SWEEP, function(gf) {
+    passed <- genes[gene_fraction >= gf]
+    cnt <- passed[, .(n_entities = uniqueN(get(level))),
+                  by = c("sample_id", gd_primary_col)]
+    cnt[, min_gene_fraction := gf]
+    cnt
+  }))
+  if (nrow(level_rows) == 0) next
 
-            rows_out.append({
-                **threshold_labels,
-                "min_gene_fraction":                          gf,
-                "n_alignments_retained":                      n_retained,
-                "pct_alignments_retained_of_baseline":        pct_retained,
-                "n_alignments_in_passing_genes":              n_aln_in_passing_genes,
-                "pct_alignments_in_passing_genes_of_baseline": pct_aln_in_passing_genes,
-                "n_fragment_hits_retained":                   n_fragment_hits_retained,
-                "pct_fragment_hits_retained_of_baseline":     pct_fragment_hits_retained,
-                "n_fragment_hits_in_passing_genes":           n_hits_in_passing_genes,
-                "pct_fragment_hits_in_passing_genes_of_baseline": pct_hits_in_passing_genes,
-                "n_genes_at_filter":                          n_genes_at_filter,
-                "n_genes_passing_both":                       n_genes_passing,
-                "pct_genes_passing_of_baseline_genes":        pct_genes_passing,
-                "n_classes_passing":                          len(passing_classes),
-                "pct_classes_passing":  round(len(passing_classes)    / baseline_classes    * 100, 2) if baseline_classes    else 0.0,
-                "n_mechanisms_passing":                       len(passing_mechanisms),
-                "pct_mechanisms_passing": round(len(passing_mechanisms) / baseline_mechanisms * 100, 2) if baseline_mechanisms else 0.0,
-                "n_groups_passing":                           len(passing_groups),
-                "pct_groups_passing":   round(len(passing_groups)     / baseline_groups     * 100, 2) if baseline_groups     else 0.0,
-            })
+  # baseline per sample = count at (min primary, min gf)
+  base <- level_rows[get(gd_primary_col) == min(primary_values) &
+                       min_gene_fraction == min(GF_SWEEP),
+                     .(sample_id, baseline_n = n_entities)]
+  level_rows <- merge(level_rows, base, by = "sample_id", all.x = TRUE)
+  level_rows[, pct_of_baseline := ifelse(baseline_n > 0, n_entities / baseline_n * 100, NA_real_)]
 
-        gf_console_summary = " ".join(f"gf>={gf:.2g}:{n:,}grp" for gf, n in gf_group_summary)
+  # mean across samples
+  level_mean <- level_rows[, .(mean_n = mean(n_entities),
+                               mean_pct = mean(pct_of_baseline, na.rm = TRUE)),
+                           by = c(gd_primary_col, "min_gene_fraction")]
 
-        discordant_suffix = ""
-        if args.group_aware:
-            n_same_group = discordant_diagnostics.get('same_group_diff_gene', 0)
-            n_cross_group = discordant_diagnostics.get('cross_group_both_counted', 0)
-            n_disagreeing = n_same_group + n_cross_group
-            discordant_suffix = (
-                f" | {n_disagreeing:,} disagreeing pairs "
-                f"({n_same_group:,} same-Group collapsed, {n_cross_group:,} cross-Group counted-both)"
-            )
+  # ── Dropoff curve: x = primary, y = mean count, colour = gene fraction ──
+  p1 <- ggplot(level_mean, aes(.data[[gd_primary_col]] * (if (PRIMARY_IS_IDENTITY) 1 else 100),
+                               mean_n, colour = factor(min_gene_fraction))) +
+    geom_line(data = level_rows,
+             aes(x = .data[[gd_primary_col]] * (if (PRIMARY_IS_IDENTITY) 1 else 100),
+                 y = n_entities,
+                 group = interaction(sample_id, min_gene_fraction)),
+             colour = "grey75", alpha = 0.2, linewidth = 0.25, inherit.aes = FALSE) +
+    geom_line(linewidth = 0.9) + geom_point(size = 1.5) +
+    scale_colour_viridis_d(name = "Min gene\nfraction") +
+    scale_x_continuous(labels = if (PRIMARY_IS_IDENTITY) label_comma() else label_percent(scale = 1)) +
+    scale_y_continuous(labels = label_comma()) +
+    labs(title = paste0(Level, " count vs ", primary_label),
+         subtitle = paste(c("Bold = mean across samples; grey = each sample",
+                            fixed_filter_note(genes, gd_primary_col)),
+                          collapse = "\n"),
+         x = primary_label, y = paste0("Distinct ", level, " count")) +
+    theme_bw(base_size = 11) + theme(legend.position = "bottom")
+  show_plot(p1, paste0("dropoff_", level, "_count_vs_primary"))
 
-        print(f"  qcov>={qcov:.0%} identity>={identity:.0%} match_qcov>={match_qcov:.0%}: "
-              f"{n_retained:,} alignments ({pct_retained:.1f}% of baseline), "
-              f"{n_fragment_hits_retained:,} fragment hits ({pct_fragment_hits_retained:.1f}%), "
-              f"{n_genes_at_filter:,} genes detectable (pre-gf) | {gf_console_summary}{discordant_suffix}",
-              flush=True)
+  # ── % of baseline version ──
+  p2 <- ggplot(level_mean, aes(.data[[gd_primary_col]] * (if (PRIMARY_IS_IDENTITY) 1 else 100),
+                               mean_pct, colour = factor(min_gene_fraction))) +
+    geom_line(linewidth = 0.9) + geom_point(size = 1.5) +
+    scale_colour_viridis_d(name = "Min gene\nfraction") +
+    scale_x_continuous(labels = if (PRIMARY_IS_IDENTITY) label_comma() else label_percent(scale = 1)) +
+    scale_y_continuous(labels = label_percent(scale = 1), limits = c(0, NA)) +
+    labs(title = paste0(Level, " retained (% of baseline) vs ", primary_label),
+         x = primary_label, y = "% of baseline retained") +
+    theme_bw(base_size = 11) + theme(legend.position = "bottom")
+  show_plot(p2, paste0("dropoff_", level, "_pct_vs_primary"))
 
-    # ── write outputs ────────────────────────────────────────────────────────────
-    out_dir = os.path.dirname(args.output)
-    if out_dir:
-        os.makedirs(out_dir, exist_ok=True)
-    with open(args.output, "w", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=list(rows_out[0].keys()))
-        writer.writeheader()
-        writer.writerows(rows_out)
-    print(f"\n[INFO] Wrote {len(rows_out)} grid rows to {args.output}", flush=True)
-    print("[INFO] Compare n_alignments_retained (qcov filter only) against "
-          "n_alignments_in_passing_genes (qcov + gene_fraction together) to see "
-          "how much alignment volume sits in genes with poor breadth.", flush=True)
+  # ── TWO-PANEL heatmap: absolute count | percent of baseline ────────────────
+  p3_count <- heatmap_panel(
+    level_mean, gd_primary_col, "min_gene_fraction", "mean_n",
+    label_expr  = round(level_mean$mean_n, 0),
+    fill_name   = paste0("Mean\n", level, "\ncount"),
+    panel_title = paste0("Absolute ", level, " count"),
+    x_lab = primary_label, y_lab = "Min gene fraction"
+  )
+  p3_pct <- heatmap_panel(
+    level_mean, gd_primary_col, "min_gene_fraction", "mean_pct",
+    label_expr  = paste0(round(level_mean$mean_pct, 0), "%"),
+    fill_name   = "% of\nbaseline",
+    panel_title = paste0("Percent of baseline ", level, " retained"),
+    x_lab = primary_label, y_lab = "Min gene fraction",
+    fill_limits = c(0, 100)
+  )
+  save_two_panel(p3_count, p3_pct, paste0("dropoff_", level, "_heatmap"),
+                 title = paste0(Level, " detected across the joint threshold grid"))
 
-    if args.gene_detail_output and gene_detail_rows:
-        detail_dir = os.path.dirname(args.gene_detail_output)
-        if detail_dir:
-            os.makedirs(detail_dir, exist_ok=True)
-        with open(args.gene_detail_output, "w", newline="") as fh:
-            writer = csv.DictWriter(fh, fieldnames=list(gene_detail_rows[0].keys()))
-            writer.writeheader()
-            writer.writerows(gene_detail_rows)
-        print(f"[INFO] Wrote {len(gene_detail_rows):,} per-gene rows to {args.gene_detail_output}",
-              flush=True)
-        print("[INFO] Long tail: sort by read_count asc + gene_fraction asc. "
-              "Suspicious conserved-motif genes: sort by read_count DESC + gene_fraction asc.",
-              flush=True)
+  fwrite(level_mean, file.path(out_dir, paste0("dropoff_", level, "_summary.csv")))
+}
 
-    if args.redundancy_output and redundancy_rows:
-        red_dir = os.path.dirname(args.redundancy_output)
-        if red_dir:
-            os.makedirs(red_dir, exist_ok=True)
-        with open(args.redundancy_output, "w", newline="") as fh:
-            writer = csv.DictWriter(fh, fieldnames=list(redundancy_rows[0].keys()))
-            writer.writeheader()
-            writer.writerows(redundancy_rows)
-        print(f"[INFO] Wrote {len(redundancy_rows):,} group-redundancy rows to {args.redundancy_output}",
-              flush=True)
-
-        flagged = [r for r in redundancy_rows if r["min_query_coverage"] == qcov_values[0] and r["likely_redundant"]]
-        flagged.sort(key=lambda r: -r["n_accessions"])
-        if flagged:
-            print(f"[INFO] Top likely-redundant groups at qcov={qcov_values[0]:.0%} "
-                  f"(many near-identical accessions, no dominant single hit):", flush=True)
-            for r in flagged[:10]:
-                print(f"    {r['group']:<20} n_accessions={r['n_accessions']:<4} "
-                      f"total_reads={r['total_reads']:<6} "
-                      f"top_accession_share={r['pct_reads_in_top_accession']:.1f}% "
-                      f"length_cv={r['gene_length_cv']:.3f}", flush=True)
-
-    if args.length_quantiles_output and length_quantile_rows:
-        lq_dir = os.path.dirname(args.length_quantiles_output)
-        if lq_dir:
-            os.makedirs(lq_dir, exist_ok=True)
-        with open(args.length_quantiles_output, "w", newline="") as fh:
-            writer = csv.DictWriter(fh, fieldnames=list(length_quantile_rows[0].keys()))
-            writer.writeheader()
-            writer.writerows(length_quantile_rows)
-        print(f"[INFO] Wrote {len(length_quantile_rows)} length-quantile rows to "
-              f"{args.length_quantiles_output}", flush=True)
-
-    if not args.tmp_csv and not args.keep_tmp_csv:
-        os.remove(tmp_csv)
-    elif args.keep_tmp_csv:
-        print(f"[INFO] Intermediate per-alignment CSV kept at: {tmp_csv}", flush=True)
-
-
-if __name__ == "__main__":
-    main()
+message("\nDone. Figures + summary CSVs written to: ", out_dir)
