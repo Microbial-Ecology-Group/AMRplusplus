@@ -1,6 +1,21 @@
 Details on AMR++ updates
 ------------
 
+# 2026-09-15 Integrated metaSNV module and updated container environments
+
+- **Added SNV calling subworkflow (`bam_snv`)**:
+  - Implemented `ngless_filter_snv` process for per-sample quality and unique-alignment filtering via NGLess.
+  - Implemented `run_metasnv` process to run metaSNV across filtered sample BAMs against MEGARes.
+  - Integrated `clean_metasnv` (`clean_metaSNP_1.0.2.py`) to output AMR++-formatted SNV count matrices and annotation tables.
+  - Added optional matrix filtering (`Filter_SNV_matrix.py`) via `params.snv_filter_by_resistome` to restrict SNV calls to genes confirmed present in the resistome count matrix.
+- **Container and profile updates**:
+  - Rebuilt and updated the official Docker container to package NGLess, metaSNV v2, Python 3 environments, and supporting binaries.
+  - Updated `docker.config`, `docker_slurm.config`, and `apptainer_slurm.config` to use the updated container image across containerized profiles.
+- **Database & documentation additions**:
+  - Updated default database and annotation references to MEGARes v4.00 (`megares_database_v4.00.fasta` and `megares_annotations_v4.00.csv`).
+  - Added `envs/AMR++_SNV_env.yaml` for standalone Conda installation of SNV dependencies.
+  - Published comprehensive step-by-step user guide in `docs/SNV_calling_tutorial.md`.
+
 # 2026-07-26 Finalizing new alignment analyzer and updating to nextflow syntax v2
 - Update code to work with new nextflow syntax version
 - **Updated SNP confirmation tool (on a separate branch).** The SNP verifier now adjusts counts by the *proportion of reads that actually carry the confirmed SNP*: it computes (reads with the SNP / reads covering the SNP position) and multiplies by the gene's count, rather than substituting a raw resistant-read count. Genes that require SNP confirmation but have no entry in the SNP database are now set to zero (previously they passed through unconfirmed). The tool has also been updated to run cleanly under **Nextflow DSL2 syntax**.

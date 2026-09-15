@@ -50,24 +50,24 @@ process ngless_filter_snv {
     set -euo pipefail
 
     cat > filter_${sample_id}.ngl <<'NGLEOF'
-        ngless "1.5"
-        import "samtools" version "0.0"
+ngless "1.5"
+import "samtools" version "0.0"
 
-        # Filter alignments for SNV calling with metaSNV v2.
-        # Keep only alignments meeting the minimum aligned-block size and percent
-        # identity, then keep only reads that mapped uniquely. Multi-mapped reads are
-        # discarded because a variant cannot be attributed to one gene when the read
-        # maps equally well to another.
+# Filter alignments for SNV calling with metaSNV v2.
+# Keep only alignments meeting the minimum aligned-block size and percent
+# identity, then keep only reads that mapped uniquely. Multi-mapped reads are
+# discarded because a variant cannot be attributed to one gene when the read
+# maps equally well to another.
 
-        input = samfile('${bam}')
+input = samfile('${bam}')
 
-        filtered = select(input) using |mr|:
-            mr = mr.filter(min_match_size=${params.snv_min_match_size}, min_identity_pc=${params.snv_min_identity_pc}, action={unmatch})
+filtered = select(input) using |mr|:
+    mr = mr.filter(min_match_size=${params.snv_min_match_size}, min_identity_pc=${params.snv_min_identity_pc}, action={unmatch})
 
-        filtered_unique = select(filtered, keep_if=[{mapped}, {unique}])
-        filtered_unique = samtools_sort(filtered_unique)
-        write(filtered_unique, ofile='${sample_id}.SNV.unique.sorted.bam')
-        NGLEOF
+filtered_unique = select(filtered, keep_if=[{mapped}, {unique}])
+filtered_unique = samtools_sort(filtered_unique)
+write(filtered_unique, ofile='${sample_id}.SNV.unique.sorted.bam')
+NGLEOF
 
     ngless --trace -j ${task.cpus} filter_${sample_id}.ngl
     """
