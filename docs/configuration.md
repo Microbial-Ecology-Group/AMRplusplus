@@ -36,7 +36,6 @@ profiles {
   }
   local_slurm {
     includeConfig "config/local_slurm.config"
-    process.executor = 'slurm'
   }
   conda {
     includeConfig "config/conda.config"
@@ -45,10 +44,26 @@ profiles {
     conda.useMamba = true
     conda.createTimeout = '30 min'
   }
+  conda_slurm {
+    includeConfig "config/conda_slurm.config"
+    conda.cacheDir = "$baseDir/envs/"
+    conda.enabled = true
+    conda.useMamba = true
+    conda.createTimeout = '30 min'
+  }
   docker {
-    includeConfig "config/local.config"
-    docker.enabled = true
-    process.container = 'enriquedoster/amrplusplus:latest'
+    includeConfig "config/docker.config"
+    docker.enabled       = true
+    docker.runOptions     = '-u $(id -u):$(id -g)'
+    singularity.enabled  = false
+    apptainer.enabled    = false
+  }
+  docker_slurm {
+    includeConfig "config/docker_slurm.config"
+    docker.enabled       = true
+    docker.runOptions     = '-u $(id -u):$(id -g)'
+    singularity.enabled  = false
+    apptainer.enabled    = false
   }
   singularity {
     includeConfig "config/singularity.config"
@@ -56,26 +71,23 @@ profiles {
     singularity.autoMounts = true
     singularity.cacheDir = "$baseDir/envs/"
   }
-   apptainer {
+  singularity_slurm {
+    includeConfig "config/singularity_slurm.config"
+    singularity.enabled = true
+    singularity.autoMounts = true
+    singularity.cacheDir = "$baseDir/envs/"
+  }
+  apptainer {
     includeConfig "config/apptainer.config"
     apptainer.enabled = true
     apptainer.autoMounts = true
     apptainer.cacheDir = "$baseDir/envs/"
   }
-  conda_slurm {
-    includeConfig "config/conda_slurm.config"
-    process.executor = 'slurm'
-    conda.cacheDir = "$baseDir/envs/"
-    conda.enabled = true
-    conda.useMamba = true
-    conda.createTimeout = '30 min'
-  }
-   singularity_slurm {
-    includeConfig "config/singularity_slurm.config"
-    process.executor = 'slurm'
-    singularity.enabled = true
-    singularity.autoMounts = true
-    singularity.cacheDir = "$baseDir/envs/"
+  apptainer_slurm {
+    includeConfig "config/apptainer_slurm.config"
+    apptainer.enabled = true
+    apptainer.autoMounts = true
+    apptainer.cacheDir = "$baseDir/envs/"
   }
 }
 ```
@@ -91,30 +103,41 @@ Below is a list of all of the parameters that AMR++ uses by default. They can be
 These are all of the parameters used by AMR++:
 ```bash
 params {
-     /* Display help message */
+    /* Default pipeline */
+    pipeline = "demo"
+
+    /* Display help message */
     help = false
 
     /* Location of forward and reverse read pairs */
     reads = "${baseDir}/data/raw/*_R{1,2}.fastq.gz"
 
+    /* for merged analysis */
+    merged_reads = 'test_results/Flash_reads/*.{extendedFrags,notCombined}.fastq.gz'
+
+    /* Output directory */
+    output = "test_results"
+
     /* Optional input for bam files for use with "--pipeline bam_resistome" */
     bam_files = null
+
+    /* Default memory to run clumpify */
+    clumpify_mem_gb = 8
 
     /* Location of reference/host genome */
     host = "${baseDir}/data/host/chr21.fasta.gz"
 
     /* Optionally, you can specify the location of the host index files created with bwa with the path and wildcard (*): */
     /* If you don't have the index files, replace this with "null" without quotes */
-    host_index =  "${baseDir}/data/host/chr21.fasta.gz*"
-
-    /* Output directory */
-    output = "test_results"
+    host_index =  null
     
     /* Kraken database location, default is "null" */   
     kraken_db = null
     
     /* Kraken confidence score, 0.0 by default */
     kraken_confidence = 0.0
+
+    kraken_options = ""
 
     /* Location of amr index files with wildcard */
     amr_index = "${baseDir}/data/amr/megares_database_v3.00.fasta*"
@@ -125,57 +148,165 @@ params {
     /* Location of amr annotation file */
     annotation = "${baseDir}/data/amr/megares_annotations_v3.00.csv"
 
-    /* Add SNP analysis */
-    snp = "N"
+    /* Samtools Resistome alignment flag options */
+    samtools_flag = "" // For example: "-F 2304" to remove secondary and supplemental alignments
 
-    /* Add deduplicaation analysis */
-    deduped = "N"
-    prefix = "AMR"
+    /* Add SNP analysis */
+    snp = "Y"
+
+    /* Resistome threshold - associated with outdated resistomeanalyzer, now replaced with alignment_analyzer.py */
+    threshold = 0
+
+    /* Add rarefaction analysis */ 
+    rarefaction = "N"
 
     /* Number of threads */
     threads = 4
 
     /* Trimmomatic trimming parameters */
     adapters = "${baseDir}/data/adapters/nextera.fa"
-
     leading = 3
     trailing = 3
     slidingwindow = "4:15"
     minlen = 36
-
-    /* Resistome threshold */
-    threshold = 80
+    crop_len = 200
 
     /* Starting rarefaction level */
     min = 5
-
     /* Ending rarefaction level */
     max = 100
-
     /* Number of levels to skip */
     skip = 5
-
     /* Number of iterations to sample at */
     samples = 1
 
     /* multiQC */
     multiqc = "$baseDir/data/multiqc"
 
-    /* Qiime2 */
+    /* Optional read deduplication (Clumpify) after QC trimming */
+    read_dedup            = "N"         // Y inserts dedup between trim and host removal
 
+    /* Add read deduplicaation analysis */
+    deduped = "N"
+    prefix = "AMR"
+
+    /* Qiime2 - convenience subworkflow, not primary objective of AMR++ */
     /* Dada parameters */
     p_trim_left_f = 25
-
     p_trim_left_r = 26
-
     p_trunc_len_f = 225
-
     p_trunc_len_r = 220
 
     /* qiime2 bayes classifier */
     dada2_db = "$baseDir/data/qiime/gg-13-8-99-515-806-nb-classifier.qza"
 
+    /* ── Alignment filtering (applied by alignment_analyzer.py) ───────────
+     * Three independent filters, all on a 0 to 1 proportion scale:
+     *
+     *   min_gene_fraction    how much of the GENE must be covered
+     *   min_query_coverage   how much of the READ must align
+     *   min_identity         how well the ALIGNED PORTION must match
+     *
+     * match_qcov changes HOW min_query_coverage is calculated. The threshold
+     * value means the same thing either way; only the metric changes:
+     *   N  aligned_length / read_length            (mismatches count as covered)
+     *   Y  (aligned_length - NM) / read_length     (genuine matches only)
+     *
+     * Y requires the NM tag. With min_query_coverage > 0 under match_qcov=Y,
+     * or with any min_identity > 0, alignments lacking NM are excluded.
+     */
+    count_mode            = "fragment"  // DEFAULT. Mates resolved to one fragment.
+                                        // Alternatives: read_end, alignment.
+    group_aware           = "Y"         // DEFAULT ON. Same-Group mate disagreements -> 1 hit
+                                        // (tie-break: higher match_qcov).
+    edge_aware_qcov       = "Y"         // DEFAULT ON. Coverage-anchored qcov. 
+    include_supplementary = "N"
+    include_secondary = "N"
+    cigar_aware_coverage  = "Y"
+    per_read_alignment_stats = "N"      // Optional file with alignment data for each read. 
 
+    /* Filters, all proportions 0 to 1 */
+    min_gene_fraction     = 0
+    min_query_coverage    = 0
+    min_identity          = 0
+    min_mapq              = 0
+
+    /* Changes HOW min_query_coverage is calculated. Threshold value is unchanged.
+     * N: aligned_length / read_length      Y: (aligned_length - NM) / read_length */
+    match_qcov            = "N"     
+
+
+    /* ── Coverage threshold evaluation ─────────────────────────────────────────
+     * The evaluation always tests a two-dimensional grid: gene fraction against one
+     * read-level filter. All values are comma-separated proportions from 0 to 1,
+     * and "0" turns a filter off.
+     *
+     * AXIS 1 is always gene fraction.
+     *
+     * AXIS 2 is ONE of the three below. Set your choice to a list of values and
+     * leave the other two at "0":
+     *
+     *   evaluation_query_coverage  how much of the READ aligned, measured as
+     *                         aligned_length / read_length
+     *   evaluation_match_qcov      how much of the READ aligned, measured as
+     *                         (aligned_length - NM) / read_length, counting
+     *                         only matching bases within the alignment
+     *   evaluation_identity        how well the ALIGNED PORTION matched, measured
+     *                         as (aligned_length - NM) / aligned_length
+     *
+     * evaluation_query_coverage and evaluation_match_qcov are two ways of measuring the
+     * SAME property, so evaluating both is meaningless. Choose whichever
+     * definition of query coverage you want to filter on. evaluation_identity
+     * measures something different and is a genuine alternative axis.
+     *
+     * A single NON-ZERO value is a FIXED filter applied at every point in the
+     * grid rather than a evaluated axis. So evaluation_identity = "0.9" holds identity
+     * at 90% throughout while you evaluation gene fraction against a query-coverage
+     * measure.
+     */
+
+    /* AXIS 1: always evaluated */
+    evaluation_gene_fraction   = "0,0.1,0.25,0.5,0.8"                    // proportion, 0 to 1
+
+    /* AXIS 2: evaluation ONE of these three; leave the others at "0",
+     * or give one a single value to apply it as a fixed filter */
+    evaluation_query_coverage  = "0,0.5,0.6,0.7,0.8,0.9,0.95"            // proportion, 0 to 1
+    evaluation_match_qcov      = "0"                                     // proportion, 0 to 1
+    evaluation_identity        = "0"                                     // proportion, 0 to 1
+
+    /* Applied at every point in the grid regardless of what is evaluated */
+    evaluation_edge_aware_qcov = "Y"   // coverage-anchored qcov: soft and hard clips
+                                  // treated alike, and read bases overhanging a
+                                  // short gene's edge are not penalized
+    evaluation_exclude_snp     = "Y"   // Y drops RequiresSNPConfirmation genes entirely
+
+
+    /* ── SNV calling (bam_snv) ────────────────────────────────────────────
+     * The BAMs must be aligned to the SAME fasta given here. Use the MEGARes
+     * REPRESENTATIVE database: both the NGLess filter and metaSNV require
+     * uniquely-mapping reads, and the complete database's near-identical
+     * accessions turn a large share of short reads into multi-mappers.
+     */
+    snv_reference          = "${baseDir}/data/amr/megares_database_v3.00.fasta"
+
+    /* NGLess alignment filters. Applied before variant calling.
+     * min_match_size is the aligned block size in bp; 45 is the floor used in
+     * the benchmarking workflow, 100 is the stricter setting.
+     * min_identity_pc is percent ANI; metaSNV guidance is 97 or above. */
+    snv_min_match_size     = 100
+    snv_min_identity_pc    = 97
+
+    /* metaSNV options */
+    snv_n_splits           = 1     // >1 writes one raw SNP file per split
+    snv_db_ann             = ""    // optional gene annotation file
+    snv_snpfile_prefix     = "called_SNPs"   // prefix shared by the raw call files
+
+    /* Which alignment set was used; controls output filenames */
+    snv_aln_wf             = "Standard"      // or "Deduped"
+
+    /* Restrict the SNV matrix to genes also detected in the resistome matrix.
+     * Requires a resistome run, so leave N when running bam_snv alone. */
+    snv_filter_by_resistome = "N"
 }
 ```
 ### Modifying parameters using the command-line
@@ -214,18 +345,27 @@ To include SNP confirmation as part of the AMR++ analysis, you have to include t
 nextflow run main_AMR++.nf -profile singularity  --reads "path/to/your/reads/*_R{1,2}.fastq.gz" --snp Y
 ```
 
-#### Running with deduplicated counts
+#### Running with deduplicated counts or reads
 -----
-Additionally, you can also output deduplicated counts by cinluding the flag, ```--deduped Y```. Like this:
+You can run the AMR++ pipeline and have it deduplicate reads after read QC trimming and before host alignment and removal by including the flag ```read_dedup Y```.
+
+```bash
+nextflow run main_AMR++.nf -profile singularity  --reads "path/to/your/reads/*_R{1,2}.fastq.gz" --snp Y --read_dedup Y
+```
+
+Additionally, you can also output deduplicated alignments by including the flag, ```--deduped Y```. Like this:
 
 ```bash
 nextflow run main_AMR++.nf -profile singularity  --reads "path/to/your/reads/*_R{1,2}.fastq.gz" --snp Y --deduped Y
 ```
 
 
+
 ## Selecting the right pipeline
 
 AMR++ now includes the option to run different components of the pipeline at a time by specifying the ```--pipeline``` flag.
+
+For more information about picking the right pipeline, [read this document](choosing_pipeline.md). Below is a brief summary of some options.
 
 Main pipeline options
   * Standard AMR pipeline ( QC trimming > Host DNA removal > Resistome alignment > Resistome results)

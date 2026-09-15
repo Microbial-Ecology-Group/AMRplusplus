@@ -1,8 +1,0 @@
-name: alignment
-channels:
-  - bioconda
-  - conda-forge
-dependencies:
-  - bedtools = 2.30.0
-  - bwa = 0.7.17
-  - samtools = 1.15.1

@@ -4,24 +4,37 @@ channels:
   - conda-forge
   - anaconda
 dependencies:
+  # --- core pipeline ---
+  - python=3.9
   - bwa
   - samtools
-  - multiqc
-  - fastqc
-  - kraken2
-  - python = 3.9
-  - matplotlib
-  - numpy
-  - pysam
-  - pandas
+  - bedtools
   - trimmomatic
-  - biopython
-  - nextflow
-  - git
-  - flash
-  - seqkit
+  - fastqc
+  - multiqc
+  - git                  # build_dependencies clones the SNP tool at runtime
+
+  # --- workflow-specific ---
+  - flash                # merged-read workflow
+  - bbmap                # provides clumpify.sh for read deduplication
+  - seqkit               # read statistics
+  - ngless>=1.5          # BAM filtering for metaSNV
+  - metasnv>=2.0.1       # For SNV calling
+
+  # --- microbiome (optional analyses) ---
+  - kraken2
+
+  # --- python libraries ---
+  - numpy
+  - pandas
+  - matplotlib
   - pysam
-  - duckdb            # python duckdb
+  - biopython            # SNP verification tool (Bio.SeqIO)
+  - python-duckdb        # coverage threshold evaluation; see note on package name
+
+  # --- R, for the threshold evaluation drop-off plots ---
   - r-base
-  - r-tidyverse
   - r-data.table
+  - r-ggplot2
+  - r-scales
+
