@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-coverage_threshold_sweep.py
+coverage_threshold_evaluation.py
 ════════════════════════════════════════════════════════════════════════════════
 
-Single-pass-then-sweep diagnostic for choosing --min-query-coverage and
+Single-pass-then-evaluation diagnostic for choosing --min-query-coverage and
 --min-gene-fraction thresholds for alignment_analyzer.py.
 
 WHY A SEPARATE SCRIPT
@@ -25,7 +25,7 @@ WHAT'S IN THIS VERSION
    "RequiresSNPConfirmation" in MEGARes. Coverage of these genes only tells
    you the (often universally-conserved) gene is present — NOT that the
    specific resistance-conferring point mutation was observed. Applied as a
-   fixed pre-filter alongside --min-mapq, before any threshold sweep.
+   fixed pre-filter alongside --min-mapq, before any threshold evaluation.
 3. Class/Mechanism/Group pass-counts added directly to the main grid output,
    so you can see how taxonomy-level detection is affected without needing
    the separate batch/taxonomy pipeline.
@@ -80,11 +80,11 @@ confirm the exact number for your final pair with --cigar-aware-coverage.
    merged read covering the same physical fragment.
 
 Usage:
-    python coverage_threshold_sweep.py -i sample.bam -o sweep_results.csv \\
+    python coverage_threshold_evaluation.py -i sample.bam -o evaluation_results.csv \\
         --min-mapq 0 \\
         --exclude-snp-confirmation \\
-        --query-coverage-sweep 0,0.5,0.6,0.7,0.8,0.9,0.95 \\
-        --gene-fraction-sweep 0,0.1,0.25,0.5,0.8 \\
+        --query-coverage-evaluation 0,0.5,0.6,0.7,0.8,0.9,0.95 \\
+        --gene-fraction-evaluation 0,0.1,0.25,0.5,0.8 \\
         --gene-detail-output gene_detail.csv \\
         --redundancy-output redundancy.csv \\
         --length-quantiles-output length_quantiles.csv
@@ -165,7 +165,7 @@ def parse_args() -> argparse.Namespace:
                         "BAMs to triple-count reads depending on what went into the merge — "
                         "passing the original source files here sidesteps that risk entirely."
                     ))
-    ap.add_argument("-o", "--output", required=True, help="Output sweep-grid CSV")
+    ap.add_argument("-o", "--output", required=True, help="Output evaluation-grid CSV")
     ap.add_argument("--min-mapq", type=int, default=0,
                     help="Fixed MAPQ floor applied to every grid cell (default 0)")
     ap.add_argument("--edge-aware-qcov", dest="edge_aware_qcov", action="store_true", default=True,
@@ -181,7 +181,7 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--min-aln-length", type=int, default=0,
                     help=(
                         "Fixed ABSOLUTE aligned-length floor (in bp), applied alongside "
-                        "every swept --query-coverage-sweep value rather than replacing it. "
+                        "every evaluated --query-coverage-evaluation value rather than replacing it. "
                         "Catches reads that don't have ENOUGH absolute matching sequence "
                         "even if their percentage technically passes (most relevant for "
                         "short reads). Default 0 (disabled)."
@@ -189,14 +189,14 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--max-unaligned-length", type=int, default=None,
                     help=(
                         "Fixed ABSOLUTE cap (in bp) on read_length - aln_length, applied "
-                        "alongside every swept --query-coverage-sweep value. Catches the "
+                        "alongside every evaluated --query-coverage-evaluation value. Catches the "
                         "OTHER direction: a long read (e.g. a 300bp FLASH-merged read) can "
                         "clear a 50%% query-coverage bar while still leaving 150bp "
                         "unexplained, far more absolute unaligned sequence than the same "
                         "50%% would tolerate on a 150bp read. Combined with the qcov_pct "
-                        "sweep, this naturally makes longer reads satisfy a STRICTER "
+                        "evaluation, this naturally makes longer reads satisfy a STRICTER "
                         "effective percentage without needing a different --query-coverage- "
-                        "sweep value per read-length stratum: at a fixed cap, a 300bp read's "
+                        "evaluation value per read-length stratum: at a fixed cap, a 300bp read's "
                         "effective bar tightens automatically relative to a 150bp read's, "
                         "exactly compensating for read length rather than ignoring it. "
                         "Default None (disabled, identical to previous behavior)."
@@ -208,7 +208,7 @@ def parse_args() -> argparse.Namespace:
                         "These are often universally-conserved housekeeping genes where "
                         "coverage alone does NOT confirm the specific resistance "
                         "mutation was observed. Applied as a fixed pre-filter, like "
-                        "--min-mapq, before the threshold sweep."
+                        "--min-mapq, before the threshold evaluation."
                     ))
     ap.add_argument("--group-aware", "--group-aware-discordant", dest="group_aware",
                     action="store_true", default=True,
@@ -233,45 +233,45 @@ def parse_args() -> argparse.Namespace:
                     action="store_false",
                     help="Disable group-aware resolution; mates that disagree on "
                          "gene_accession each get their own hit (legacy behavior).")
-    ap.add_argument("--query-coverage-sweep", default="0,0.5,0.6,0.7,0.8,0.9,0.95",
+    ap.add_argument("--query-coverage-evaluation", default="0,0.5,0.6,0.7,0.8,0.9,0.95",
                     help="Comma-separated min-query-coverage values to test (0-1). "
-                         "Set to '0' to disable qcov filtering and use identity-sweep alone.")
-    ap.add_argument("--gene-fraction-sweep", default="0,0.1,0.25,0.5,0.8",
+                         "Set to '0' to disable qcov filtering and use identity-evaluation alone.")
+    ap.add_argument("--gene-fraction-evaluation", default="0,0.1,0.25,0.5,0.8",
                     help="Comma-separated min-gene-fraction values to test (0-1)")
-    ap.add_argument("--identity-sweep", default="0",
+    ap.add_argument("--identity-evaluation", default="0",
                     help=(
-                        "Comma-separated minimum identity values to sweep as PROPORTIONS (0-1). "
+                        "Comma-separated minimum identity values to evaluation as PROPORTIONS (0-1). "
                         "Identity = (query_alignment_length - NM) / query_alignment_length * 100, "
                         "measuring how similar the ALIGNED PORTION of each read is to the "
                         "reference, independent of how much of the read aligned (qcov handles "
                         "that). Default '0' (no identity filtering, same as previous behavior). "
-                        "Typical sweep: '0,0.8,0.9,0.95,0.97'. "
+                        "Typical evaluation: '0,0.8,0.9,0.95,0.97'. "
                         "Reads missing an NM tag pass at identity=0 but are excluded at any "
-                        "higher threshold. Can be used alongside --query-coverage-sweep to "
-                        "produce a 3-axis grid, or set --query-coverage-sweep 0 to sweep "
+                        "higher threshold. Can be used alongside --query-coverage-evaluation to "
+                        "produce a 3-axis grid, or set --query-coverage-evaluation 0 to evaluation "
                         "identity × gene-fraction only."
                     ))
-    ap.add_argument("--match-qcov-sweep", default="0",
+    ap.add_argument("--match-qcov-evaluation", default="0",
                     help=(
-                        "Comma-separated minimum 'match-only query-coverage' values to sweep "
+                        "Comma-separated minimum 'match-only query-coverage' values to evaluation "
                         "as PROPORTIONS (0-1). match_qcov_pct = (query_alignment_length - NM) / "
                         "query_length * 100 — what fraction of the WHOLE read is explained "
                         "by genuine matches, with both clipped bases AND mismatches/indels "
-                        "excluded from the numerator. Unlike plain --query-coverage-sweep "
+                        "excluded from the numerator. Unlike plain --query-coverage-evaluation "
                         "(which only checks clipping, blind to mismatches) this also "
-                        "penalizes a fully-aligned-but-noisy read. Unlike --identity-sweep "
+                        "penalizes a fully-aligned-but-noisy read. Unlike --identity-evaluation "
                         "alone (which only checks the aligned portion's quality, blind to "
                         "extent) this also penalizes a short-but-clean fragment — and "
                         "because NM >= 0, match_qcov_pct can NEVER exceed plain qcov_pct, so "
                         "a short fragment is capped at its own length-driven ceiling no "
                         "matter how clean it is; high identity cannot 'rescue' a short hit "
                         "the way it might first seem to. Default '0' (disabled, same as "
-                        "previous behavior). Typical sweep for filtering on this alone: "
+                        "previous behavior). Typical evaluation for filtering on this alone: "
                         "'0,0.5,0.6,0.7,0.8,0.9'. Designed to be used INSTEAD of separately "
-                        "sweeping --query-coverage-sweep and --identity-sweep, when you want "
+                        "evaluating --query-coverage-evaluation and --identity-evaluation, when you want "
                         "extent and quality combined into a single filtering decision rather "
                         "than tracked as two independent diagnostic axes — set "
-                        "--query-coverage-sweep 0 --identity-sweep 0 and sweep this instead."
+                        "--query-coverage-evaluation 0 --identity-evaluation 0 and evaluation this instead."
                     ))
     ap.add_argument("--tmp-csv", default=None,
                     help="Where to write the intermediate per-alignment CSV "
@@ -280,13 +280,13 @@ def parse_args() -> argparse.Namespace:
                     help="Don't delete the intermediate per-alignment CSV after the run")
     ap.add_argument("--gene-detail-output", default=None,
                     help="Optional CSV: per-gene breadth, read count, taxonomy, and "
-                         "read/alignment-length quantiles at each swept qcov threshold.")
+                         "read/alignment-length quantiles at each evaluated qcov threshold.")
     ap.add_argument("--redundancy-output", default=None,
                     help="Optional CSV: per-Group multi-mapping redundancy metrics at "
-                         "each swept qcov threshold (see module docstring point 4).")
+                         "each evaluated qcov threshold (see module docstring point 4).")
     ap.add_argument("--length-quantiles-output", default=None,
                     help="Optional CSV: dataset-wide read_length/alignment_length "
-                         "quantiles at each swept qcov threshold.")
+                         "quantiles at each evaluated qcov threshold.")
     return ap.parse_args()
 
 
@@ -322,7 +322,7 @@ def stream_primary_alignments_to_csv(
     its not-combined/unmerged BAM together), writing every PRIMARY MAPPED
     alignment passing --min-mapq AND (if requested) not flagged
     RequiresSNPConfirmation into ONE shared per-alignment CSV. Both filters
-    are fixed for the whole sweep, applied here once.
+    are fixed for the whole evaluation, applied here once.
 
     Combining multiple files here (rather than relying on a pre-merged BAM)
     means gene_fraction/breadth downstream is computed from the TRUE union
@@ -564,7 +564,7 @@ def compute_redundancy_table(
     row (e.g. {"min_query_coverage": 0.0, "min_identity": 90.0,
     "min_match_qcov": 0.0}) — generalized from a single qcov argument so the
     redundancy table stays labeled correctly across however many threshold
-    axes are actually being swept.
+    axes are actually being evaluated.
 
     Reports both the raw alignment-record count (total_reads, as before) and
     the fragment-hit count (total_fragment_hits). A concordant PE pair
@@ -622,10 +622,10 @@ def compute_redundancy_table(
 def main():
     args = parse_args()
 
-    qcov_values       = sorted(float(x) for x in args.query_coverage_sweep.split(","))
-    gf_values         = sorted(float(x) for x in args.gene_fraction_sweep.split(","))
-    identity_values   = sorted(float(x) for x in args.identity_sweep.split(","))
-    match_qcov_values = sorted(float(x) for x in args.match_qcov_sweep.split(","))
+    qcov_values       = sorted(float(x) for x in args.query_coverage_evaluation.split(","))
+    gf_values         = sorted(float(x) for x in args.gene_fraction_evaluation.split(","))
+    identity_values   = sorted(float(x) for x in args.identity_evaluation.split(","))
+    match_qcov_values = sorted(float(x) for x in args.match_qcov_evaluation.split(","))
 
     for values, name, lo, hi in [
         (qcov_values,       "query-coverage", 0.0, 1.0),
@@ -635,7 +635,7 @@ def main():
     ]:
         for x in values:
             if not lo <= x <= hi:
-                sys.exit(f"[ERROR] {name} sweep values must be {lo}-{hi}, got {x}")
+                sys.exit(f"[ERROR] {name} evaluation values must be {lo}-{hi}, got {x}")
 
     tmp_csv = args.tmp_csv or tempfile.mktemp(suffix=".csv")
     if len(args.input) > 1:
@@ -650,17 +650,17 @@ def main():
               flush=True)
     if args.min_aln_length > 0:
         print(f"[INFO] --min-aln-length {args.min_aln_length}bp is ON: applied alongside "
-              f"every swept threshold combination.", flush=True)
+              f"every evaluated threshold combination.", flush=True)
     if args.max_unaligned_length is not None:
         print(f"[INFO] --max-unaligned-length {args.max_unaligned_length}bp is ON.", flush=True)
     if identity_values != [0.0]:
-        print(f"[INFO] Identity sweep: {identity_values}", flush=True)
+        print(f"[INFO] Identity evaluation: {identity_values}", flush=True)
     else:
-        print("[INFO] Identity sweep: off (all reads pass; set --identity-sweep to enable)", flush=True)
+        print("[INFO] Identity evaluation: off (all reads pass; set --identity-evaluation to enable)", flush=True)
     if match_qcov_values != [0.0]:
-        print(f"[INFO] Match-qcov sweep: {match_qcov_values}", flush=True)
+        print(f"[INFO] Match-qcov evaluation: {match_qcov_values}", flush=True)
     else:
-        print("[INFO] Match-qcov sweep: off (all reads pass; set --match-qcov-sweep to enable)", flush=True)
+        print("[INFO] Match-qcov evaluation: off (all reads pass; set --match-qcov-evaluation to enable)", flush=True)
 
     total_seen, ref_lengths, n_excluded_by_snp = stream_primary_alignments_to_csv(
         args.input, tmp_csv, args.min_mapq, args.exclude_snp_confirmation,
@@ -670,7 +670,7 @@ def main():
           f"(before any filtering)", flush=True)
     if args.exclude_snp_confirmation:
         print(f"[INFO] {n_excluded_by_snp:,} alignments excluded as "
-              f"RequiresSNPConfirmation (after --min-mapq, before query-coverage sweep)",
+              f"RequiresSNPConfirmation (after --min-mapq, before query-coverage evaluation)",
               flush=True)
 
     con = duckdb.connect(":memory:")
@@ -806,7 +806,7 @@ def main():
             "AND (? = 0 OR (pct_identity IS NOT NULL AND pct_identity >= ?)) "
             "AND (? = 0 OR (match_qcov_pct IS NOT NULL AND match_qcov_pct >= ?))"
         )
-        # Sweep values are proportions (0-1); the stored pct_identity and
+        # Evaluation values are proportions (0-1); the stored pct_identity and
         # match_qcov_pct columns are percentages, so scale before comparing.
         params_base = [qcov * 100.0, args.min_aln_length,
                        identity * 100.0, identity * 100.0,
@@ -961,7 +961,7 @@ def main():
         gf_group_summary = []  # (gf, n_groups_passing) — surfaced in the console line below,
                                 # since the per-threshold print previously only showed counts
                                 # from BEFORE the gf filter (n_genes_at_filter), making it look
-                                # like gene-fraction wasn't being swept at all even though it was.
+                                # like gene-fraction wasn't being evaluated at all even though it was.
         for gf in gf_values:
             passing_genes = [g for g, f in gene_fraction_at_filter.items() if f >= gf]
             n_genes_passing = len(passing_genes)

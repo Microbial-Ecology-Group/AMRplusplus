@@ -6,26 +6,6 @@ alignment_analyzer.py
 For each read (read-end) in a BAM/SAM, output the gene(s) it maps to via primary
 alignments and the MAPQ, plus a summary of counts per gene.
 
-CHANGES IN THIS VERSION
-────────────────────────
-1. --min-query-coverage flag (0.0-1.0, default 0.0). Read-level counterpart to
-   --min-gene-fraction: an alignment must cover this fraction of the READ's
-   length (aligned query bases / total read length) to be counted.
-
-2. Gene-length breadth coverage (--min-gene-fraction) now respects the same
-   quality filters as alignment counting by default. --coverage-ignore-filters
-   restores the old unfiltered behaviour.
-
-3. --coverage-output gains per-gene query-coverage depth stats (mean/median/n)
-   alongside the existing breadth-based coverage_fraction, plus a "meg_id"
-   join column (gene_accession split on the first '|').
-
-4. retained-read tracking. Every run now reports, and optionally writes
-   to a small stats file, how many primary alignments existed BEFORE any
-   --min-mapq/--min-query-coverage filtering vs how many passed (and the %
-   retained). Previously this number wasn't tracked or surfaced anywhere —
-   the script silently filtered without reporting what fraction of the
-   original classified reads survived.
 
 ## Example command
 #    python3 alignment_analyzer.py \
@@ -61,7 +41,7 @@ def parse_args() -> argparse.Namespace:
         )
     )
     parser.add_argument("-i", "--input", required=True, help="Input alignment file (.bam or .sam)")
-    parser.add_argument("-r", "--read-output", required=True, help="Output TSV with per-read information")
+    parser.add_argument("-r", "--read-output", default=None,help=("Optional extremely large output TSV with per-read information ... Omit to skip writing it."))
     parser.add_argument("-g", "--gene-summary", required=True, help="Output TSV with per-gene summary counts")
     parser.add_argument("--min-mapq", type=int, default=0,
                         help="Minimum mapping quality for an alignment to be considered (default: 0).")
@@ -128,7 +108,7 @@ def parse_args() -> argparse.Namespace:
             "'fragment': mates are resolved together into one physical fragment "
             "(base_read_id groups R1/R2 and strips FLASH suffixes), so a paired-end "
             "fragment and a FLASH-merged fragment are weighted IDENTICALLY (1 hit each). "
-            "This is the counting unit used by coverage_threshold_sweep.py and fixes the "
+            "This is the counting unit used by coverage_threshold_evaluation.py and fixes the "
             "old Combined-BAM problem where unmerged (paired) reads were counted twice "
             "relative to merged reads."
         ),
@@ -201,7 +181,9 @@ def parse_args() -> argparse.Namespace:
 
 
 def check_outputs_exist(args: argparse.Namespace) -> bool:
-    outputs_to_check = [args.read_output, args.gene_summary]
+    outputs_to_check = [args.gene_summary]
+    if args.read_output:
+        outputs_to_check.append(args.read_output)
     if args.coverage_output:
         outputs_to_check.append(args.coverage_output)
     return all(os.path.exists(f) for f in outputs_to_check)
@@ -409,13 +391,14 @@ def aggregate_per_read_and_alignment_counts(
     min_identity_pct = min_identity * 100.0
 
     for read in aln.fetch(until_eof=True):
+
+        if read.is_unmapped:
+            continue
+
         rid = read_end_id(read)
 
         if rid not in per_read:
             per_read[rid] = {"primary_genes": {}, "secondary_genes": {}, "supplementary_genes": {}}
-
-        if read.is_unmapped:
-            continue
 
         ref_name = aln.get_reference_name(read.reference_id)
 
@@ -680,16 +663,16 @@ def write_stats_output(
         out.write(f"pct_genes_passing_of_baseline\t{pct_genes_passing if pct_genes_passing is not None else 'NA'}\n")
 
 
-# ── Fragment-level counting (mirrors coverage_threshold_sweep.resolve_fragment_hits) ──
+# ── Fragment-level counting (mirrors coverage_threshold_evaluation.resolve_fragment_hits) ──
 
-# Same regexes coverage_threshold_sweep.py uses, so fragment identity is identical
+# Same regexes coverage_threshold_evaluation.py uses, so fragment identity is identical
 # between the two tools: strip FLASH suffixes and a trailing /1 /2 .1 .2.
 _RE_FLASH = re.compile(r'\.(extendedFrags|notCombined)[^/]*$')
 _RE_PAIR  = re.compile(r'[/\.][12]$')
 
 
 def get_base_read_id(read_id: str) -> str:
-    """Collapse a read-end id to its physical-fragment id (matches the sweep)."""
+    """Collapse a read-end id to its physical-fragment id (matches the evaluation)."""
     base = _RE_FLASH.sub('', read_id)
     return _RE_PAIR.sub('', base)
 
@@ -699,7 +682,7 @@ def parse_megares_group(ref_name: str) -> str:
     Extract the Group field from a MEGARes pipe-delimited accession.
     Header layout: MEG_ID|Type|Class|Mechanism|Group[|SNP]. Returns the Group
     (5th field, index 4) or '' if the name isn't in the expected format.
-    Mirrors coverage_threshold_sweep.parse_gene_reference so both tools derive
+    Mirrors coverage_threshold_evaluation.parse_gene_reference so both tools derive
     Group the same way — directly from the reference name, no annotation CSV needed.
     """
     parts = ref_name.split('|')
@@ -717,7 +700,7 @@ def summarize_genes_fragment(
 
     "Best gene per read-end" and the group-aware disagreement tie-break both use
     match_qcov_pct (fraction of the read explained by genuine matches), consistent
-    with coverage_threshold_sweep.resolve_fragment_hits. Ties broken alphabetically.
+    with coverage_threshold_evaluation.resolve_fragment_hits. Ties broken alphabetically.
 
       both mates same gene            -> 1 hit
       only one mate present           -> 1 hit
@@ -884,7 +867,8 @@ def main():
         print(f"[INFO] Gene fraction filter: {len(passing_genes)}/{n_genes_baseline} "
               f"genes pass >= {args.min_gene_fraction:.1%} coverage")
 
-    write_read_output(per_read, args.read_output)
+    if args.read_output:
+        write_read_output(per_read, args.read_output)
 
     if args.coverage_output:
         write_coverage_output(

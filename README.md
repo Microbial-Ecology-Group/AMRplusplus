@@ -37,7 +37,7 @@ Brief overview:
 6. Added single-end and merged-read analysis.
 7. Changed defaults to skip rarefaction analysis, but default to running SNP confirmation.
 8. **Updated SNP confirmation tool (on a separate branch).** The SNP verifier now adjusts counts by the *proportion of reads that actually carry the confirmed SNP*: it computes (reads with the SNP / reads covering the SNP position) and multiplies by the gene's count, rather than substituting a raw resistant-read count. Genes that require SNP confirmation but have no entry in the SNP database are now set to zero (previously they passed through unconfirmed). The tool has also been updated to run cleanly under **Nextflow DSL2 syntax**.
-9. **New coverage-threshold sweep workflow (`bam_coverage_sweep`).** Runs a set of pre-aligned BAMs across a grid of gene-fraction and query-coverage thresholds, then produces combined matrices and drop-off plots showing how the resistome (genes, classes, mechanisms, groups) shrinks as thresholds tighten — a way to choose sensible cutoffs and see each sample's sensitivity to them. See the [coverage sweep tutorial](docs/Coverage_sweep_tutorial.md).
+9. **New coverage-threshold evaluation workflow (`bam_coverage_evaluation`).** Runs a set of pre-aligned BAMs across a grid of gene-fraction and query-coverage thresholds, then produces combined matrices and drop-off plots showing how the resistome (genes, classes, mechanisms, groups) shrinks as thresholds tighten — a way to choose sensible cutoffs and see each sample's sensitivity to them. See the [coverage evaluation tutorial](docs/Coverage_evaluation_tutorial.md).
 
 
 [Additional analysis tips here.](docs/Analysis_recommendations.md)
@@ -53,7 +53,7 @@ More Information
   - [Paired-end analysis step-by-step](docs/Step_by_step_tutorial.md)
   - [Single-end analysis step-by-step](docs/SingleEnd_read_tutorial.md)
   - [Merged-read analysis step-by-step](docs/Merged_read_tutorial.md)
-  - [Coverage threshold sweep](docs/Coverage_sweep_tutorial.md)
+  - [Coverage threshold evaluation](docs/Coverage_evaluation_tutorial.md)
 - [Configuration](docs/configuration.md)
   - [Tips for using SLURM](docs/Running_with_SLURM.md)
 - [Output](docs/output.md)

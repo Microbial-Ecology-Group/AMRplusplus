@@ -1,16 +1,16 @@
-# Coverage Threshold Sweep: Step-by-Step Tutorial
+# Coverage Threshold Evaluation: Step-by-Step Tutorial
 
-This tutorial covers the `bam_coverage_sweep` pipeline, which takes a set of pre-aligned BAM files and evaluates the resistome across a grid of alignment filter thresholds. Instead of committing to a single cutoff, the sweep shows you how the number of detected genes, groups, mechanisms and classes drops off as you tighten each threshold, so you can choose sensible cutoffs and see how sensitive each sample is to them. It produces combined result matrices and a set of drop-off plots.
+This tutorial covers the `bam_coverage_evaluation` pipeline, which takes a set of pre-aligned BAM files and evaluates the resistome across a grid of alignment filter thresholds. Instead of committing to a single cutoff, the evaluation shows you how the number of detected genes, groups, mechanisms and classes drops off as you tighten each threshold, so you can choose sensible cutoffs and see how sensitive each sample is to them. It produces combined result matrices and a set of drop-off plots.
 
 > **Before you start:** This pipeline runs on BAM files you have already produced with AMR++ (for example, the `*_alignment_sorted.bam` files under `Alignment/BAM_files/Standard/`). It also requires a few extra tools that are **not** bundled in the default AMR++ conda environment. See [Additional tools required](#additional-tools-required) below.
 
 ## Table of Contents
 
 - [Additional tools required](#additional-tools-required)
-- [What the sweep does](#what-the-sweep-does)
-- [Running the sweep](#running-the-sweep)
+- [What the evaluation does](#what-the-evaluation-does)
+- [Running the evaluation](#running-the-evaluation)
 - [The three filters](#the-three-filters)
-- [Choosing what to sweep](#choosing-what-to-sweep)
+- [Choosing what to evaluation](#choosing-what-to-evaluation)
 - [Outputs](#outputs)
 - [Interpreting the plots](#interpreting-the-plots)
 - [Applying the selected filter thresholds](#applying-the-selected-filter-thresholds)
@@ -19,9 +19,9 @@ This tutorial covers the `bam_coverage_sweep` pipeline, which takes a set of pre
 
 ## Additional tools required
 
-The sweep uses a Python analysis step and an R plotting step whose dependencies are **not included in the AMR++ conda environment**, because adding them, especially the R plotting stack, would substantially increase an already large environment. Install them separately before running the sweep.
+The evaluation uses a Python analysis step and an R plotting step whose dependencies are **not included in the AMR++ conda environment**, because adding them, especially the R plotting stack, would substantially increase an already large environment. Install them separately before running the evaluation.
 
-**Python** (for `coverage_threshold_sweep.py` and `combine_sweep_results.py`):
+**Python** (for `coverage_threshold_evaluation.py` and `combine_evaluation_results.py`):
 
 - `pysam` for reading BAM alignments
 - `duckdb` for fast aggregation of the per-alignment table
@@ -31,7 +31,7 @@ The sweep uses a Python analysis step and an R plotting step whose dependencies 
 pip install pysam duckdb
 ```
 
-**R** (for `plot_sweep_dropoff.R`):
+**R** (for `plot_evaluation_dropoff.R`):
 
 - `data.table`
 - `ggplot2`
@@ -49,7 +49,7 @@ Make sure `Rscript` is on your `PATH`. The pipeline calls it through the `$RSCRI
 
 ---
 
-## What the sweep does
+## What the evaluation does
 
 For each BAM, the pipeline:
 
@@ -59,26 +59,26 @@ For each BAM, the pipeline:
 
 Then across all samples:
 
-4. Combines the per-sample CSVs into single matrices with `combine_sweep_results.py`.
-5. Produces drop-off plots and summary tables with `plot_sweep_dropoff.R`.
+4. Combines the per-sample CSVs into single matrices with `combine_evaluation_results.py`.
+5. Produces drop-off plots and summary tables with `plot_evaluation_dropoff.R`.
 
 Because the BAM is parsed only once and the whole grid is evaluated from the resulting intermediate table, the full grid costs roughly the same as a single counting run.
 
-A sample that ends up with no usable alignments, for example one where every alignment was to a gene requiring SNP confirmation and `sweep_exclude_snp` removed it, is handled gracefully. The sweep writes header-only outputs for that sample, prints a warning naming the filters responsible, and the run continues.
+A sample that ends up with no usable alignments, for example one where every alignment was to a gene requiring SNP confirmation and `evaluation_exclude_snp` removed it, is handled gracefully. The evaluation writes header-only outputs for that sample, prints a warning naming the filters responsible, and the run continues.
 
 ---
 
-## Running the sweep
+## Running the evaluation
 
 ```bash
 nextflow run main_AMR++.nf \
     -profile local \
-    --pipeline bam_coverage_sweep \
+    --pipeline bam_coverage_evaluation \
     --bam_files "/path/to/Alignment/BAM_files/Standard/*_alignment_sorted.bam" \
     --output Filtering_sensitivity_analysis
 ```
 
-- `--bam_files` is a glob matching the BAMs to sweep. Quote it so the shell does not expand it.
+- `--bam_files` is a glob matching the BAMs to evaluation. Quote it so the shell does not expand it.
 - `--output` is where results are written.
 - On a cluster, swap `-profile local` for your SLURM profile. See [Running with SLURM](Running_with_SLURM.md).
 
@@ -86,7 +86,7 @@ Example with the SLURM profile:
 
 ```bash
 nextflow run main_AMR++.nf \
-    --pipeline bam_coverage_sweep \
+    --pipeline bam_coverage_evaluation \
     --bam_files "AMR++_output/Alignment/BAM_files/Standard/*" \
     --output Filtering_sensitivity_analysis \
     -profile local_slurm
@@ -96,7 +96,7 @@ nextflow run main_AMR++.nf \
 
 ## The three filters
 
-AMR++ applies three independent alignment filters. The sweep explores the same three, so a threshold you pick from a sweep can be applied directly to a counting run.
+AMR++ applies three independent alignment filters. The evaluation explores the same three, so a threshold you pick from a evaluation can be applied directly to a counting run.
 
 **All values are proportions from 0 to 1.** A value of `0` turns a filter off.
 
@@ -114,16 +114,16 @@ Query coverage has two definitions, and you choose between them rather than appl
 
 | Parameter | Calculation | Behavior |
 |---|---|---|
-| `sweep_query_coverage` | `aligned_length / read_length` | Counts mismatches inside the aligned region as covered |
-| `sweep_match_qcov` | `(aligned_length - NM) / read_length` | Counts only genuine matches |
+| `evaluation_query_coverage` | `aligned_length / read_length` | Counts mismatches inside the aligned region as covered |
+| `evaluation_match_qcov` | `(aligned_length - NM) / read_length` | Counts only genuine matches |
 
-Because the edit distance is never negative, the match-based value can never exceed the standard one, so a given threshold is always at least as strict under `sweep_match_qcov`.
+Because the edit distance is never negative, the match-based value can never exceed the standard one, so a given threshold is always at least as strict under `evaluation_match_qcov`.
 
 In the counting step the same choice is made with the `match_qcov` parameter, which is `"Y"` or `"N"` rather than a list of values.
 
 ### The NM tag requirement
 
-`sweep_match_qcov` and `sweep_identity` are both computed from the NM tag, which records each alignment's edit distance. NM is an optional SAM field, so it is not always present.
+`evaluation_match_qcov` and `evaluation_identity` are both computed from the NM tag, which records each alignment's edit distance. NM is an optional SAM field, so it is not always present.
 
 With the filter off, alignments lacking NM still pass. At any threshold above 0 they are **excluded**, because their identity cannot be verified. BWA-MEM emits NM by default, so BAMs produced by the standard AMR++ alignment step are fine, but BAMs rewritten by other tools may not carry it.
 
@@ -136,42 +136,42 @@ samtools index output.nm.bam
 
 ---
 
-## Choosing what to sweep
+## Choosing what to evaluation
 
-The sweep always tests a **two-dimensional grid**: gene fraction against one read-level filter.
+The evaluation always tests a **two-dimensional grid**: gene fraction against one read-level filter.
 
-**Axis 1 is always gene fraction.** `sweep_gene_fraction` is swept in every run and appears in every figure.
+**Axis 1 is always gene fraction.** `evaluation_gene_fraction` is evaluated in every run and appears in every figure.
 
 **Axis 2 is one of the three read-level filters.** Set your choice to a list of values and leave the others at `0`.
 
 The relevant `params.config` block:
 
 ```groovy
-    /* AXIS 1: always swept */
-    sweep_gene_fraction   = "0,0.1,0.25,0.5,0.8"
+    /* AXIS 1: always evaluated */
+    evaluation_gene_fraction   = "0,0.1,0.25,0.5,0.8"
 
-    /* AXIS 2: sweep ONE of these three; leave the others at "0",
+    /* AXIS 2: evaluation ONE of these three; leave the others at "0",
      * or give one a single value to apply it as a fixed filter */
-    sweep_query_coverage  = "0,0.5,0.6,0.7,0.8,0.9,0.95"
-    sweep_match_qcov      = "0"
-    sweep_identity        = "0"
+    evaluation_query_coverage  = "0,0.5,0.6,0.7,0.8,0.9,0.95"
+    evaluation_match_qcov      = "0"
+    evaluation_identity        = "0"
 
-    /* Applied at every point in the grid regardless of what is swept */
-    sweep_edge_aware_qcov = "Y"
-    sweep_exclude_snp     = "N"
+    /* Applied at every point in the grid regardless of what is evaluated */
+    evaluation_edge_aware_qcov = "Y"
+    evaluation_exclude_snp     = "N"
 ```
 
-`sweep_query_coverage` and `sweep_match_qcov` measure the same property, so sweeping both is meaningless. Pick whichever definition of query coverage you want to filter on. `sweep_identity` measures something different and is a genuine alternative axis.
+`evaluation_query_coverage` and `evaluation_match_qcov` measure the same property, so evaluating both is meaningless. Pick whichever definition of query coverage you want to filter on. `evaluation_identity` measures something different and is a genuine alternative axis.
 
 ### A single value is a fixed filter
 
-A single **non-zero** value is a filter applied at every point in the grid rather than a swept axis. This is how you hold one filter constant while exploring another:
+A single **non-zero** value is a filter applied at every point in the grid rather than a evaluated axis. This is how you hold one filter constant while exploring another:
 
 ```groovy
-// sweep gene fraction against query coverage, with identity pinned at 0.9
-sweep_gene_fraction   = "0,0.1,0.25,0.5,0.8"
-sweep_query_coverage  = "0,0.5,0.6,0.7,0.8,0.9,0.95"
-sweep_identity        = "0.9"
+// evaluation gene fraction against query coverage, with identity pinned at 0.9
+evaluation_gene_fraction   = "0,0.1,0.25,0.5,0.8"
+evaluation_query_coverage  = "0,0.5,0.6,0.7,0.8,0.9,0.95"
+evaluation_identity        = "0.9"
 ```
 
 The figures plot gene fraction against query coverage, and the plot subtitle records that identity was fixed at 0.9 so the constraint stays visible.
@@ -179,10 +179,10 @@ The figures plot gene fraction against query coverage, and the plot subtitle rec
 ### Overriding on the command line
 
 ```bash
-nextflow run main_AMR++.nf --pipeline bam_coverage_sweep \
+nextflow run main_AMR++.nf --pipeline bam_coverage_evaluation \
     --bam_files "AMR++_output/Alignment/BAM_files/Standard/*" \
-    --sweep_gene_fraction '0,0.5,0.9' \
-    --sweep_query_coverage '0,0.6,0.7,0.8,0.85,0.9,0.95' \
+    --evaluation_gene_fraction '0,0.5,0.9' \
+    --evaluation_query_coverage '0,0.6,0.7,0.8,0.85,0.9,0.95' \
     --output Filtering_sensitivity_analysis
 ```
 
@@ -206,7 +206,7 @@ Every combination is evaluated, so the grid grows multiplicatively. Rows written
 
 ## Outputs
 
-Under `--output`, in `CoverageSweep/`:
+Under `--output`, in `CoverageEvaluation/`:
 
 - `PerSample/` contains one set of CSVs per BAM: `<prefix>_results.csv`, `_gene_detail.csv`, `_redundancy.csv` and `_length_quantiles.csv`.
 - `Combined/` contains the merged matrices across all samples: `combined_results.csv`, `combined_gene_detail.csv` and `combined_length_quantiles.csv`, each with a `sample_id` column.
@@ -224,20 +224,20 @@ Under `--output`, in `CoverageSweep/`:
 
 Expect the annotation levels to behave differently. Gene accession counts usually fall fastest, because accession-level detection is the most sensitive to database redundancy, while group, mechanism and class counts hold up longer. A threshold that removes many accessions but few groups is generally preferable to the reverse, since aggregation to the group level or above is what we recommend for statistical comparison in any case.
 
-The sweep shows what a threshold costs on your data. It cannot tell you which threshold is correct, because that depends on the question you are asking.
+The evaluation shows what a threshold costs on your data. It cannot tell you which threshold is correct, because that depends on the question you are asking.
 
 ---
 
 ## Applying the selected filter thresholds
 
-Once you have chosen thresholds, re-run counting on the same BAM files with `bam_resistome`. The parameter names match the sweep parameters without the `sweep_` prefix, and use the same 0 to 1 proportion scale.
+Once you have chosen thresholds, re-run counting on the same BAM files with `bam_resistome`. The parameter names match the evaluation parameters without the `evaluation_` prefix, and use the same 0 to 1 proportion scale.
 
-| Sweep parameter | Counting parameter |
+| Evaluation parameter | Counting parameter |
 |---|---|
-| `sweep_gene_fraction` | `--min_gene_fraction` |
-| `sweep_query_coverage` | `--min_query_coverage` |
-| `sweep_identity` | `--min_identity` |
-| `sweep_match_qcov` | `--match_qcov Y` together with `--min_query_coverage` |
+| `evaluation_gene_fraction` | `--min_gene_fraction` |
+| `evaluation_query_coverage` | `--min_query_coverage` |
+| `evaluation_identity` | `--min_identity` |
+| `evaluation_match_qcov` | `--match_qcov Y` together with `--min_query_coverage` |
 
 A run using a gene fraction of 0.5 and a query coverage of 0.8:
 
@@ -252,7 +252,7 @@ nextflow run main_AMR++.nf \
     -profile local_slurm
 ```
 
-If your sweep used `sweep_match_qcov` rather than `sweep_query_coverage`, set `match_qcov` when applying so the counting step computes query coverage the same way the sweep did:
+If your evaluation used `evaluation_match_qcov` rather than `evaluation_query_coverage`, set `match_qcov` when applying so the counting step computes query coverage the same way the evaluation did:
 
 ```bash
 nextflow run main_AMR++.nf \

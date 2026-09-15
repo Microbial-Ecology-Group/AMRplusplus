@@ -4,7 +4,7 @@ Details on AMR++ updates
 # 2026-07-26 Finalizing new alignment analyzer and updating to nextflow syntax v2
 - Update code to work with new nextflow syntax version
 - **Updated SNP confirmation tool (on a separate branch).** The SNP verifier now adjusts counts by the *proportion of reads that actually carry the confirmed SNP*: it computes (reads with the SNP / reads covering the SNP position) and multiplies by the gene's count, rather than substituting a raw resistant-read count. Genes that require SNP confirmation but have no entry in the SNP database are now set to zero (previously they passed through unconfirmed). The tool has also been updated to run cleanly under **Nextflow DSL2 syntax**.
-- **New coverage-threshold sweep workflow (`bam_coverage_sweep`).** Runs a set of pre-aligned BAMs across a grid of gene-fraction and query-coverage thresholds, then produces combined matrices and drop-off plots showing how the resistome (genes, classes, mechanisms, groups) shrinks as thresholds tighten — a way to choose sensible cutoffs and see each sample's sensitivity to them. See the [coverage sweep tutorial](docs/Coverage_sweep_tutorial.md).
+- **New coverage-threshold evaluation workflow (`bam_coverage_evaluation`).** Runs a set of pre-aligned BAMs across a grid of gene-fraction and query-coverage thresholds, then produces combined matrices and drop-off plots showing how the resistome (genes, classes, mechanisms, groups) shrinks as thresholds tighten — a way to choose sensible cutoffs and see each sample's sensitivity to them. See the [coverage evaluation tutorial](docs/Coverage_evaluation_tutorial.md).
 
 # 2026-07-08 Partial update
 - Fragment counting, group-aware fragment resolution, and edge-aware query-coverage are now ON
@@ -13,7 +13,7 @@ Details on AMR++ updates
   * group_aware: same-MEGARes-Group mate disagreements collapse to one hit (higher-match_qcov mate).
   * edge_aware_qcov: qcov is soft/hard-clip invariant and forgives gene-edge overhang while still
     penalizing genuinely partial (mid-gene) clips.
-- Unified alignment_analyzer.py and coverage_threshold_sweep.py: identical --group-aware flag
+- Unified alignment_analyzer.py and coverage_threshold_evaluation.py: identical --group-aware flag
   (old --group-aware-discordant kept as alias), identical match_qcov_pct tie-break, and both parse
   MEGARes Group from the reference name (alignment_analyzer no longer needs --annotation for
   group-aware).

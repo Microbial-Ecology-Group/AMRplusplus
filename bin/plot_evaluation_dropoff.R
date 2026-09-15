@@ -1,9 +1,9 @@
 # ══════════════════════════════════════════════════════════════════════════════
-# Sweep Threshold Dropoff — Query-Coverage and Gene-Fraction
+# Evaluation Threshold Dropoff — Query-Coverage and Gene-Fraction
 # ══════════════════════════════════════════════════════════════════════════════
 #
 # Reads combined_gene_detail.csv / combined_results.csv / combined_length_quantiles.csv
-# (from combine_sweep_results.py). Each row carries a sample_id; there is no
+# (from combine_evaluation_results.py). Each row carries a sample_id; there is no
 # workflow / read_subset grouping and no faceting. Line plots are a single panel
 # showing the mean across samples (bold) with each sample as a thin grey line.
 #
@@ -12,11 +12,11 @@
 # independent fill scales, which is why patchwork is used to combine them.
 #
 # The gene-fraction grid is read from combined_results.csv rather than hardcoded,
-# so it always matches whatever was actually swept by coverage_threshold_sweep.py.
+# so it always matches whatever was actually evaluated by coverage_threshold_evaluation.py.
 #
 # Usage:
-#   Rscript plot_sweep_dropoff.R
-#   Rscript plot_sweep_dropoff.R combined_sweep_results/ figures/
+#   Rscript plot_evaluation_dropoff.R
+#   Rscript plot_evaluation_dropoff.R combined_evaluation_results/ figures/
 # ══════════════════════════════════════════════════════════════════════════════
 
 suppressPackageStartupMessages({
@@ -25,6 +25,13 @@ suppressPackageStartupMessages({
   library(scales)
 })
 setDTthreads(1)
+# ── figure text scaling ───────────────────────────────────────────────────────
+# Multiplier applied to font size for heatmaps. 1 keeps the original sizes, 2
+# doubles them. Figure dimensions are deliberately left unchanged, so text grows
+# relative to the plot and stays legible when a figure is reduced to column
+# width in a manuscript. Raising this much above 2 will start to crowd the
+# heatmap tiles and the rotated x-axis labels.
+FONT_SCALE <- 2
 
 # patchwork is used to place the count and percentage heatmaps side by side with
 # independent fill scales. If it is unavailable the script still runs and writes
@@ -34,19 +41,19 @@ if (HAVE_PATCHWORK) suppressPackageStartupMessages(library(patchwork))
 
 # ── arguments ─────────────────────────────────────────────────────────────────
 args    <- commandArgs(trailingOnly = TRUE)
-in_dir  <- if (length(args) >= 1) args[1] else "combined_sweep_results/"
+in_dir  <- if (length(args) >= 1) args[1] else "combined_evaluation_results/"
 out_dir <- if (length(args) >= 2) args[2] else file.path(in_dir, "figures")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
 gene_path <- file.path(in_dir, "combined_gene_detail.csv")
 if (!file.exists(gene_path)) stop("combined_gene_detail.csv not found in ", in_dir,
-                                  " - run combine_sweep_results.py first")
+                                  " - run combine_evaluation_results.py first")
 
 LEVELS_TO_PLOT <- c("gene_accession", "class", "mechanism", "group")
 
 # Fallback only. This is overwritten below with the actual values found in
 # combined_results.csv, so it no longer has to be kept in sync by hand.
-GF_SWEEP <- c(0, 0.1, 0.25, 0.5, 0.8)
+GF_EVALUATION <- c(0, 0.1, 0.25, 0.5, 0.8)
 
 message("Loading data...")
 genes <- fread(gene_path, showProgress = FALSE)
@@ -72,34 +79,34 @@ if (length(match_qcov_values) > 1) {
   primary_col    <- "min_query_coverage"
   primary_label  <- "Min query coverage"
 }
-# All four sweep axes are now proportions (0-1), so no axis needs special
+# All four evaluation axes are now proportions (0-1), so no axis needs special
 # scaling. PRIMARY_IS_IDENTITY is retained as FALSE for backward compatibility
 # with any local edits that referenced it.
 PRIMARY_IS_IDENTITY <- FALSE
 
-# ── Guard: these figures assume ONE read-level axis was swept ─────────────────
-# coverage_threshold_sweep.py evaluates the full cartesian product of
+# ── Guard: these figures assume ONE read-level axis was evaluated ─────────────────
+# coverage_threshold_evaluation.py evaluates the full cartesian product of
 # query-coverage x identity x match-qcov x gene-fraction. Every figure below
 # plots against a single "primary" axis. If more than one read-level axis was
-# swept, the other axes have to be dealt with somehow; this script holds them at
+# evaluated, the other axes have to be dealt with somehow; this script holds them at
 # their most permissive value (see hold_non_primary below) so each figure means
 # "detection vs the primary axis, with the other filters off". That is a
 # well-defined statement, but it is NOT the same as exploring the joint grid, so
 # say so loudly rather than letting the reader assume otherwise.
-n_axes_swept <- sum(c(length(qcov_values) > 1,
+n_axes_evaluated <- sum(c(length(qcov_values) > 1,
                       length(identity_values) > 1,
                       length(match_qcov_values) > 1))
-if (n_axes_swept > 1) {
+if (n_axes_evaluated > 1) {
   message("")
   message("  ================================================================")
-  message("  NOTE: more than one read-level threshold axis was swept.")
+  message("  NOTE: more than one read-level threshold axis was evaluated.")
   message("    query-coverage values : ", length(qcov_values))
   message("    identity values       : ", length(identity_values))
   message("    match-qcov values     : ", length(match_qcov_values))
   message("  Figures plot against '", primary_col, "' and hold the other axes")
   message("  at their most permissive value. The CSV outputs contain the full")
   message("  grid and remain the source of truth for joint effects.")
-  message("  To plot a different axis, sweep that one alone.")
+  message("  To plot a different axis, evaluation that one alone.")
   message("  ================================================================")
   message("")
 }
@@ -142,7 +149,7 @@ hold_non_primary <- function(dt, keep_col, label) {
 message(sprintf("  %s rows | %d samples",
                 formatC(nrow(genes), format = "d", big.mark = ","),
                 uniqueN(genes$sample_id)))
-message(sprintf("  Primary sweep: %s - values: %s",
+message(sprintf("  Primary evaluation: %s - values: %s",
                 primary_col, paste(primary_values, collapse = ", ")))
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -156,14 +163,14 @@ if (file.exists(results_path)) {
   results[, n_fragment_hits_in_passing_genes := as.double(n_fragment_hits_in_passing_genes)]
 
   # Derive the gene-fraction grid from the data instead of hardcoding it, so the
-  # figures always match whatever grid was passed to coverage_threshold_sweep.py.
+  # figures always match whatever grid was passed to coverage_threshold_evaluation.py.
   if ("min_gene_fraction" %in% names(results)) {
     results[, min_gene_fraction := as.double(min_gene_fraction)]
-    GF_SWEEP <- sort(unique(results$min_gene_fraction))
-    message("  Gene-fraction grid read from data: ", paste(GF_SWEEP, collapse = ", "))
+    GF_EVALUATION <- sort(unique(results$min_gene_fraction))
+    message("  Gene-fraction grid read from data: ", paste(GF_EVALUATION, collapse = ", "))
   } else {
     message("  [NOTE] min_gene_fraction column absent; using default grid: ",
-            paste(GF_SWEEP, collapse = ", "))
+            paste(GF_EVALUATION, collapse = ", "))
   }
 
   THRESHOLD_COLS <- intersect(c("min_query_coverage", "min_identity",
@@ -202,7 +209,7 @@ if (file.exists(results_path)) {
 } else {
   message("\n[NOTE] combined_results.csv not found in ", in_dir,
          " - skipping quick summary table.")
-  message("  Using default gene-fraction grid: ", paste(GF_SWEEP, collapse = ", "))
+  message("  Using default gene-fraction grid: ", paste(GF_EVALUATION, collapse = ", "))
 }
 
 show_plot <- function(p, stem, w = 9, h = 7) {
@@ -222,7 +229,7 @@ save_two_panel <- function(p_count, p_pct, stem, title = NULL, w = 13, h = 6) {
     if (!is.null(title)) {
       combined <- combined + patchwork::plot_annotation(
         title = title,
-        theme = theme(plot.title = element_text(size = 13, face = "bold"))
+        theme = theme(plot.title = element_text(size = 13 * FONT_SCALE, face = "bold"))
       )
     }
     show_plot(combined, stem, w = w, h = h)
@@ -239,13 +246,13 @@ heatmap_panel <- function(data, x_col, y_col, fill_col, label_expr,
                           fill_limits = NULL) {
   ggplot(data, aes(factor(.data[[x_col]]), factor(.data[[y_col]]), fill = .data[[fill_col]])) +
     geom_tile(colour = "white") +
-    geom_text(aes(label = label_expr), size = 2.7) +
+    geom_text(aes(label = label_expr), size = 4.5) +
     scale_fill_distiller(palette = "RdYlBu", direction = 1,
                          name = fill_name, limits = fill_limits) +
     labs(title = panel_title, x = x_lab, y = y_lab) +
-    theme_bw(base_size = 9) +
+    theme_bw(base_size = 9 * FONT_SCALE) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1),
-          plot.title  = element_text(size = 10, face = "bold"),
+          plot.title  = element_text(size = 10 * FONT_SCALE, face = "bold"),
           legend.position = "right")
 }
 
@@ -274,7 +281,7 @@ make_combo_plot <- function(data, level, x_col, y_col, colour_col, colour_label,
          else
            "Each line holds the other threshold fixed at its labelled value",
          x = x_lab, y = y_lab) +
-    theme_bw(base_size = 11) + theme(legend.position = "bottom")
+    theme_bw(base_size = 11 * FONT_SCALE) + theme(legend.position = "bottom")
   p <- p + if (x_col == "mean_pct") {
     scale_x_continuous(labels = label_comma(suffix = "%"), limits = c(0, 100))
   } else {
@@ -313,12 +320,12 @@ if (exists("results")) {
       scale_y_continuous(labels = label_comma()) +
       labs(title = paste0("Fragment-hits retained vs ", x_lab, " - every sample (grey) + mean (blue)"),
            x = x_lab, y = NULL) +
-      theme_bw(base_size = 10) +
+      theme_bw(base_size = 10 * FONT_SCALE) +
       theme(strip.background = element_rect(fill = "grey92"))
     show_plot(p, fname_stem, h = 9)
   }
 
-  plot_reads_retained("min_gene_fraction", min(GF_SWEEP),
+  plot_reads_retained("min_gene_fraction", min(GF_EVALUATION),
                       primary_col, primary_label, "reads_retained_vs_primary")
   plot_reads_retained(primary_col, min(primary_values),
                       "min_gene_fraction", "Min gene fraction", "reads_retained_vs_gf")
@@ -369,7 +376,7 @@ if (exists("results")) {
                   "reads_retained_combo_by_gf_count", sample_data = reads_per_sample)
 
   baseline_per_sample <- results[
-    get(primary_col) == min(primary_values) & min_gene_fraction == min(GF_SWEEP),
+    get(primary_col) == min(primary_values) & min_gene_fraction == min(GF_EVALUATION),
     .(sample_id, baseline_hits = n_fragment_hits_in_passing_genes)
   ]
   results_lost <- merge(results, baseline_per_sample, by = "sample_id")
@@ -397,12 +404,12 @@ if (exists("results")) {
       labs(title = paste0("Fragment-hits LOST vs ", x_lab, " - every sample (grey) + mean (red)"),
            subtitle = "Complement of the retained figures; baseline = count at no-filter (qcov=0, gf=0)",
            x = x_lab, y = NULL) +
-      theme_bw(base_size = 10) +
+      theme_bw(base_size = 10 * FONT_SCALE) +
       theme(strip.background = element_rect(fill = "grey92"))
     show_plot(p, fname_stem, h = 9)
   }
 
-  plot_reads_lost("min_gene_fraction", min(GF_SWEEP),
+  plot_reads_lost("min_gene_fraction", min(GF_EVALUATION),
                   primary_col, primary_label, "reads_lost_vs_primary")
   plot_reads_lost(primary_col, min(primary_values),
                   "min_gene_fraction", "Min gene fraction", "reads_lost_vs_gf")
@@ -465,7 +472,7 @@ if (file.exists(quant_path)) {
                              " grey lines = per-sample median.\n",
                              "Identity = (aln_length - NM) / aln_length; based on NM edit-distance tag."),
            x = quant_primary_label, y = "Percent identity across aligned region") +
-      theme_bw(base_size = 10)
+      theme_bw(base_size = 10 )
     show_plot(p_id_dist, "identity_distribution_vs_primary", h = 7, w = 10)
 
     # ── Figure 2: alignment length, WITH and WITHOUT accounting for matches ─
@@ -506,7 +513,7 @@ if (file.exists(quant_path)) {
              subtitle = paste0("Box = IQR (p25-p75), whiskers = p5-p95, across samples.\n",
                                "Matched-only length = aln_length - NM (mismatches/indels subtracted via the NM edit-distance tag)."),
              x = quant_primary_label, y = "Length (bp)", colour = NULL, fill = NULL) +
-        theme_bw(base_size = 10) + theme(legend.position = "bottom")
+        theme_bw(base_size = 10 ) + theme(legend.position = "bottom")
       show_plot(p_len_dist, "alignment_length_with_vs_without_matches", h = 7, w = 10)
 
       fwrite(len_summary, file.path(out_dir, "alignment_length_quantile_summary.csv"))
@@ -524,13 +531,13 @@ if (file.exists(quant_path)) {
                             factor(round(quant_primary, 0)),
                             fill = mean_identity)) +
       geom_tile(colour = "white") +
-      geom_text(aes(label = round(mean_identity, 1)), size = 2.6) +
+      geom_text(aes(label = round(mean_identity, 1)), size = 4.5) +
       scale_fill_distiller(palette = "RdYlBu", direction = 1,
                            limits = c(50, 100), name = "Mean\nidentity (%)") +
       labs(title = paste0("Mean percent identity quantiles by ", quant_primary_label),
            subtitle = "Each cell = mean across samples of that quantile of the identity distribution",
            x = "Identity quantile", y = quant_primary_label) +
-      theme_bw(base_size = 9)
+      theme_bw(base_size = 9 * FONT_SCALE)
     show_plot(p_id_heat, "identity_quantile_heatmap", w = 10)
 
     fwrite(id_summary, file.path(out_dir, "identity_quantile_summary.csv"))
@@ -583,14 +590,13 @@ if (file.exists(quant_path)) {
         geom_line(data = dens_dt, aes(x, y), colour = "firebrick", linewidth = 0.7) +
         { if (!is.null(xlim)) coord_cartesian(xlim = xlim) } +
         labs(title = title,
-             subtitle = paste0("Baseline (zero-filter) distribution reconstructed from per-sample quantiles ",
-                               "(p5-p95; shaded area = ", TRUE_MASS,
-                               "; outer 5% tails on each side not shown).\n",
-                               uniqueN(pts_dt), " pooled sample-rows."),
-             x = x_lab,
-             y = paste0("Density (integrates to ~", TRUE_MASS,
-                        " over shown range; remaining ", 1 - TRUE_MASS, " in unshown tails)")) +
-        theme_bw(base_size = 10)
+            subtitle = paste0("Zero-filter distribution reconstructed from per-sample quantiles ",
+                              "(p5-p95). Shaded area = ", TRUE_MASS,
+                              "; outer 5% tails not shown. ",
+                              formatC(uniqueN(pts_dt), big.mark = ","), " pooled sample-rows."),
+            x = x_lab,
+            y = "Density") +
+        theme_bw(base_size = 10 )
       show_plot(p, fname, h = 6, w = 9)
     }
 
@@ -663,7 +669,7 @@ num_cols <- intersect(c("min_query_coverage", "min_identity", "min_match_qcov",
                         "gene_fraction", "read_count"), names(genes))
 for (col in num_cols) genes[, (col) := as.double(get(col))]
 
-# the primary sweep column present in gene_detail
+# the primary evaluation column present in gene_detail
 gd_primary_col <- if ("min_match_qcov" %in% names(genes) && length(match_qcov_values) > 1) "min_match_qcov" else
                   if ("min_identity"   %in% names(genes) && length(identity_values)   > 1) "min_identity"   else
                   "min_query_coverage"
@@ -685,8 +691,8 @@ for (level in level_available) {
   Level <- paste0(toupper(substr(level, 1, 1)), substr(level, 2, nchar(level)))
 
   # For each (sample, primary, gene_fraction cutoff), count distinct level entities
-  # whose gene_fraction >= cutoff. Built across the data-derived GF_SWEEP grid.
-  level_rows <- rbindlist(lapply(GF_SWEEP, function(gf) {
+  # whose gene_fraction >= cutoff. Built across the data-derived GF_EVALUATION grid.
+  level_rows <- rbindlist(lapply(GF_EVALUATION, function(gf) {
     passed <- genes[gene_fraction >= gf]
     cnt <- passed[, .(n_entities = uniqueN(get(level))),
                   by = c("sample_id", gd_primary_col)]
@@ -697,7 +703,7 @@ for (level in level_available) {
 
   # baseline per sample = count at (min primary, min gf)
   base <- level_rows[get(gd_primary_col) == min(primary_values) &
-                       min_gene_fraction == min(GF_SWEEP),
+                       min_gene_fraction == min(GF_EVALUATION),
                      .(sample_id, baseline_n = n_entities)]
   level_rows <- merge(level_rows, base, by = "sample_id", all.x = TRUE)
   level_rows[, pct_of_baseline := ifelse(baseline_n > 0, n_entities / baseline_n * 100, NA_real_)]
@@ -724,7 +730,7 @@ for (level in level_available) {
                             fixed_filter_note(genes, gd_primary_col)),
                           collapse = "\n"),
          x = primary_label, y = paste0("Distinct ", level, " count")) +
-    theme_bw(base_size = 11) + theme(legend.position = "bottom")
+    theme_bw(base_size = 11 ) + theme(legend.position = "bottom")
   show_plot(p1, paste0("dropoff_", level, "_count_vs_primary"))
 
   # ── % of baseline version ──
@@ -736,7 +742,7 @@ for (level in level_available) {
     scale_y_continuous(labels = label_percent(scale = 1), limits = c(0, NA)) +
     labs(title = paste0(Level, " retained (% of baseline) vs ", primary_label),
          x = primary_label, y = "% of baseline retained") +
-    theme_bw(base_size = 11) + theme(legend.position = "bottom")
+    theme_bw(base_size = 11 ) + theme(legend.position = "bottom")
   show_plot(p2, paste0("dropoff_", level, "_pct_vs_primary"))
 
   # ── TWO-PANEL heatmap: absolute count | percent of baseline ────────────────

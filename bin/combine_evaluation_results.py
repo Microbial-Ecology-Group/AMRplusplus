@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-combine_sweep_results.py
+combine_evaluation_results.py
 ════════════════════════════════════════════════════════════════════════════════
 
-Combines per-sample outputs from coverage_threshold_sweep.py (run one sample at
+Combines per-sample outputs from coverage_threshold_evaluation.py (run one sample at
 a time) into single matrices — one per output file type — with a sample_id
 column injected from each file's name, so every sample and file type becomes one
-queryable table, ready for plot_sweep_dropoff.R.
+queryable table, ready for plot_evaluation_dropoff.R.
 
 Scans a single directory for files matching the known suffixes:
     <prefix>_results.csv, <prefix>_gene_detail.csv,
@@ -22,7 +22,7 @@ are produced) — each with a sample_id column prepended. Written progressively;
 each output file is cleared once at the start of this run.
 
 Usage:
-    python combine_sweep_results.py sweep_results/ --out-dir combined/
+    python combine_evaluation_results.py evaluation_results/ --out-dir combined/
 """
 
 import argparse
@@ -78,22 +78,22 @@ def make_combiner(out_dir: Path):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("input_dir", help="Directory holding the per-sample sweep CSVs")
-    ap.add_argument("--out-dir", default="combined_sweep_results")
+    ap.add_argument("input_dir", help="Directory holding the per-sample evaluation CSVs")
+    ap.add_argument("--out-dir", default="combined_evaluation_results")
     args = ap.parse_args()
 
     root = Path(args.input_dir)
     if not root.is_dir():
         sys.exit(f"[ERROR] {root} is not a directory")
 
-    sweep_files = sorted(
+    evaluation_files = sorted(
         f for f in root.iterdir() if f.is_file() and classify_filename(f.name)
     )
-    if not sweep_files:
+    if not evaluation_files:
         sys.exit(f"[ERROR] No matching *_results.csv / *_gene_detail.csv / etc. files "
                  f"found in {root}")
 
-    print(f"[INFO] Found {len(sweep_files)} sweep file(s) in {root}", flush=True)
+    print(f"[INFO] Found {len(evaluation_files)} evaluation file(s) in {root}", flush=True)
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -102,7 +102,7 @@ def main():
     counts = {ft: 0 for ft in set(FILE_TYPES.values())}
     n_files = 0
 
-    for f in sweep_files:
+    for f in evaluation_files:
         prefix, file_type = classify_filename(f.name)
         sample_id = prefix  # full BAM basename; no token-splitting
 

@@ -1,5 +1,5 @@
 // resistome
-include {snp_coverage_summary;coverage_threshold_sweep ; combine_sweep_results ; plot_sweep_dropoff ; plotrarefaction ; runresistome_analyzer ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults  } from '../modules/Resistome/resistome'
+include {snp_coverage_summary;coverage_threshold_evaluation ; combine_evaluation_results ; plot_evaluation_dropoff ; plotrarefaction ; runresistome_analyzer ; runsnp ; resistomeresults ; runrarefaction ; build_dependencies ; snpresults  } from '../modules/Resistome/resistome'
 
 
 workflow BAM_RESISTOME_WF {
@@ -35,23 +35,23 @@ workflow BAM_RESISTOME_WF {
         }
 }
 
-workflow BAM_COVERAGE_SWEEP_WF {
+workflow BAM_COVERAGE_EVALUATION_WF {
     take:
         bam_ch     // tuple(prefix, bam)  -- prefix = BAM basename minus .bam
 
     main:
-        // 1. One sweep per BAM. Each emits its four <prefix>_*.csv files.
-        coverage_threshold_sweep( bam_ch )
+        // 1. One evaluation per BAM. Each emits its four <prefix>_*.csv files.
+        coverage_threshold_evaluation( bam_ch )
 
         // 2. Gather EVERY per-sample CSV across ALL samples into one list, then
         //    combine into the four combined_*.csv matrices. flatten() because each
-        //    sweep task emits a list of 4 files; collect() to wait for all samples.
-        all_sweep_csvs = coverage_threshold_sweep.out.sweep_csvs.flatten().collect()
-        combine_sweep_results( all_sweep_csvs )
+        //    evaluation task emits a list of 4 files; collect() to wait for all samples.
+        all_evaluation_csvs = coverage_threshold_evaluation.out.evaluation_csvs.flatten().collect()
+        combine_evaluation_results( all_evaluation_csvs )
 
         // 3. Plot dropoff summaries from the combined matrices.
-        plot_sweep_dropoff( combine_sweep_results.out.combined )
+        plot_evaluation_dropoff( combine_evaluation_results.out.combined )
 
     emit:
-        combined = combine_sweep_results.out.combined
+        combined = combine_evaluation_results.out.combined
 }

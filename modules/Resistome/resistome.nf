@@ -118,9 +118,10 @@ process runresistome_analyzer {
     def group_flag = (params.group_aware == "N")     ? "--no-group-aware"     : "--group-aware"
     def edge_flag  = (params.edge_aware_qcov == "N")  ? "--no-edge-aware-qcov" : "--edge-aware-qcov"
     def supp_flag  = (params.include_supplementary == "Y") ? "--include-supplementary" : "" 
-    def sec_flag  = (params.include_secondary == "Y") ? "--include_secondary" : ""
+    def sec_flag  = (params.include_secondary == "Y") ? "--include-secondary" : ""
     def cigar_flag = (params.cigar_aware_coverage  == "Y") ? "--cigar-aware-coverage"  : ""
     def mq_flag = (params.match_qcov == "Y") ? "--match-qcov" : "--no-match-qcov"
+    def read_flag  = (params.per_read_alignment_stats == "Y") ? "-r ${sample_id}.${params.prefix}_per_read.tsv" : ""
     """
     set -euo pipefail
 
@@ -129,7 +130,6 @@ process runresistome_analyzer {
     if [ "\$aln_count" -gt 0 ]; then
         \$PYTHON3 $baseDir/bin/alignment_analyzer.py \\
             -i ${bam} \\
-            -r ${sample_id}.${params.prefix}_per_read.tsv \\
             -g ${sample_id}.${params.prefix}.gene_summary.tsv \\
             --sample-id ${sample_id} \\
             --count-mode ${count_mode} \\
@@ -139,7 +139,7 @@ process runresistome_analyzer {
             --min-identity ${params.min_identity} \\
             ${mq_flag} \\
             --coverage-output ${sample_id}.${params.prefix}_coverage_stats.tsv \\
-            ${group_flag} ${edge_flag} ${supp_flag} ${cigar_flag} ${sec_flag}
+            ${group_flag} ${edge_flag} ${supp_flag} ${cigar_flag} ${sec_flag} ${read_flag}
 
         # Reshape: gene_accession \\t meg_id \\t count  ->  sample \\t gene \\t count
         tail -n +2 ${sample_id}.${params.prefix}.gene_summary.tsv \\
@@ -152,48 +152,52 @@ process runresistome_analyzer {
     """
 }
 
-// Coverage-threshold sweep diagnostic. Runs coverage_threshold_sweep.py on each BAM
+// Coverage-threshold evaluation diagnostic. Runs coverage_threshold_evaluation.py on each BAM
 // to profile how gene detection drops off as coverage/quality thresholds increase,
-// then summarizes all per-sample sweeps with plot_sweep_dropoff.R.
+// then summarizes all per-sample evaluations with plot_evaluation_dropoff.R.
 //
-// NOTE on counting: coverage_threshold_sweep.py counts per-FRAGMENT (mates resolved
+// NOTE on counting: coverage_threshold_evaluation.py counts per-FRAGMENT (mates resolved
 // together via base_read_id), so paired-end (unmerged) and FLASH-merged reads are
 // weighted identically. This matches --count-mode fragment in alignment_analyzer.py.
 
-process coverage_threshold_sweep {
+process coverage_threshold_evaluation {
     tag { prefix }
     label "medium"
-    publishDir "${params.output}/CoverageSweep/PerSample", mode: "copy"
+    publishDir "${params.output}/CoverageEvaluation/PerSample", mode: "copy"
 
     input:
         tuple val(prefix), path(bam)
 
     output:
         // All four are emitted into one channel so the combine step can stage them
-        // together. gene_detail + length_quantiles are what plot_sweep_dropoff.R needs;
+        // together. gene_detail + length_quantiles are what plot_evaluation_dropoff.R needs;
         // _results.csv is the main grid; _redundancy.csv is optional diagnostics.
-        path("${prefix}_*.csv"), emit: sweep_csvs
+        path("${prefix}_*.csv"), emit: evaluation_csvs
 
     script:
     def group_flag = (params.group_aware == "N")          ? "--no-group-aware"     : "--group-aware"
-    def edge_flag  = (params.sweep_edge_aware_qcov == "N") ? "--no-edge-aware-qcov" : "--edge-aware-qcov"
-    def snp_flag   = (params.sweep_exclude_snp == "Y")     ? "--exclude-snp-confirmation" : ""
+    def edge_flag  = (params.evaluation_edge_aware_qcov == "N") ? "--no-edge-aware-qcov" : "--edge-aware-qcov"
+    def snp_flag   = (params.evaluation_exclude_snp == "Y")     ? "--exclude-snp-confirmation" : ""
     """
     set -euo pipefail
 
     aln_count=\$(\$SAMTOOLS view -c ${bam} 2>/dev/null || echo 0)
 
     if [ "\$aln_count" -gt 0 ]; then
-        \$PYTHON3 $baseDir/bin/coverage_threshold_sweep.py \\
+        \$PYTHON3 $baseDir/bin/coverage_threshold_evaluation.py \\
             -i ${bam} \\
             -o ${prefix}_results.csv \\
             --min-mapq ${params.min_mapq} \\
+            --query-coverage-evaluation ${params.evaluation_query_coverage} \\
+            --gene-fraction-evaluation ${params.evaluation_gene_fraction} \\
+            --identity-evaluation ${params.evaluation_identity} \\
+            --match-qcov-evaluation ${params.evaluation_match_qcov} \\
             --gene-detail-output ${prefix}_gene_detail.csv \\
             --redundancy-output ${prefix}_redundancy.csv \\
             --length-quantiles-output ${prefix}_length_quantiles.csv \\
             ${group_flag} ${edge_flag} ${snp_flag}
     else
-        echo "[INFO] No alignments in ${bam} — writing empty sweep CSVs"
+        echo "[INFO] No alignments in ${bam} — writing empty evaluation CSVs"
         echo "min_query_coverage,min_identity,min_match_qcov,min_gene_fraction,n_alignments_retained" \\
             > ${prefix}_results.csv
         echo "min_query_coverage,gene_accession,gene_fraction,read_count" > ${prefix}_gene_detail.csv
@@ -203,10 +207,10 @@ process coverage_threshold_sweep {
     """
 }
 
-process combine_sweep_results {
-    tag "combine_sweep"
+process combine_evaluation_results {
+    tag "combine_evaluation"
     label "small"
-    publishDir "${params.output}/CoverageSweep/Combined", mode: "copy"
+    publishDir "${params.output}/CoverageEvaluation/Combined", mode: "copy"
 
     input:
         // every per-sample CSV, staged flat into the task workdir
@@ -218,17 +222,17 @@ process combine_sweep_results {
     script:
     """
     set -euo pipefail
-    # combine_sweep_results.py scans a directory for the per-sample sweep CSVs and
+    # combine_evaluation_results.py scans a directory for the per-sample evaluation CSVs and
     # injects a sample_id column (the BAM basename) into each row. All staged CSVs
     # are already in the task workdir ('.'), so scan that directly.
-    \$PYTHON3 $baseDir/bin/combine_sweep_results.py . --out-dir combined
+    \$PYTHON3 $baseDir/bin/combine_evaluation_results.py . --out-dir combined
     """
 }
 
-process plot_sweep_dropoff {
-    tag "sweep_summary"
+process plot_evaluation_dropoff {
+    tag "evaluation_summary"
     label "small"
-    publishDir "${params.output}/CoverageSweep/Summary", mode: "copy"
+    publishDir "${params.output}/CoverageEvaluation/Summary", mode: "copy"
 
     input:
         path(combined_dir_csvs)   // the combined_*.csv files
@@ -241,10 +245,10 @@ process plot_sweep_dropoff {
     script:
     """
     set -euo pipefail
-    # plot_sweep_dropoff.R reads combined_gene_detail.csv / combined_results.csv /
+    # plot_evaluation_dropoff.R reads combined_gene_detail.csv / combined_results.csv /
     # combined_length_quantiles.csv from its input directory ('.') and writes to
     # ./figures by default.
-    \$RSCRIPT $baseDir/bin/plot_sweep_dropoff.R . figures
+    \$RSCRIPT $baseDir/bin/plot_evaluation_dropoff.R . figures
     """
 }
 
