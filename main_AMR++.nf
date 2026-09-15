@@ -135,7 +135,8 @@ def helpMessage() {
     bam_resistome           Resistome analysis from BAM files
     bam_resistome_counts    Resistome counting from BAM files
     bam_coverage_evaluation      Per-BAM coverage threshold evaluation + dropoff summary
-
+    bam_snv                 NGLess filtering + metaSNV SNV calling from BAM files
+    
     -------------------------------------------------------------------------------
                               OPTIONS
     -------------------------------------------------------------------------------
@@ -170,7 +171,9 @@ def helpMessage() {
         singularity         Uses Singularity container
         singularity_slurm   Singularity with SLURM job control
         apptainer           Uses Apptainer (.sif) container
+        apptainer_slurm     Apptainer with SLURM job control
         docker              Uses Docker container
+        docker_slurm        Docker with SLURM job control
 
     -------------------------------------------------------------------------------
                               EXAMPLES
@@ -260,6 +263,7 @@ include { FASTQ_DEDUP_PE_WF } from './subworkflows/fastq_deduplicate.nf'
 include { BAM_RESISTOME_WF } from './subworkflows/bam_resistome.nf'
 include { BAM_RESISTOME_COUNTS_WF } from './subworkflows/bam_resistome_counts.nf'
 include { BAM_COVERAGE_EVALUATION_WF } from './subworkflows/bam_resistome.nf'
+include { BAM_SNV_WF } from './subworkflows/bam_snv.nf'
 
 // =============================================================================
 //  Entry workflow
@@ -581,6 +585,21 @@ workflow {
             .map { file -> tuple(file.baseName.split('\\.')[0], file) }
             .set { bam_files_ch }
         BAM_COVERAGE_EVALUATION_WF( bam_files_ch )
+    }
+    else if(params.pipeline == "bam_snv"){
+        logPipelineStart("BAM SNV calling",
+            "NGLess filtering + metaSNV variant calling from pre-aligned BAM files.\n    Input: ${params.bam_files}\n    Reference: ${params.snv_reference}")
+        Channel
+            .fromPath(params.bam_files)
+            .ifEmpty { exit 1, "BAM files could not be found: ${params.bam_files}" }
+            .map { file -> tuple(file.baseName, file) }
+            .set { bam_files_ch }
+
+        resistome_ch = params.snv_filter_by_resistome == "Y" ?
+            Channel.fromPath("${params.output}/Results/*AMR_analytic_matrix.csv") :
+            Channel.empty()
+
+        BAM_SNV_WF( bam_files_ch, file(params.snv_reference), resistome_ch )
     }
 
     // =========================================================================

@@ -7,7 +7,7 @@ Overview
 # AMR++ bioinformatic pipeline
 (https://megares.meglab.org/)
 
-AMR++ is a bioinformatic pipeline meant to aid in the analysis of raw sequencing reads to characterize the profile of antimicrobial resistance genes, or resistome. AMR++ was developed to work in conjuction with the the MEGARes database which contains sequence data for approximately 11,500 hand-curated antimicrobial resistance genes accompanied by an annotation structure that is optimized for use with high throughput sequencing and metagenomic analysis. The acyclical annotation graph of MEGARes allows for accurate, count-based, hierarchical statistical analysis of resistance at the population level, much like microbiome analysis, and is also designed to be used as a training database for the creation of statistical classifiers.
+AMR++ is a bioinformatic pipeline meant to aid in the analysis of raw sequencing reads to characterize the profile of antimicrobial resistance genes, or resistome. AMR++ was developed to work in conjuction with the the MEGARes database which contains sequence data for 11,506 hand-curated antimicrobial resistance genes accompanied by an annotation structure that is optimized for use with high throughput sequencing and metagenomic analysis. The acyclical annotation graph of MEGARes allows for accurate, count-based, hierarchical statistical analysis of resistance at the population level, much like microbiome analysis, and is also designed to be used as a training database for the creation of statistical classifiers. [Details on all updates to MEGARes can be found here.](https://github.com/Microbial-Ecology-Group/MEGARes_db_maintenance)
 
 The goal of many metagenomics studies is to characterize the content and relative abundance of sequences of interest from the DNA of a given sample or set of samples. You may want to know what is contained within your sample or how abundant a given sequence is relative to another.
 
@@ -54,6 +54,7 @@ More Information
   - [Single-end analysis step-by-step](docs/SingleEnd_read_tutorial.md)
   - [Merged-read analysis step-by-step](docs/Merged_read_tutorial.md)
   - [Coverage threshold evaluation](docs/Coverage_evaluation_tutorial.md)
+  - [SNV calling](docs/SNV_calling_tutorial.md)
 - [Configuration](docs/configuration.md)
   - [Tips for using SLURM](docs/Running_with_SLURM.md)
 - [Output](docs/output.md)
@@ -131,6 +132,8 @@ Here are some tutorials to run each analysis step by step:
 - [Paired-end analysis step-by-step](docs/Step_by_step_tutorial.md)
 - [Single-end analysis step-by-step](docs/SingleEnd_read_tutorial.md)
 - [Merged-read analysis step-by-step](docs/Merged_read_tutorial.md)
+- [SNV calling](docs/SNV_calling_tutorial.md)
+
 
 > **Tip:** Always run the demo first (`--pipeline demo`) before your first analysis. See [Getting Started](docs/GettingStarted.md) for an explanation of the work directory, SLURM setup, and conda vs local profiles.
 
@@ -142,7 +145,7 @@ Here are some tutorials to run each analysis step by step:
 AMR++ now works in conjuction with a [custom SNP verification software](https://github.com/Isabella136/AmrPlusPlus_SNP) to evaluate alignments to gene accessions requiring SNP confirmation to confer resistance. To include this workflow, include the ```--snp Y``` flag in your command like this:
 
 ```bash
-nextflow run main_AMR++.nf -profile conda --snp Y
+nextflow run main_AMR++.nf -profile local --snp Y
 ```
 This will create with the standard count table (AMR_analytic_matrix.csv) in addition to a count matrix with SNP confirmed counts (SNPconfirmed_AMR_analytic_matrix.csv).
 
@@ -151,7 +154,7 @@ This will create with the standard count table (AMR_analytic_matrix.csv) in addi
 Another option is to include results for deduplicated counts by using the ```--deduped Y``` flag in your command.
 
 ```bash
-nextflow run main_AMR++.nf -profile conda --snp Y --deduped Y
+nextflow run main_AMR++.nf -profile local --snp Y --deduped Y
 ```
 
 With this flag, AMR++ will extract the deduplicated alignments to MEGARes also output a count matrix with deduplicated counts. Since also we included the ```--snp Y``` flag, we will end up with 4 total output count matrices.
@@ -161,7 +164,7 @@ With this flag, AMR++ will extract the deduplicated alignments to MEGARes also o
 The final optional analyis is to perform rarefaction on resistome counts to evaluate sequencing depth at all resistome annotation levels (i.e. Type, Class, Mechanism, Group, Gene). You can run this analysis by adding ```--rarefaction Y``` to your command or modifying the params.config file. 
 
 ```bash
-nextflow run main_AMR++.nf -profile conda --snp Y --deduped Y --rarefaction Y
+nextflow run main_AMR++.nf -profile local --rarefaction Y
 ```
 
 With rarefaction analysis, we'll create various figures to summarize sequencing depth and output figures in the "ResistomeAnalysis/Rarefaction/Figures" directory. 

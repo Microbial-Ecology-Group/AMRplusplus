@@ -45,7 +45,7 @@ What type of sequencing data do you have?
 │   └── se_AMR
 │
 └── Pre-aligned BAM files
-    └── bam_resistome or bam_resistome_counts
+    └── bam_resistome, bam_resistome_counts, or bam_snv
 ```
 
 
@@ -252,6 +252,7 @@ For analyzing pre-aligned BAM files (e.g., from a previous AMR++ alignment run).
 |----------|-------------|----------------|
 | `bam_resistome` | Full resistome analysis from BAM files | `--bam_files`, `--amr`, `--annotation` |
 | `bam_resistome_counts` | Generate count matrices from BAM files | `--bam_files`, `--amr`, `--annotation` |
+| `bam_snv` | Generate SNV call matrices from BAM files | `--bam_files`, `--amr` |
 
 ### Examples
 
@@ -263,6 +264,11 @@ nextflow run main_AMR++.nf -profile local --pipeline bam_resistome \
 # Count matrix generation from BAM files
 nextflow run main_AMR++.nf -profile local --pipeline bam_resistome_counts \
     --bam_files "path/to/alignments/*.bam"
+
+# SNV calling on bam alignments to MEGARes
+nextflow run main_AMR++.nf --pipeline bam_snv \
+  --bam_files 'test_results/Alignment/BAM_files/Standard/*.bam' \
+  --output snv_results
 ```
 
 ---
