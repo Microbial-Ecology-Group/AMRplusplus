@@ -344,6 +344,8 @@ To include SNP confirmation as part of the AMR++ analysis, you have to include t
 ```bash
 nextflow run main_AMR++.nf -profile singularity  --reads "path/to/your/reads/*_R{1,2}.fastq.gz" --snp Y
 ```
+> **Note:** The SNP confirmation tool and its corresponding SNP information FASTA reside in a separate repository that is automatically cloned when `--snp Y` is enabled. Compute nodes often lack outbound internet access, so this download will fail if it hasn't been fetched beforehand. See [Running the Demo First](GettingStarted.md#running-the-demo-first) to set this up ahead of time from a login node.
+
 
 #### Running with deduplicated counts or reads
 -----

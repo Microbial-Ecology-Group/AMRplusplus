@@ -1,9 +1,10 @@
 name: AMR++_SNV_env
 channels:
-  - bioconda
   - conda-forge
+  - bioconda
   - anaconda
 dependencies:
+  - nextflow
   # --- core pipeline ---
   - python=3.9
   - bwa

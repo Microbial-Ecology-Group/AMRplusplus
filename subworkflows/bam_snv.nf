@@ -43,7 +43,9 @@ workflow BAM_SNV_WF {
         all_bams = index_snv_bams.out.indexed_bam.map { id, bam, bai -> bam }.collect()
         all_bais = index_snv_bams.out.indexed_bam.map { id, bam, bai -> bai }.collect()
 
-        run_metasnv( all_bams, all_bais, reference )
+        db_ann_file = params.snv_db_ann ? file(params.snv_db_ann, checkIfExists: true) : []
+
+        run_metasnv( all_bams, all_bais, reference ,db_ann_file)
 
         /* ── (4) parse into an AMR++-style matrix ───────────────────────────*/
         clean_metasnv( run_metasnv.out.snv_dir )

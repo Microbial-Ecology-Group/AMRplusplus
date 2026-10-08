@@ -14,7 +14,7 @@ workflow RESOLVE_BWA_INDEX {
             amr_name  = file(amr).name
             idx_files = files(params.amr_index)
             idx_bases = idx_files.collect {
-                it.name.replaceAll(/\.(amb|ann|bwt|pac|sa|fai)$/, '')
+                it.name.replaceAll(/\.(amb|ann|bwt|pac|sa)$/, '')
             } as Set
 
             if (idx_bases.isEmpty()) {
@@ -48,9 +48,9 @@ workflow RESOLVE_BWA_INDEX {
                 .ifEmpty { error "No files match --amr_index '${params.amr_index}'" }
                 .collect()
                 .map { fs ->
-                    if (fs.size() < 7) {
-                        error "Expected 7 AMR index files, found ${fs.size()}. " +
-                              "Please provide all 7 files, including the AMR database " +
+                    if (fs.size() < 6) {
+                        error "Expected 6 AMR index files, found ${fs.size()}. " +
+                              "Please provide all 6 files, including the AMR database " +
                               "fasta file. Remember to use * in your path."
                     }
                     fs.sort()
