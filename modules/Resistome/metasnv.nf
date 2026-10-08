@@ -117,13 +117,14 @@ process run_metasnv {
         path(bams)
         path(bais)
         path(reference)
+        path(db_ann)
 
     output:
         path("SNV_analysis_output"),             emit: snv_dir
         path("SNV_analysis_output/all_samples"), emit: all_samples
 
     script:
-    def db_ann   = params.snv_db_ann   ? "--db_ann ${params.snv_db_ann}"     : ""
+    def db_ann_arg = db_ann ? "--db_ann ${db_ann}" : ""
     def n_splits = params.snv_n_splits ? "--n_splits ${params.snv_n_splits}" : ""
     """
     set -euo pipefail
@@ -153,7 +154,7 @@ process run_metasnv {
     echo "[INFO] Running metaSNV on \$(wc -l < all_samples) sample(s)"
 
     metaSNV.py SNV_analysis_output all_samples snv_reference.fasta \\
-        --threads ${task.cpus} ${n_splits} ${db_ann}
+        --threads ${task.cpus} ${n_splits} ${db_ann_arg}
 
     # clean_metaSNP reads the run-order sample list from the output directory.
     if [ ! -f SNV_analysis_output/all_samples ]; then
