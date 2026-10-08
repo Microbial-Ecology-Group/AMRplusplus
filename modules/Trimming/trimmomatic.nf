@@ -17,7 +17,10 @@ process runqc {
         tuple val(sample_id), path("${sample_id}*U.fastq.gz"), emit: unpaired_fastq
         path("${sample_id}.trimmomatic.stats.log"), emit: trimmomatic_stats
    script:
+   def heap_gb = task.memory ? task.memory.toGiga() : 8
     """
+     export _JAVA_OPTIONS="-Xmx${heap_gb}g"
+
      \$TRIMMOMATIC \
       PE \
       -threads ${task.cpus} \
@@ -35,7 +38,7 @@ process runqc {
 
 process runqc_se {
   tag { sample_id }
-  label "small"
+  label "micro_long"
 
   publishDir "${params.output}/QC_trimming/Single", mode: 'copy', pattern: '*.fastq.gz',
     saveAs: { fn -> fn }
@@ -49,7 +52,10 @@ process runqc_se {
     path("${sample_id}.trimmomatic.summary.txt"),                            emit: trimmomatic_summary  // NEW: uniform summary
 
   script:
+  def heap_gb = task.memory ? task.memory.toGiga() : 8
   """
+  export _JAVA_OPTIONS="-Xmx${heap_gb}g"
+
   \$TRIMMOMATIC \
     SE \
     -threads ${task.cpus} \
