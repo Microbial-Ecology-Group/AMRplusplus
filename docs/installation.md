@@ -63,6 +63,7 @@ nextflow run main_AMR++.nf -profile conda
 # accurately request computing resources. Then, run it using:
 sbatch run_AMR++_slurm.sh
 ```
+> **Note:** If you plan to use SNP confirmation (`--snp Y`), run the quick demo once from a login node *before* submitting SLURM jobs — compute nodes often don't have internet access, which the SNP confirmation download requires. See [Running the Demo First](GettingStarted.md#running-the-demo-first) for details.
 
 
 
@@ -121,10 +122,13 @@ cd AMRplusplus
 nextflow run main_AMR++.nf -profile singularity
 
 # Alternatively, you can pull the singularity container first like this:
-singularity pull docker://enriquedoster/amrplusplus:latest
+singularity pull envs/enriquedoster-amrplusplus-4.0.0.img docker://enriquedoster/amrplusplus:4.0.0
 
 # Then, specify the path to the singularity image.
-nextflow run main_AMR++.nf -profile local -with-singularity amrplusplus_latest.sif
+nextflow run main_AMR++.nf -profile local -with-singularity envs/enriquedoster-amrplusplus-4.0.0.img
+
+# The SNV workflow uses a separate singularity container 
+singularity pull envs/enriquedoster-amrplusplus_snv-4.0.0.img docker://enriquedoster/amrplusplus_snv:4.0.0
 
 ```
 
@@ -134,7 +138,7 @@ Requirements:
 * Nextflow
 * Apptainer
 
-Apptainer is the opensourc fork of singularity that is a part of the linux project. Sometimes HPCs might have apptainer intstalled rather than singularity. This configuration will allow AMR++ to download and use a singularity/apptainer container with all of the pre-installed software requirements.
+Apptainer is the opensource fork of singularity that is a part of the linux project. Sometimes HPCs might have apptainer intstalled rather than singularity. This configuration will allow AMR++ to download and use a singularity/apptainer container with all of the pre-installed software requirements.
 
 ```bash
 
