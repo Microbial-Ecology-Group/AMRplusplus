@@ -15,7 +15,7 @@ workflow BAM_RESISTOME_COUNTS_WF {
             amrsnp =  build_dependencies.out.amrsnp
         }
         else {
-            amrsnp = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
+            amrsnp = files("${baseDir}/bin/AmrPlusPlus_SNP/*", type: 'any')
         }
         // Run resistome analyzer and count matrix creation
         runresistome_analyzer(bam_ch )
