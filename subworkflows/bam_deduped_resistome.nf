@@ -17,7 +17,7 @@ workflow BAM_DEDUP_RESISTOME_WF {
             amrsnp =  build_dependencies.out.amrsnp
         }
         else {
-            amrsnp = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
+            amrsnp = files("${baseDir}/bin/AmrPlusPlus_SNP/*", type: 'any')
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
         }
         runresistome_dedup(bam_ch)

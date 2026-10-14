@@ -132,6 +132,19 @@ singularity pull envs/enriquedoster-amrplusplus_snv-4.0.0.img docker://enriquedo
 
 ```
 
+Another tip, the singularity containers are quite large (~2.5GB and 1.5GB) and building them on a "scratch" space can get snagged due to how they handle the multitude of files. If you need to change the location of the build, use these commands:
+
+```
+export SINGULARITY_CACHEDIR=/home/$USER/singularity_cache
+export SINGULARITY_TMPDIR=/home/$USER/singularity_tmp
+# Make new singularity directories
+mkdir -p "$SINGULARITY_CACHEDIR" "$SINGULARITY_TMPDIR"
+
+# Now pull the container as before:
+singularity pull envs/enriquedoster-amrplusplus-4.0.0.img docker://enriquedoster/amrplusplus:4.0.0
+```
+
+
 ## Run AMR++ using Apptainer
 
 Requirements:

@@ -23,7 +23,7 @@ workflow FASTQ_RESISTOME_WF {
             amrsnp              = build_dependencies.out.amrsnp
         } else {
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
-            amrsnp              = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
+            amrsnp              = files("${baseDir}/bin/AmrPlusPlus_SNP/*", type: 'any')
         }
 
         /* ------------ (2) AMR INDEX --------------------------------------- */
@@ -73,7 +73,7 @@ workflow MERGED_FASTQ_RESISTOME_WF {
             amrsnp              = build_dependencies.out.amrsnp
         } else {
             rarefactionanalyzer = file("${baseDir}/bin/rarefaction")
-            amrsnp              = files("${baseDir}/bin/AmrPlusPlus_SNP/*")
+            amrsnp              = files("${baseDir}/bin/AmrPlusPlus_SNP/*", type: 'any')
         }  
 
         /* ------------ (2) AMR INDEX ------------------------------------- */
