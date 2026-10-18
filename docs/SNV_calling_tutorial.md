@@ -36,7 +36,7 @@ nextflow run main_AMR++.nf --pipeline bam_snv \
 
 You can customize the SNV calling behavior using the following parameters:
 
-* **`--snv_reference`**: The FASTA file used for alignment (Default: `"${baseDir}/data/amr/megares_database_v4.00.fasta"`). **Crucial note:** The BAM files must be aligned to this exact FASTA file. It is highly recommended to use the MEGARes **REPRESENTATIVE** database rather than the complete database to avoid excessive multi-mapping of short reads among near-identical accessions.
+* **`--snv_reference`**: The FASTA file used for alignment (Default: `"${baseDir}/data/amr/megares_database_v4.00.fasta"`). **Crucial note:** The BAM files must be aligned to this exact FASTA file. It is highly recommended to use the MEGARes database rather than the complete database to avoid excessive multi-mapping of short reads among near-identical accessions.
 
 
 * **`--snv_min_match_size`**: The minimum aligned block size in base pairs used by the NGLess filter before variant calling. A value of 45 is the floor for benchmarking, while 100 is the stricter setting (Default: `100`).

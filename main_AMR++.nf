@@ -219,6 +219,50 @@ def logPipelineStart(String pipelineName, String description) {
     """
 }
 
+// Pipelines that run Trimmomatic (directly or via a main workflow)
+def usesTrimming() {
+    def trimPipelines = [null, "help", "demo", "standard_AMR", "fast_AMR", "standard_AMR_wKraken",
+                         "se_AMR", "se_AMR_wKraken", "merged_AMR", "merged_AMR_wKraken",
+                         "trim_qc", "se_trim_qc"]
+    return params.pipeline in trimPipelines
+}
+
+// Log which adapter sequences Trimmomatic will clip, and remind the user to check them
+def logAdapterInfo() {
+    def adapterFile = new File(params.adapters.toString())
+    if (!adapterFile.exists()) {
+        log.warn "Adapter file not found: ${params.adapters} -- Trimmomatic will fail. Set --adapters to a valid FASTA."
+        return
+    }
+
+    def names = adapterFile.readLines().findAll { it.startsWith(">") }.collect { it.substring(1).trim() }
+    def preview = names.take(5).collect { "      - ${it}" }.join("\n")
+    def more = names.size() > 5 ? "\n      ... and ${names.size() - 5} more" : ""
+
+    log.info """
+    -------------------------------------------------------------------------------
+     QC trimming adapters (Trimmomatic ILLUMINACLIP)
+    -------------------------------------------------------------------------------
+     Adapter file   : ${adapterFile.name}
+     Path           : ${params.adapters}
+     Sequences      : ${names.size()}
+${preview}${more}
+
+     Options in ${projectDir}/data/adapters/:
+       nextera.fa       Nextera / Nextera XT / Illumina DNA Prep (default)
+       NexteraPE-PE.fa  Nextera, paired-end (Trimmomatic standard)
+       TruSeq3-PE-2.fa  TruSeq / NEBNext, paired-end, with read-through entries
+       TruSeq3-PE.fa    TruSeq, paired-end
+       TruSeq3-SE.fa    TruSeq, single-end
+       TruSeq2-PE.fa    Older TruSeq2 (GAII), paired-end
+       TruSeq2-SE.fa    Older TruSeq2 (GAII), single-end
+     Change with: --adapters data/adapters/<file>.fa
+    -------------------------------------------------------------------------------
+    """
+    log.warn "Were your libraries prepared with the kit that '${adapterFile.name}' covers? " +
+             "If not, rerun with --adapters pointing to the correct adapter FASTA."
+}
+
 // =============================================================================
 //  Includes (declarations -- always allowed at top level)
 // =============================================================================
@@ -274,6 +318,10 @@ include { BAM_SNV_WF } from './subworkflows/bam_snv.nf'
 workflow {
 
     printPipelineBanner()
+
+    if (usesTrimming()) {
+        logAdapterInfo()
+    }
 
     Channel
         .fromFilePairs( params.reads , size: (params.reads =~ /\{/) ? 2 : 1)

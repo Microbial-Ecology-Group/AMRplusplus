@@ -40,7 +40,7 @@ process bwa_align {
     script:
     if( params.deduped == "N")
         """
-        \$BWA mem ${indexfiles[0]} ${reads} -t ${task.cpus} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
+        \$BWA mem ${indexfiles[0]} ${reads} -t ${task.cpus} -K 100000000 -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
         \$SAMTOOLS view -@ ${task.cpus} -S -b ${params.samtools_flag} ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
         rm ${pair_id}_alignment.sam
         \$SAMTOOLS sort -@ ${task.cpus} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
@@ -48,7 +48,7 @@ process bwa_align {
         """
     else if( params.deduped == "Y")
         """
-        \$BWA mem ${indexfiles[0]} ${reads} -t ${task.cpus} -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
+        \$BWA mem ${indexfiles[0]} ${reads} -t ${task.cpus} -K 100000000 -R '@RG\\tID:${pair_id}\\tSM:${pair_id}' > ${pair_id}_alignment.sam
         \$SAMTOOLS view -@ ${task.cpus} -S -b ${params.samtools_flag} ${pair_id}_alignment.sam > ${pair_id}_alignment.bam
         rm ${pair_id}_alignment.sam
         \$SAMTOOLS sort -@ ${task.cpus} -n ${pair_id}_alignment.bam -o ${pair_id}_alignment_sorted.bam
@@ -101,7 +101,7 @@ process bwa_merged_align {
 
         # ───── merged reads ──────────────────────────────────────────
         if has_reads ${merged_fq}; then
-            \$BWA mem ${indexfiles[0]} ${merged_fq} -t ${task.cpus} \
+            \$BWA mem ${indexfiles[0]} ${merged_fq} -t ${task.cpus} -K 100000000 \
                 -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
             | \$SAMTOOLS view -@ ${task.cpus} -b ${params.samtools_flag} - \
             | \$SAMTOOLS sort -@ ${task.cpus} -n -o ${sample_id}_merged_alignment_sorted.bam -
@@ -112,7 +112,7 @@ process bwa_merged_align {
 
         # ───── un-merged reads ───────────────────────────────────────
         if has_reads ${unmerged_fq}; then
-            \$BWA mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpus} \
+            \$BWA mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpus} -K 100000000 \
                 -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
             | \$SAMTOOLS view -@ ${task.cpus} -b ${params.samtools_flag} - \
             | \$SAMTOOLS sort -@ ${task.cpus} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
@@ -130,7 +130,7 @@ process bwa_merged_align {
 
         # ───── merged reads (+ dedup) ────────────────────────────────
         if has_reads ${merged_fq}; then
-            \$BWA mem ${indexfiles[0]} ${merged_fq} -t ${task.cpus} \
+            \$BWA mem ${indexfiles[0]} ${merged_fq} -t ${task.cpus} -K 100000000 \
                 -R '@RG\\tID:${sample_id}_merged\\tSM:${sample_id}' \
             | \$SAMTOOLS view -@ ${task.cpus} -b ${params.samtools_flag} - \
             | \$SAMTOOLS sort -@ ${task.cpus} -n -o ${sample_id}_merged_alignment_sorted.bam -
@@ -147,7 +147,7 @@ process bwa_merged_align {
 
         # ───── un-merged reads (+ dedup) ─────────────────────────────
         if has_reads ${unmerged_fq}; then
-            \$BWA mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpus} \
+            \$BWA mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpus} -K 100000000 \
                 -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
             | \$SAMTOOLS view -@ ${task.cpus} -b ${params.samtools_flag} - \
             | \$SAMTOOLS sort -@ ${task.cpus} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
@@ -187,7 +187,7 @@ process bwa_align_se {
     """
     set -euo pipefail
 
-    \$BWA mem ${indexfiles[0]} ${read} -t ${task.cpus} \
+    \$BWA mem ${indexfiles[0]} ${read} -t ${task.cpus} -K 100000000 \
         -R '@RG\\tID:${sample_id}\\tSM:${sample_id}' \
     | \$SAMTOOLS view -@ ${task.cpus} -b ${params.samtools_flag} - \
     | \$SAMTOOLS sort -@ ${task.cpus} -o ${sample_id}_alignment_sorted.bam -
@@ -247,7 +247,7 @@ process bwa_rm_contaminant_fq {
     
     script:
     """
-    \$BWA mem ${indexfiles[0]} ${reads[0]} ${reads[1]} -t ${task.cpus} > ${pair_id}.host.sam
+    \$BWA mem ${indexfiles[0]} ${reads[0]} ${reads[1]} -t ${task.cpus} -K 100000000 > ${pair_id}.host.sam
     \$SAMTOOLS view -bS ${pair_id}.host.sam | \$SAMTOOLS sort -@ ${task.cpus} -o ${pair_id}.host.sorted.bam
     rm ${pair_id}.host.sam
     \$SAMTOOLS index ${pair_id}.host.sorted.bam && \$SAMTOOLS idxstats ${pair_id}.host.sorted.bam > ${pair_id}.samtools.idxstats
@@ -298,7 +298,7 @@ process bwa_rm_contaminant_merged_fq {
 
     # ───────────────────────── merged reads ────────────────────────────
     if has_reads ${merged_fq}; then
-        \$BWA mem ${indexfiles[0]} ${merged_fq} -t ${task.cpus} \\
+        \$BWA mem ${indexfiles[0]} ${merged_fq} -t ${task.cpus} -K 100000000 \\
             | \$SAMTOOLS sort -@ ${task.cpus} -o ${sample_id}.merged.host.sorted.bam
 
         \$SAMTOOLS index   ${sample_id}.merged.host.sorted.bam
@@ -316,7 +316,7 @@ process bwa_rm_contaminant_merged_fq {
 
     # ──────────────────────── un-merged reads ──────────────────────────
     if has_reads ${unmerged_fq}; then
-        \$BWA mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpus} \\
+        \$BWA mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpus} -K 100000000 \\
             | \$SAMTOOLS sort -@ ${task.cpus} -o ${sample_id}.unmerged.host.sorted.bam
 
         \$SAMTOOLS index   ${sample_id}.unmerged.host.sorted.bam
@@ -354,7 +354,7 @@ process bwa_rm_contaminant_se {
     """
     set -euo pipefail
 
-    \$BWA mem ${indexfiles[0]} ${read} -t ${task.cpus} \
+    \$BWA mem ${indexfiles[0]} ${read} -t ${task.cpus} -K 100000000 \
       | \$SAMTOOLS sort -@ ${task.cpus} -o ${sample_id}.host.sorted.bam -
 
     \$SAMTOOLS index ${sample_id}.host.sorted.bam

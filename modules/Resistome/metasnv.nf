@@ -134,6 +134,9 @@ process run_metasnv {
     cp -L ${reference} snv_reference.fasta
     chmod u+w snv_reference.fasta
 
+    # Build the index once, before the parallel split jobs start.
+    \$SAMTOOLS faidx snv_reference.fasta
+
     # One BAM path per line. Sorted so the column order of the resulting matrix
     # is deterministic across runs rather than depending on channel arrival order.
     for b in \$(ls -1 *.bam | sort); do
@@ -154,7 +157,23 @@ process run_metasnv {
     echo "[INFO] Running metaSNV on \$(wc -l < all_samples) sample(s)"
 
     metaSNV.py SNV_analysis_output all_samples snv_reference.fasta \\
-        --threads ${task.cpus} ${n_splits} ${db_ann_arg}
+        --threads ${task.cpus} ${n_splits} ${db_ann_arg} 2> metasnv.err \\
+        || { cat metasnv.err >&2; exit 1; }
+    cat metasnv.err >&2
+
+    if grep -qE 'fai_read|fai_load|was not found|Segmentation fault|Killed' metasnv.err; then
+        echo "[ERROR] One or more metaSNV split jobs failed (see messages above)." >&2
+        exit 1
+    fi
+
+    # A split cut off mid-write leaves a non-empty file without a trailing newline.
+    for f in SNV_analysis_output/snpCaller/called_SNPs*; do
+        [ -e "\$f" ] || continue
+        if [ -s "\$f" ] && [ "\$(tail -c1 "\$f" | wc -l)" -eq 0 ]; then
+            echo "[ERROR] Truncated metaSNV output: \$f" >&2
+            exit 1
+        fi
+    done
 
     # clean_metaSNP reads the run-order sample list from the output directory.
     if [ ! -f SNV_analysis_output/all_samples ]; then
