@@ -116,6 +116,25 @@ To change the reads that were analyzed, you should specify the ```--reads`` para
 nextflow run main_AMR++.nf --reads "path/to/your/reads/*_R{1,2}.fastq.gz" 
 ```
 
+## Adapter sequences for QC trimming
+
+Trimmomatic removes adapter sequences using the FASTA file set by the ```--adapters``` parameter. Common adapter files are provided in the "data/adapters/" directory. Make sure the adapter file matches the library prep kit used for your samples. At the start of each run that includes trimming, AMR++ prints the adapter file in use as a reminder.
+
+| File | Use for |
+| ---- | ------- |
+| `nextera.fa` (default) | Nextera / Nextera XT / Illumina DNA Prep, including i5/i7 index primers |
+| `NexteraPE-PE.fa` | Nextera paired-end (Trimmomatic's standard Nextera file) |
+| `TruSeq3-PE-2.fa` | TruSeq / NEBNext paired-end (HiSeq, MiSeq, NextSeq, NovaSeq), with read-through entries |
+| `TruSeq3-PE.fa` | TruSeq paired-end, without the read-through entries |
+| `TruSeq3-SE.fa` | TruSeq single-end |
+| `TruSeq2-PE.fa` | Older TruSeq2 paired-end (GAII era) |
+| `TruSeq2-SE.fa` | Older TruSeq2 single-end (GAII era) |
+
+To use a different file, add ```--adapters``` to your command:
+```bash
+nextflow run main_AMR++.nf --reads "path/to/your/reads/*_R{1,2}.fastq.gz" --adapters data/adapters/TruSeq3-PE-2.fa
+```
+
 
 ## Choosing the right pipeline
 
