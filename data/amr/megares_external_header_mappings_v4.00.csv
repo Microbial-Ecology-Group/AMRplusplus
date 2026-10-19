@@ -4176,23 +4176,23 @@ BacMet,nikE|CAA51663|CAA51663.1EscherichiacoliNikE:Location:1..807,MEG_4174|Meta
 BacMet,nikR|BAA04676|BAA04676.1Escherichiacolipartialhypotheticalprotein:Location:1..121,MEG_4175|Metals|Nickel_resistance|Nickel_ABC_efflux_regulator|NIKR,
 BacMet,nikR|BAA04676|BAA04676.1Escherichiacolipartialhypotheticalprotein:Location:1..121,MEG_4176|Metals|Nickel_resistance|Nickel_ABC_efflux_regulator|NIKR,REMOVED
 BacMet,nikR|CAA70150|CAA70150.1Escherichiacolinickelresponsiveregulator:Location:1..402,MEG_4177|Metals|Nickel_resistance|Nickel_ABC_efflux_regulator|NIKR,
-NCBI,gi|238800276|gb|FJ969397.1|1-457,MEG_4178|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMA,
-NCBI,gi|695196973|ref|NG_034588.1|1614-2144,MEG_4179|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMA,
-NCBI,gi|435260|emb|X71443.1|794-1288,MEG_4180|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMB,
-AMRFinder,1028097818|WP_063854491.1|NG_048013|1|1|nimC|nimC|nitroimidazole_resistance_protein_NimC NG_048013:101-592,MEG_4181|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMC,
-NCBI,gi|440383|emb|X76949.1|1549-2043,MEG_4182|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMD,
-AMRFinder,492333460|WP_005812773.1|NG_048015|1|1|nimE|nimE|nitroimidazole_resistance_protein_NimE NG_048015:101-613,MEG_4183|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIME,
-NCBI,gi|695200427|ref|NG_036131.1|1052-1486,MEG_4184|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIME,
-NCBI,gi|7327847|emb|AJ244018.1|1-458,MEG_4185|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIME,
-ResFinder,nimF_1_AJ515145 ,MEG_4186|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMF,
-ResFinder,nimH_1_KX576455 ,MEG_4187|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMH,
-AMRFinder,545309555|WP_021588763.1|NG_048016|1|1|nimI|nimI|nitroimidazole_resistance_protein_NimI NG_048016:101-619,MEG_4188|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMI,
-NCBI,gi|238069258|gb|FJ940883.1|1-457,MEG_4189|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMI,
-NCBI,gi|238069260|gb|FJ940884.1|1-457,MEG_4190|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMI,
-NCBI,gi|238069264|gb|FJ940886.1|1-457,MEG_4191|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMI,
-NCBI,gi|238069270|gb|FJ940889.1|1-463,MEG_4192|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMI,
-NCBI,gi|238069272|gb|FJ940890.1|1-457 gi|238069266|gb|FJ940887.1|1-457,MEG_4193|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMI,
-AMRFinder,492333575|WP_005812825.1|NG_048017|1|1|nimJ|nimJ|nitroimidazole_resistance_protein_NimJ NG_048017:101-598,MEG_4194|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMJ,
+NCBI,gi|238800276|gb|FJ969397.1|1-457,MEG_4178|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMA,MEG_4178|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMA
+NCBI,gi|695196973|ref|NG_034588.1|1614-2144,MEG_4179|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMA,MEG_4179|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMA
+NCBI,gi|435260|emb|X71443.1|794-1288,MEG_4180|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMB,MEG_4180|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMB
+AMRFinder,1028097818|WP_063854491.1|NG_048013|1|1|nimC|nimC|nitroimidazole_resistance_protein_NimC NG_048013:101-592,MEG_4181|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMC,MEG_4181|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMC
+NCBI,gi|440383|emb|X76949.1|1549-2043,MEG_4182|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMD,MEG_4182|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMD
+AMRFinder,492333460|WP_005812773.1|NG_048015|1|1|nimE|nimE|nitroimidazole_resistance_protein_NimE NG_048015:101-613,MEG_4183|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIME,MEG_4183|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIME
+NCBI,gi|695200427|ref|NG_036131.1|1052-1486,MEG_4184|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIME,MEG_4184|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIME
+NCBI,gi|7327847|emb|AJ244018.1|1-458,MEG_4185|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIME,MEG_4185|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIME
+ResFinder,nimF_1_AJ515145 ,MEG_4186|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMF,MEG_4186|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMF
+ResFinder,nimH_1_KX576455 ,MEG_4187|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMH,MEG_4187|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMH
+AMRFinder,545309555|WP_021588763.1|NG_048016|1|1|nimI|nimI|nitroimidazole_resistance_protein_NimI NG_048016:101-619,MEG_4188|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMI,MEG_4188|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI
+NCBI,gi|238069258|gb|FJ940883.1|1-457,MEG_4189|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMI,MEG_4189|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI
+NCBI,gi|238069260|gb|FJ940884.1|1-457,MEG_4190|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMI,MEG_4190|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI
+NCBI,gi|238069264|gb|FJ940886.1|1-457,MEG_4191|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMI,MEG_4191|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI
+NCBI,gi|238069270|gb|FJ940889.1|1-463,MEG_4192|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMI,MEG_4192|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI
+NCBI,gi|238069272|gb|FJ940890.1|1-457 gi|238069266|gb|FJ940887.1|1-457,MEG_4193|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMI,MEG_4193|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI
+AMRFinder,492333575|WP_005812825.1|NG_048017|1|1|nimJ|nimJ|nitroimidazole_resistance_protein_NimJ NG_048017:101-598,MEG_4194|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMJ,MEG_4194|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMJ
 BacMet,nirA|AAR82963|AAR82963.1KlebsiellaoxytocaNirA,MEG_4195|Metals|Nickel_resistance|Nickel_resistance_protein|NIRA,
 BacMet,nirB|AAR82964|AAR82964.1KlebsiellaoxytocaNirB:Location:1..270,MEG_4196|Metals|Nickel_resistance|Nickel_resistance_protein|NIRB,
 BacMet,nirC|AAR82965|AAR82965.1KlebsiellaoxytocaNirC,MEG_4197|Metals|Nickel_resistance|Nickel_resistance_protein|NIRC,
@@ -7256,7 +7256,7 @@ CARD,CARD|gb|AP014611.1|-|149223-150153|ARO:3003204|TLA-3 [Serratia marcescens] 
 AMRFinder,1028100355|WP_063856490.1|NG_048320|1|1|tlmB|tlmB|bleomycin_family_antibiotic_N-acetyltransferase_TlmB NG_048320:101-979,MEG_7255|Drugs|Glycopeptides|Bleomycin_resistance_protein|TLMB,
 ARG-ANNOT,(MLS)TlrC:NC_016113:803268-384890:1623,MEG_7256|Drugs|MLS|MLS_resistance_ABC_efflux_pumps|TLRC,
 CARD,CARD|gb|M57437|+|0-1647|ARO:3002827|tlrC [Streptomyces fradiae] ,MEG_7257|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|TLRCM,
-CARD,CARD|gb|AE000516|+|1908741-1909548|ARO:3003445|Mycobacterium tuberculosis tlyA mutations conferring resistance to aminoglycosides [Mycobacterium tuberculosis CDC1551] ,MEG_7258|Drugs|Aminoglycosides|Aminoglycoside-resistant_arabinosyltransferase|TLYA|RequiresSNPConfirmation,MEG_7258|Drugs|Aminoglycosides|Aminoglycoside-resistant_tlyA|TLYA|RequiresSNPConfirmation
+CARD,CARD|gb|AE000516|+|1908741-1909548|ARO:3003445|Mycobacterium tuberculosis tlyA mutations conferring resistance to aminoglycosides [Mycobacterium tuberculosis CDC1551] ,MEG_7258|Drugs|Aminoglycosides|Aminoglycoside-resistant_tlyA|TLYA|RequiresSNPConfirmation,MEG_7258|Drugs|Aminoglycosides|Aminoglycoside-resistant_arabinosyltransferase|TLYA|RequiresSNPConfirmation
 CARD,CARD|gb|AE000516|+|4238826-4242123|ARO:3003465|Mycobacterium tuberculosis embB mutants conferring resistance to rifampicin [Mycobacterium tuberculosis CDC1551] ,MEG_7259|Drugs|Aminoglycosides|Aminoglycoside-resistant_arabinosyltransferase|TLYA|RequiresSNPConfirmation,MEG_7259|Drugs|Rifampin|Rifamycin-resistant_arabinosyltransferase|REMB|RequiresSNPConfirmation
 CARD,CARD|gb|AB758278|+|98-836|ARO:3004106|TMB-2 [Acinetobacter courvalinii] ,MEG_7260|Drugs|betalactams|Class_B_betalactamases|TMB,
 CARD,CARD|gb|FR771847.1|+|15-753|ARO:3004105|TMB-1 [Achromobacter sp. sallbros1] ,MEG_7261|Drugs|betalactams|Class_B_betalactamases|TMB,
@@ -7965,7 +7965,7 @@ ResFinder,tmexC1_1_MK347425,MEG_8247|Drugs|Multi-drug_resistance|Multi-drug_RND_
 ResFinder,tmexD1_1_MK347425,MEG_8248|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_pumps|MEXD1,
 ResFinder,TOprJ2_1_MN175502,MEG_8721|Drugs|Multi-drug_resistance|Multi-drug_RND_efflux_pumps|TOPR,
 CARD,gb|AE000511.1|-|1268376-1277049|ARO:3007051|Hpyl_rpoB_RIF,MEG_8673|Drugs|Rifampin|Rifampin-resistant_beta-subunit_of_RNA_polymerase_RpoB|RPOB|RequiresSNPConfirmation,
-CARD,gb|AE000511.1|+|687927-688581|ARO:3007059|Hpyl_fxrA_MTZ,MEG_8101|Drugs|Metronidazole|fxr_nitroimidazole_reductase|FXRA|RequiresSNPConfirmation,
+CARD,gb|AE000511.1|+|687927-688581|ARO:3007059|Hpyl_fxrA_MTZ,MEG_8101|Drugs|Metronidazole|fxr_nitroimidazole_reductase|FXRA|RequiresSNPConfirmation,MEG_8101|Drugs|Nitroimidazoles|FXR_nitroimidazole_reductase|FXRA|RequiresSNPConfirmation
 CARD,gb|AE004091.2|-|1950438-1951725|ARO:3005067|ParS,MEG_8452|Drugs|Multi-drug_resistance|MDR_regulator|PARS,
 CARD,gb|AE004091.2|-|1951725-1952433|ARO:3005068|ParR,MEG_8451|Drugs|Multi-drug_resistance|MDR_regulator|PARR,
 CARD,gb|AE004091.2|+|3450837-3451509|ARO:3005063|cprR,MEG_8035|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|CPRR,
@@ -8047,7 +8047,7 @@ CARD,gb|M32091.1|+|102-1848|ARO:3004832|Ngon_PBP2_BLA,MEG_8624|Drugs|betalactams
 CARD,gb|MG309750.1|+|0-897|ARO:3005033|FLC-1,MEG_8098|Drugs|betalactams|Class_A_betalactamases|FRI,
 CARD,gb|MG739505.1|+|0-816|ARO:3009042|RSD1-1,MEG_8683|Drugs|betalactams|Class_D_betalactamases|RSD1,
 CARD,gb|MG739508.1|+|0-1191|ARO:3009041|RSC1-1,MEG_8682|Drugs|betalactams|Class_C_betalactamases|RSC,
-CARD,gb|MG827401.1|-|3868-4375|ARO:3007113|nimK,MEG_8272|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMK,
+CARD,gb|MG827401.1|-|3868-4375|ARO:3007113|nimK,MEG_8272|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMK,MEG_8272|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMK
 CARD,gb|MG844436.1|+|6618-7764|ARO:3004854|CMY-136,MEG_8022|Drugs|betalactams|Class_C_betalactamases|CMY,
 CARD,gb|MH316128.1|-|8-929|ARO:3005079|ROB-2,MEG_8666|Drugs|betalactams|Class_A_betalactamases|ROB,
 CARD,gb|MH473150.1|+|0-1494|ARO:3005121|lsaD,MEG_8233|Drugs|Multi-drug_resistance|Multi-drug_ABC_efflux_pumps|LSAD,
@@ -8119,14 +8119,14 @@ CARD,gb|MZ569034.1|+|0-897|ARO:3007102|KPC-93,MEG_8184|Drugs|betalactams|Class_A
 CARD,gb|MZ570431.1|+|0-888|ARO:3007087|KPC-90,MEG_8185|Drugs|betalactams|Class_A_betalactamases|KPC,
 CARD,gb|MZ672118.1|+|0-789|ARO:3008440|OXA-1019,MEG_8419|Drugs|betalactams|Class_D_betalactamases|OXA,
 CARD,gb|MZ672120.1|+|0-792|ARO:3008442|OXA-1021,MEG_8420|Drugs|betalactams|Class_D_betalactamases|OXA,
-CARD,gb|NC_000915.1|-|1013552-1014185|ARO:3007055|Hpyl_rdxA_MTZ,MEG_8662|Drugs|Metronidazole|rdxA_nitroimidazole_reductase|RDXA,
+CARD,gb|NC_000915.1|-|1013552-1014185|ARO:3007055|Hpyl_rdxA_MTZ,MEG_8662|Drugs|Metronidazole|rdxA_nitroimidazole_reductase|RDXA,MEG_8662|Drugs|Nitroimidazoles|RDXA_nitroimidazole_reductase|RDXA
 CARD,gb|NC_000915.1|+|527685-530007|ARO:3007053|Hpyl_gyrB_FLO,MEG_8152|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRB|RequiresSNPConfirmation,
 CARD,gb|NC_000915.1|+|752511-754995|ARO:3007052|Hpyl_gyrA_FLO,MEG_8149|Drugs|Fluoroquinolones|Fluoroquinolone-resistant_DNA_topoisomerases|GYRA|RequiresSNPConfirmation,
 CARD,gb|NC_000962.3|+|1917939-1918746|ARO:3003445|Mtub_tlyA_AMG,MEG_8720|Drugs|Aminoglycosides|Aminoglycoside-resistant_arabinosyltransferase|TLYA|RequiresSNPConfirmation,
 CARD,gb|NC_000962.3|+|575347-576790|ARO:3004925|Mtub_mshA_INH ; gb|NC_000962.3|+|575347-576790|ARO:3005108|Mtub_mshA_PTO,MEG_8257|Drugs|Mycobacterium_tuberculosis-specific_Drug|Isoniazid-resistant_mutant|MSHA|RequiresSNPConfirmation,
 CARD,gb|NC_000962.3|+|778989-779487|ARO:3007674|Mtub_Rv0678_BDQ ; gb|NC_000962.3|+|778989-779487|ARO:3007852|Mtub_Rv0678_CFZ,MEG_8687|Drugs|Mycobacterium_tuberculosis-specific_Drug|MDR_mutant_promoter|RV0678|RequiresSNPConfirmation,
 CARD,gb|NC_016941.1|-|2187139-2187613|ARO:3007012|sepA,MEG_8693|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_RND_efflux_pumps|SEPA,
-CARD,gb|NFLR01000029.1|-|2830-3325|ARO:3007109|nimG,MEG_8271|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMG,
+CARD,gb|NFLR01000029.1|-|2830-3325|ARO:3007109|nimG,MEG_8271|Drugs|Metronidazole|nim_nitroimidazole_reductase|NIMG,MEG_8271|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMG
 CARD,gb|NG_055585.1|+|0-1152|ARO:3006478|MOX-13,MEG_8255|Drugs|betalactams|Class_C_betalactamases|MOX,
 CARD,gb|NG_055587.1|+|0-1146|ARO:3005198|CMY-157,MEG_8023|Drugs|betalactams|Class_C_betalactamases|CMY,
 CARD,gb|NG_055665.1|+|0-741|ARO:3005475|IMP-69,MEG_8161|Drugs|betalactams|Class_B_betalactamases|IMP,
@@ -9963,7 +9963,7 @@ CARD,gb|CP001918.1|+|3479859-3480582|ARO:3000828|baeR,MEG_9961|Multi-compound|Dr
 CARD,gb|CP104209.1|-|786782-787487|ARO:3007437|EBR-5,MEG_9962|Drugs|betalactams|Class_B_betalactamases|EBR,
 CARD,gb|AP022513.1|+|2715236-2715917|ARO:3003188|QnrB76,MEG_9963|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRB,
 CARD,gb|EU077611.1|+|2-656|ARO:3002792|QnrS3,MEG_9964|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRS,
-CARD,gb|FJ969397.1|+|2-455|ARO:3007110|nimH,MEG_9965|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMH,
+CARD,gb|FJ969397.1|+|2-455|ARO:3007110|nimH,MEG_9965|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMH,MEG_9965|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMH
 CARD,gb|NG_070720.1|+|100-574|ARO:3005347|DfrA37,MEG_9966|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA|RequiresSNPConfirmation,
 CARD,gb|LC536747.1|+|0-468|ARO:3007204|AAC(6')-Iap,MEG_9967|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,
 CARD,gb|PHCQ01000010.1|-|114139-114376|ARO:3007490|dfrB11,MEG_9968|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRB,
@@ -9980,7 +9980,7 @@ CARD,gb|PP336699.1|+|0-885|ARO:3009044|SED-2,MEG_9978|Drugs|betalactams|Class_A_
 CARD,gb|MN366378.1|+|0-756|ARO:3005061|AAC(3)-IVb,MEG_9979|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC3,
 CARD,gb|D44479.1|+|389-1544|ARO:3007972|ACT-GC1,MEG_9980|Drugs|betalactams|Class_C_betalactamases|ACT,
 CARD,gb|NR_076156.1|+|0-2947|ARO:3007759|Tpal_23S_ERY,MEG_9981|Drugs|MLS|Macrolide-resistant_23S_rRNA_mutation|MLS23S|RequiresSNPConfirmation,
-CARD,gb|FN545816.1|-|1547473-1547941|ARO:3007671|CdnimB,MEG_9982|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMB,
+CARD,gb|FN545816.1|-|1547473-1547941|ARO:3007671|CdnimB,MEG_9982|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMB,MEG_9982|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMB
 CARD,gb|CP072112.1|-|1373040-1375296|ARO:3007531|Spyo_PBP2x_BLA,MEG_9983|Drugs|betalactams|Penicillin_binding_protein|PBP2,
 CARD,gb|FO834906.1|-|4514344-4516111|ARO:3007421|Kpne_PBP3_BLA,MEG_9984|Drugs|betalactams|Penicillin_binding_protein|PBP3|RequiresSNPConfirmation,
 CARD,gb|X55034.1|+|7942-9709|ARO:3007423|Ecol_PBP3_BLA,MEG_9985|Drugs|betalactams|Penicillin_binding_protein|PBP3|RequiresSNPConfirmation,
@@ -11492,18 +11492,18 @@ ResFinder,erm(A)_3_EU348758,MEG_11490|Drugs|MLS|23S_rRNA_methyltransferases|ERMA
 ResFinder,qnrB47_1_JQ349155,MEG_11491|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRB,
 ResFinder,qnrS3_1_EU077611,MEG_11492|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRS,
 ResFinder,catS_1_X74948,MEG_11493|Drugs|Phenicol|Chloramphenicol_acetyltransferases|CATS,
-ResFinder,nimI_1_FJ940884,MEG_11494|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,
-ResFinder,nimI_1_FJ940883,MEG_11495|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,
-ResFinder,nimI_1_FJ940889,MEG_11496|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,
-ResFinder,nimI_1_FJ940886,MEG_11497|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,
-ResFinder,nimI_1_FJ940887,MEG_11498|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,
-ResFinder,nimE_1_AJ244018,MEG_11499|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIME,
-ResFinder,nimH_1_KX576455,MEG_11500|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMH,
+ResFinder,nimI_1_FJ940884,MEG_11494|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,MEG_11494|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI
+ResFinder,nimI_1_FJ940883,MEG_11495|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,MEG_11495|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI
+ResFinder,nimI_1_FJ940889,MEG_11496|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,MEG_11496|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI
+ResFinder,nimI_1_FJ940886,MEG_11497|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,MEG_11497|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI
+ResFinder,nimI_1_FJ940887,MEG_11498|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,MEG_11498|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI
+ResFinder,nimE_1_AJ244018,MEG_11499|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIME,MEG_11499|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIME
+ResFinder,nimH_1_KX576455,MEG_11500|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMH,MEG_11500|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMH
 ResFinder,aac(6')-29b_1_AF263519,MEG_11501|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,
 ResFinder,mcr-9.2_1_MN164032,MEG_11502|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|MCR,
 ResFinder,fmrO_1_Q08325,MEG_11503|Drugs|Aminoglycosides|16S_rRNA_methyltransferases|FMRO,
 ResFinder,blaOXA-104_1_EF581285,MEG_11504|Drugs|betalactams|Class_D_betalactamases|OXA,
-ResFinder,nimF_1_AJ515145,MEG_11505|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMF,
+ResFinder,nimF_1_AJ515145,MEG_11505|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMF,MEG_11505|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMF
 ResFinder,str_3_AM932524,MEG_11506|Drugs|Aminoglycosides|Aminoglycoside_O-nucleotidyltransferases|ANT6,
 ResFinder,erm(54)_1_OM362497,MEG_11507|Drugs|MLS|23S_rRNA_methyltransferases|ERM,
 ResFinder,erm(N)_2_MZ015744,MEG_11508|Drugs|MLS|23S_rRNA_methyltransferases|ERMN,

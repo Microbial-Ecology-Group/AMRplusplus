@@ -1,4 +1,4 @@
-header,type,class,mechanism,group,snp,Can be confirmed
+header,type,class,mechanism,group,snp,Can_be_confirmed
 MEG_1|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|A16S|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,A16S,RequiresSNPConfirmation,Yes
 MEG_2|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|A16S|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,A16S,RequiresSNPConfirmation,Yes
 MEG_3|Drugs|Aminoglycosides|Aminoglycoside-resistant_16S_ribosomal_subunit_protein|A16S|RequiresSNPConfirmation,Drugs,Aminoglycosides,Aminoglycoside-resistant 16S ribosomal subunit protein,A16S,RequiresSNPConfirmation,Yes
@@ -4168,23 +4168,23 @@ MEG_4173|Metals|Nickel_resistance|Nickel_ABC_efflux_pumps|NIKE,Metals,Nickel res
 MEG_4174|Metals|Nickel_resistance|Nickel_ABC_efflux_pumps|NIKE,Metals,Nickel resistance,Nickel ABC efflux pumps,NIKE,,
 MEG_4175|Metals|Nickel_resistance|Nickel_ABC_efflux_regulator|NIKR,Metals,Nickel resistance,Nickel ABC efflux regulator,NIKR,,
 MEG_4177|Metals|Nickel_resistance|Nickel_ABC_efflux_regulator|NIKR,Metals,Nickel resistance,Nickel ABC efflux regulator,NIKR,,
-MEG_4178|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMA,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMA,,
-MEG_4179|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMA,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMA,,
-MEG_4180|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMB,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMB,,
-MEG_4181|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMC,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMC,,
-MEG_4182|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMD,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMD,,
-MEG_4183|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIME,Drugs,Metronidazole,NIM nitroimidazole reductase,NIME,,
-MEG_4184|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIME,Drugs,Metronidazole,NIM nitroimidazole reductase,NIME,,
-MEG_4185|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIME,Drugs,Metronidazole,NIM nitroimidazole reductase,NIME,,
-MEG_4186|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMF,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMF,,
-MEG_4187|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMH,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMH,,
-MEG_4188|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMI,,
-MEG_4189|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMI,,
-MEG_4190|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMI,,
-MEG_4191|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMI,,
-MEG_4192|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMI,,
-MEG_4193|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMI,,
-MEG_4194|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMJ,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMJ,,
+MEG_4178|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMA,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMA,,
+MEG_4179|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMA,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMA,,
+MEG_4180|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMB,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMB,,
+MEG_4181|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMC,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMC,,
+MEG_4182|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMD,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMD,,
+MEG_4183|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIME,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIME,,
+MEG_4184|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIME,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIME,,
+MEG_4185|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIME,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIME,,
+MEG_4186|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMF,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMF,,
+MEG_4187|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMH,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMH,,
+MEG_4188|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMI,,
+MEG_4189|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMI,,
+MEG_4190|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMI,,
+MEG_4191|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMI,,
+MEG_4192|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMI,,
+MEG_4193|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMI,,
+MEG_4194|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMJ,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMJ,,
 MEG_4195|Metals|Nickel_resistance|Nickel_resistance_protein|NIRA,Metals,Nickel resistance,Nickel resistance protein,NIRA,,
 MEG_4196|Metals|Nickel_resistance|Nickel_resistance_protein|NIRB,Metals,Nickel resistance,Nickel resistance protein,NIRB,,
 MEG_4197|Metals|Nickel_resistance|Nickel_resistance_protein|NIRC,Metals,Nickel resistance,Nickel resistance protein,NIRC,,
@@ -7961,7 +7961,7 @@ MEG_7969|Drugs|betalactams|Class_C_betalactamases|ADC,Drugs,betalactams,Class C 
 MEG_7970|Drugs|betalactams|Class_B_betalactamases|AFM,Drugs,betalactams,Class B betalactamases,AFM,,
 MEG_7971|Drugs|Mycobacterium_tuberculosis-specific_Drug|Isoniazid-resistant_mutant|AHPC|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Isoniazid-resistant mutant,AHPC,RequiresSNPConfirmation,No
 MEG_7972|Drugs|betalactams|Class_B_betalactamases|AIM,Drugs,betalactams,Class B betalactamases,AIM,,
-MEG_7973|Drugs|Mycobacterium_tuberculosis-specific_Drug|Cycloserine-resistant_mutant|ALR|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Cycloserine-resistant mutation,ALR,RequiresSNPConfirmation,No
+MEG_7973|Drugs|Mycobacterium_tuberculosis-specific_Drug|Cycloserine-resistant_mutation|ALR|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,Cycloserine-resistant mutation,ALR,RequiresSNPConfirmation,No
 MEG_7974|Drugs|betalactams|Class_C_betalactamase_regulator|AMPCR|RequiresSNPConfirmation,Drugs,betalactams,Class C betalactamase regulator,AMPCR,RequiresSNPConfirmation,No
 MEG_7975|Drugs|Aminoglycosides|Aminoglycoside_O-nucleotidyltransferases|ANT3-DPRIME,Drugs,Aminoglycosides,Aminoglycoside O-nucleotidyltransferases,ANT3-DPRIME,,
 MEG_7976|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|ARNT,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,ARNT,,
@@ -8089,7 +8089,7 @@ MEG_8097|Drugs|betalactams|Class_C_betalactamases|FOX,Drugs,betalactams,Class C 
 MEG_8098|Drugs|betalactams|Class_A_betalactamases|FRI,Drugs,betalactams,Class A betalactamases,FRI,,
 MEG_8099|Drugs|betalactams|Class_A_betalactamases|FRI,Drugs,betalactams,Class A betalactamases,FRI,,
 MEG_8100|Drugs|Fusidic_acid|Fusidic_acid-resistant_mutation|FUSA|RequiresSNPConfirmation,Drugs,Fusidic acid,Fusidic acid-resistant mutation,FUSA,RequiresSNPConfirmation,No
-MEG_8101|Drugs|Metronidazole|FXR_nitroimidazole_reductase|FXRA|RequiresSNPConfirmation,Drugs,Metronidazole,FXR nitroimidazole reductase,FXRA,RequiresSNPConfirmation,No
+MEG_8101|Drugs|Nitroimidazoles|FXR_nitroimidazole_reductase|FXRA|RequiresSNPConfirmation,Drugs,Nitroimidazoles,FXR nitroimidazole reductase,FXRA,RequiresSNPConfirmation,No
 MEG_8102|Drugs|Aminoglycosides|Gentamicin-resistant_ATP-binding_protein|GAR,Drugs,Aminoglycosides,Gentamicin-resistant ATP-binding protein,GAR,,
 MEG_8103|Drugs|betalactams|Class_A_betalactamases|GES,Drugs,betalactams,Class A betalactamases,GES,,
 MEG_8104|Drugs|betalactams|Class_A_betalactamases|GES,Drugs,betalactams,Class A betalactamases,GES,,
@@ -8259,8 +8259,8 @@ MEG_8267|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B 
 MEG_8268|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM,,
 MEG_8269|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM,,
 MEG_8270|Drugs|betalactams|Class_B_betalactamases|NDM,Drugs,betalactams,Class B betalactamases,NDM,,
-MEG_8271|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMG,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMG,,
-MEG_8272|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMK,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMK,,
+MEG_8271|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMG,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMG,,
+MEG_8272|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMK,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMK,,
 MEG_8273|Multi-compound|Drug_and_biocide_resistance|Drug_and_biocide_MFS_efflux_pumps|NORC,Multi-compound,Drug and biocide resistance,Drug and biocide MFS efflux pumps,NORC,,
 MEG_8274|Drugs|Aminoglycosides|16S_rRNA_methyltransferases|NPMB,Drugs,Aminoglycosides,16S rRNA methyltransferases,NPMB,,
 MEG_8275|Drugs|Mycobacterium_tuberculosis-specific_Drug|MDR_mutant_promoter|NUOA|RequiresSNPConfirmation,Drugs,Mycobacterium tuberculosis-specific Drug,MDR mutant promoter,NUOA,RequiresSNPConfirmation,No
@@ -8650,7 +8650,7 @@ MEG_8658|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRVC,Drugs,Flu
 MEG_8659|Drugs|Multi-drug_resistance|Multi-drug_RND_efflux_regulator|RAMR|RequiresSNPConfirmation,Drugs,Multi-drug resistance,Multi-drug RND efflux regulator,RAMR,RequiresSNPConfirmation,No
 MEG_8660|Drugs|Aminoglycosides|Aminoglycoside_efflux_pumps|RANA,Drugs,Aminoglycosides,Aminoglycoside efflux pumps,RANA,,
 MEG_8661|Drugs|Aminoglycosides|Aminoglycoside_efflux_pumps|RANB,Drugs,Aminoglycosides,Aminoglycoside efflux pumps,RANB,,
-MEG_8662|Drugs|Metronidazole|RDXA_nitroimidazole_reductase|RDXA,Drugs,Metronidazole,RDXA nitroimidazole reductase,RDXA,,
+MEG_8662|Drugs|Nitroimidazoles|RDXA_nitroimidazole_reductase|RDXA,Drugs,Nitroimidazoles,RDXA nitroimidazole reductase,RDXA,,
 MEG_8663|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB,,
 MEG_8664|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB,,
 MEG_8665|Drugs|betalactams|Class_A_betalactamases|ROB,Drugs,betalactams,Class A betalactamases,ROB,,
@@ -9953,7 +9953,7 @@ MEG_9961|Multi-compound|Drug_and_biocide_and_metal_resistance|Drug_and_biocide_a
 MEG_9962|Drugs|betalactams|Class_B_betalactamases|EBR,Drugs,betalactams,Class B betalactamases,EBR,,
 MEG_9963|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRB,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRB,,
 MEG_9964|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRS,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRS,,
-MEG_9965|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMH,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMH,,
+MEG_9965|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMH,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMH,,
 MEG_9966|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRA|RequiresSNPConfirmation,Drugs,Trimethoprim,Dihydrofolate reductase,DFRA,RequiresSNPConfirmation,No
 MEG_9967|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC6-PRIME,,
 MEG_9968|Drugs|Trimethoprim|Dihydrofolate_reductase|DFRB,Drugs,Trimethoprim,Dihydrofolate reductase,DFRB,,
@@ -9970,7 +9970,7 @@ MEG_9978|Drugs|betalactams|Class_A_betalactamases|SED,Drugs,betalactams,Class A 
 MEG_9979|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC3,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC3,,
 MEG_9980|Drugs|betalactams|Class_C_betalactamases|ACT,Drugs,betalactams,Class C betalactamases,ACT,,
 MEG_9981|Drugs|MLS|Macrolide-resistant_23S_rRNA_mutation|MLS23S|RequiresSNPConfirmation,Drugs,MLS,Macrolide-resistant 23S rRNA mutation,MLS23S,RequiresSNPConfirmation,No
-MEG_9982|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMB,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMB,,
+MEG_9982|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMB,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMB,,
 MEG_9983|Drugs|betalactams|Penicillin_binding_protein|PBP2,Drugs,betalactams,Penicillin binding protein,PBP2,,
 MEG_9984|Drugs|betalactams|Penicillin_binding_protein|PBP3|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP3,RequiresSNPConfirmation,No
 MEG_9985|Drugs|betalactams|Penicillin_binding_protein|PBP3|RequiresSNPConfirmation,Drugs,betalactams,Penicillin binding protein,PBP3,RequiresSNPConfirmation,No
@@ -11482,18 +11482,18 @@ MEG_11490|Drugs|MLS|23S_rRNA_methyltransferases|ERMA,Drugs,MLS,23S rRNA methyltr
 MEG_11491|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRB,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRB,,
 MEG_11492|Drugs|Fluoroquinolones|Quinolone_resistance_protein_Qnr|QNRS,Drugs,Fluoroquinolones,Quinolone resistance protein Qnr,QNRS,,
 MEG_11493|Drugs|Phenicol|Chloramphenicol_acetyltransferases|CATS,Drugs,Phenicol,Chloramphenicol acetyltransferases,CATS,,
-MEG_11494|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMI,,
-MEG_11495|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMI,,
-MEG_11496|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMI,,
-MEG_11497|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMI,,
-MEG_11498|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMI,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMI,,
-MEG_11499|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIME,Drugs,Metronidazole,NIM nitroimidazole reductase,NIME,,
-MEG_11500|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMH,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMH,,
+MEG_11494|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMI,,
+MEG_11495|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMI,,
+MEG_11496|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMI,,
+MEG_11497|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMI,,
+MEG_11498|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMI,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMI,,
+MEG_11499|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIME,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIME,,
+MEG_11500|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMH,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMH,,
 MEG_11501|Drugs|Aminoglycosides|Aminoglycoside_N-acetyltransferases|AAC6-PRIME,Drugs,Aminoglycosides,Aminoglycoside N-acetyltransferases,AAC6-PRIME,,
 MEG_11502|Drugs|Lipopeptides|Colistin_phosphoethanolamine_transferase|MCR,Drugs,Lipopeptides,Colistin phosphoethanolamine transferase,MCR,,
 MEG_11503|Drugs|Aminoglycosides|16S_rRNA_methyltransferases|FMRO,Drugs,Aminoglycosides,16S rRNA methyltransferases,FMRO,,
 MEG_11504|Drugs|betalactams|Class_D_betalactamases|OXA,Drugs,betalactams,Class D betalactamases,OXA,,
-MEG_11505|Drugs|Metronidazole|NIM_nitroimidazole_reductase|NIMF,Drugs,Metronidazole,NIM nitroimidazole reductase,NIMF,,
+MEG_11505|Drugs|Nitroimidazoles|NIM_nitroimidazole_reductase|NIMF,Drugs,Nitroimidazoles,NIM nitroimidazole reductase,NIMF,,
 MEG_11506|Drugs|Aminoglycosides|Aminoglycoside_O-nucleotidyltransferases|ANT6,Drugs,Aminoglycosides,Aminoglycoside O-nucleotidyltransferases,ANT6,,
 MEG_11507|Drugs|MLS|23S_rRNA_methyltransferases|ERM,Drugs,MLS,23S rRNA methyltransferases,ERM,,
 MEG_11508|Drugs|MLS|23S_rRNA_methyltransferases|ERMN,Drugs,MLS,23S rRNA methyltransferases,ERMN,,
