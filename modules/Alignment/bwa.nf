@@ -112,7 +112,7 @@ process bwa_merged_align {
 
         # ───── un-merged reads ───────────────────────────────────────
         if has_reads ${unmerged_fq}; then
-            \$BWA mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpus} -K 100000000 \
+            \$BWA mem ${indexfiles[0]} -p ${unmerged_fq} -t ${task.cpus} -K 100000000 \
                 -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
             | \$SAMTOOLS view -@ ${task.cpus} -b ${params.samtools_flag} - \
             | \$SAMTOOLS sort -@ ${task.cpus} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
@@ -147,7 +147,7 @@ process bwa_merged_align {
 
         # ───── un-merged reads (+ dedup) ─────────────────────────────
         if has_reads ${unmerged_fq}; then
-            \$BWA mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpus} -K 100000000 \
+            \$BWA mem ${indexfiles[0]} -p ${unmerged_fq} -t ${task.cpus} -K 100000000 \
                 -R '@RG\\tID:${sample_id}_unmerged\\tSM:${sample_id}' \
             | \$SAMTOOLS view -@ ${task.cpus} -b ${params.samtools_flag} - \
             | \$SAMTOOLS sort -@ ${task.cpus} -n -o ${sample_id}_unmerged_alignment_sorted.bam -
@@ -316,14 +316,14 @@ process bwa_rm_contaminant_merged_fq {
 
     # ──────────────────────── un-merged reads ──────────────────────────
     if has_reads ${unmerged_fq}; then
-        \$BWA mem ${indexfiles[0]} ${unmerged_fq} -t ${task.cpus} -K 100000000 \\
+        \$BWA mem ${indexfiles[0]} -p ${unmerged_fq} -p -t ${task.cpus} -K 100000000 \\
             | \$SAMTOOLS sort -@ ${task.cpus} -o ${sample_id}.unmerged.host.sorted.bam
 
         \$SAMTOOLS index   ${sample_id}.unmerged.host.sorted.bam
         \$SAMTOOLS idxstats ${sample_id}.unmerged.host.sorted.bam \\
             > ${sample_id}.unmerged.samtools.idxstats
 
-        \$SAMTOOLS view -b -f 4 ${sample_id}.unmerged.host.sorted.bam \\
+        \$SAMTOOLS view -b -f 12 ${sample_id}.unmerged.host.sorted.bam \\
           | \$SAMTOOLS fastq -@ ${task.cpus} -c 6 - \\
           | pigz -p ${task.cpus} -c > ${sample_id}.unmerged.non.host.fastq.gz
     else
