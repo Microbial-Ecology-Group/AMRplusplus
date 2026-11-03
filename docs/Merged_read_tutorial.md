@@ -197,7 +197,7 @@ rm -rf work/
 nextflow run main_AMR++.nf \
     -profile local \
     --pipeline merged_rm_host \
-    --merged_reads 'Merged_AMR++_results/Flash_reads/*.{extendedFrags,notCombined}.fastq.gz' \
+    --merged_reads 'Merged_AMR++_results/Flash_reads/*.{merged,unmerged}.fastq.gz' \
     --host /path/to/host_genome.fasta \
     --output Merged_AMR++_results
 ```
